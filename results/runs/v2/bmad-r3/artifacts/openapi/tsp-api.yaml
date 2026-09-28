@@ -1,0 +1,231 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Мерчант-API СБП-шлюза. v0.2 добавляет подписки СБП (мандат плательщика и регулярные
+    списания) строго аддитивно: новые пути/схемы и опциональные поля; существующие пути,
+    поля и значения enum не изменяются (обратная совместимость с v0.1).
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      description: >
+        Регистрация мандата (согласия плательщика) на серию регулярных списаний. Мандат
+        переходит в PENDING_CONSENT до подтверждения согласия через ОПКЦ/банк плательщика.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Мандат зарегистрирован, ожидает согласия плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус мандата
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      description: >
+        Отзыв мандата по инициативе ТСП. Приоритетно блокирует новые списания; отзыв
+        плательщика приходит от ОПКЦ отдельным событием (mandate.revoked).
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Мандат отозван
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/charges:
+    post:
+      operationId: scheduleMandateCharge
+      description: >
+        Задание суммы списания для периода по variable-мандату: банк инициирует списание в
+        срок, поэтому сумма должна быть задана ТСП заранее и не превышать maxAmount.
+        Для fixed-мандата не требуется (сумма берётся из мандата). Если к началу периода
+        сумма не задана, списание за этот период не инициируется (fail-closed).
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateChargeRequest'}
+      responses:
+        '201':
+          description: Сумма списания для периода принята
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ScheduledCharge'}
+    get:
+      operationId: listMandateCharges
+      description: Список регулярных списаний по мандату (платежи типа recurring).
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - {in: query, name: periodKey, required: false, schema: {type: string}}
+      responses:
+        '200':
+          description: Список списаний
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/ChargeRef'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentType:
+          type: string
+          description: Тип платежа. Опционально (v0.2); отсутствие = oneoff (совместимо с v0.1).
+          enum: [oneoff, recurring]
+        mandateId:
+          type: string
+          description: Ссылка на мандат для регулярного списания (v0.2).
+        periodKey:
+          type: string
+          description: Период подписки, за который выполнено списание (v0.2).
+    MandateRequest:
+      type: object
+      required: [tspId, mandateType, merchantOrderId]
+      properties:
+        tspId: {type: string}
+        mandateType:
+          type: string
+          enum: [fixed, variable]
+        amount:
+          type: integer
+          description: Сумма в копейках; обязательна и фиксирована при mandateType=fixed.
+        maxAmount:
+          type: integer
+          description: Лимит одного списания в копейках; обязателен при mandateType=variable.
+        period:
+          type: string
+          description: Период списаний ISO 8601 (например, P1M).
+        currency: {type: string, default: RUB}
+        paymentPurpose: {type: string}
+        merchantOrderId: {type: string}
+    Mandate:
+      type: object
+      required: [mandateId, status, mandateType]
+      properties:
+        mandateId: {type: string}
+        status:
+          type: string
+          enum: [PENDING_CONSENT, ACTIVE, SUSPENDED, REVOKED, EXPIRED]
+        mandateType:
+          type: string
+          enum: [fixed, variable]
+        amount: {type: integer}
+        maxAmount: {type: integer}
+        period: {type: string}
+        currency: {type: string, default: RUB}
+        merchantOrderId: {type: string}
+        consentUrl:
+          type: string
+          description: Ссылка/данные для подтверждения согласия плательщиком (детали — по протоколу НСПК).
+        activatedAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+    ChargeRef:
+      type: object
+      required: [paymentId, periodKey, status]
+      properties:
+        paymentId: {type: string}
+        periodKey: {type: string}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        amount: {type: integer}
+        scheduledAt: {type: string, format: date-time}
+        paidAt: {type: string, format: date-time}
+    MandateChargeRequest:
+      type: object
+      required: [amount, periodKey]
+      properties:
+        amount:
+          type: integer
+          description: Сумма предстоящего списания в копейках; <= maxAmount мандата.
+        periodKey:
+          type: string
+          description: Период, к которому относится сумма.
+        paymentPurpose: {type: string}
+    ScheduledCharge:
+      type: object
+      required: [mandateId, periodKey, amount, status]
+      properties:
+        mandateId: {type: string}
+        periodKey: {type: string}
+        amount: {type: integer}
+        status:
+          type: string
+          enum: [SCHEDULED]
+        scheduledAt: {type: string, format: date-time}

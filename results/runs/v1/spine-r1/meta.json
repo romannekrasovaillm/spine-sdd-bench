@@ -1,0 +1,54 @@
+{
+  "condition": "spine",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-spine-r1",
+  "base_sha": "be52c723b123cedba7139a45fa5c0000d0b98870",
+  "wall_s": 810.7,
+  "turn_ok": true,
+  "records": 116,
+  "solver": "deepseek-v4-pro",
+  "judge": "glm-5.2",
+  "inventory": {
+    "project_skills": 66,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11"
+  },
+  "tool_calls": 71,
+  "tool_names": [
+    "edit",
+    "glob",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "tool_call",
+    "tool_search",
+    "write_file"
+  ],
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "M\t.qwen/settings.json",
+    "M\tARCHITECTURE-SPINE.md",
+    "A\tchanges/recurrent-c2b/DELTA.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/solutioning.md",
+    "A\tdocs/spec/mandate-state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

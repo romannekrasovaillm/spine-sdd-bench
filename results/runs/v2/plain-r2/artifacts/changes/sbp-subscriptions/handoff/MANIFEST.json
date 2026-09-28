@@ -1,0 +1,68 @@
+{
+  "created_at": "2026-09-28T00:00:00+00:00",
+  "change": "sbp-subscriptions",
+  "title": "Рекуррентные C2B-списания (СБП-подписки)",
+  "route": "critical",
+  "significance": {
+    "score": 7,
+    "triggers": [
+      "new_component",
+      "api_contract_change",
+      "data_contract_change",
+      "cross_domain_integration",
+      "significant_nfr",
+      "financial_impact",
+      "criticality_or_exception"
+    ]
+  },
+  "status": "proposed",
+  "gate": "A3 (human architecture decision) — обязательна до реализации",
+  "decision": "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md",
+  "delta": "changes/sbp-subscriptions/DELTA.md",
+  "task": "После A3: реализовать walking skeleton СБП-подписок (домен согласия + планировщик + списание как платёж) на моках ОПКЦ/АБС, не меняя инварианты AD-001..AD-008; соблюсти AD-009.",
+  "task_file": "changes/sbp-subscriptions/handoff/TASK.md",
+  "sources": [
+    "ARCHITECTURE-SPINE.md",
+    "docs/adr/ADR-001-outbox.md",
+    "docs/adr/ADR-002-model-konsistentnosti-platezha-konechnyy-avtomat-s-idempotentnostyu-na-urovne-shlyuza.md",
+    "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md",
+    "docs/adr/ADR-007-proposed-a3.md",
+    "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md",
+    "docs/spec/state-machine.md",
+    "docs/contracts/tsp-api.md",
+    "docs/contracts/opkc-adapter.md",
+    "docs/nfr.md",
+    "docs/solutioning.md",
+    "openapi/tsp-api.yaml"
+  ],
+  "epic_context_chars": 5200,
+  "epic_context_tokens_est": 1300,
+  "artifacts": {
+    "delta": "changes/sbp-subscriptions/DELTA.md",
+    "overview": "changes/sbp-subscriptions/README.md",
+    "adr": "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md",
+    "handoff": {
+      "task": "changes/sbp-subscriptions/handoff/TASK.md",
+      "architecture": "changes/sbp-subscriptions/handoff/ARCHITECTURE.md",
+      "constraints": "changes/sbp-subscriptions/handoff/CONSTRAINTS.yaml",
+      "rubric": "changes/sbp-subscriptions/handoff/RUBRIC.yaml",
+      "rollback": "changes/sbp-subscriptions/handoff/ROLLBACK.yaml"
+    }
+  },
+  "checks": [
+    "arch control score --trigger ... = Critical (score 7)",
+    "arch delta validate sbp-subscriptions = ok",
+    "arch delta guard = PASS",
+    "arch control check = PASS (14 rules, 0 violations, no weakening)",
+    "arch control spine = ok",
+    "arch control sensors docs = PASS",
+    "arch contract-diff v0.1 -> v0.2 = 0 breaking"
+  ],
+  "open_inputs": [
+    "Документация НСПК по подпискам (мандат, отзыв, лимиты, TTL) [ТРЕБУЕТ ПРОВЕРКИ]",
+    "Addendum к контракту вендора транспорта (подписочные операции) — AD-008",
+    "Правовое основание ПДн согласия (152-ФЗ) — юристы/ИБ",
+    "Коммерческие параметры и сегменты первой волны — бизнес",
+    "A3: человеческое решение по ADR-008"
+  ]
+}

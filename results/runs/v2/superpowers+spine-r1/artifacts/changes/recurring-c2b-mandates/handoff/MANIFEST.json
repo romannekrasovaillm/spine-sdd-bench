@@ -1,0 +1,40 @@
+{
+  "created_at": "2026-09-28",
+  "change": "recurring-c2b-mandates",
+  "title": "СБП-подписки (рекуррентные C2B-списания по согласию плательщика)",
+  "route": "critical",
+  "score": 9,
+  "a3_gate_required": true,
+  "status": "proposed",
+  "model": "qwen-code",
+  "task": "Реализовать СБП-подписки поверх принятого платёжного шлюза СБП: мандаты/согласие, планировщик списаний, списание как платёж, события; протокол НСПК не реализуется (внешний вход).",
+  "sources": [
+    "ARCHITECTURE-SPINE.md",
+    "docs/adr/ADR-002-model-konsistentnosti-platezha-konechnyy-avtomat-s-idempotentnostyu-na-urovne-shlyuza.md",
+    "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md",
+    "docs/adr/ADR-007-proposed-a3.md",
+    "docs/adr/ADR-008-model-sbp-podpisok-mandat-soglasie-kak-suschnost-spisanie-kak-platyozh.md",
+    "docs/adr/ADR-009-iniciaciya-rekurrentnyh-spisaniy-planirovschik-i-lease-vnutri-shlyuza.md",
+    "docs/contracts/tsp-api.md",
+    "openapi/tsp-api.yaml",
+    "docs/solutioning.md",
+    "docs/nfr.md",
+    "changes/recurring-c2b-mandates/IMPACT.md",
+    "changes/recurring-c2b-mandates/NFR.md",
+    "changes/recurring-c2b-mandates/ACCEPTANCE.md"
+  ],
+  "spec": "SPEC.md",
+  "constraints": "CONSTRAINTS.yaml",
+  "rubric": "RUBRIC.yaml",
+  "rollback": "ROLLBACK.yaml",
+  "epic_context_chars_estimate": 5600,
+  "epic_context_tokens_estimate": 1400,
+  "verification": {
+    "fitness_check_passed": true,
+    "fitness_rules": 12,
+    "openapi_lint": "PASS",
+    "contract_diff_v0.1_to_v0.2": "breaking=0",
+    "spine_lint": "PASS"
+  },
+  "publish": "arch-be handoff --repo . --task \"<см. TASK.md>\" --route critical --spec docs/solutioning.md qwen-code — выполняется после A3"
+}

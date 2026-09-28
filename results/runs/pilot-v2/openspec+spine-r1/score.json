@@ -1,0 +1,89 @@
+{
+  "files": [
+    "changes/add-sbp-subscriptions/DELTA.md",
+    "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelschika-podpiski-sbp.md",
+    "openapi/tsp-api.yaml",
+    "openspec/changes/add-sbp-subscriptions/.openspec.yaml",
+    "openspec/changes/add-sbp-subscriptions/README.md",
+    "openspec/changes/add-sbp-subscriptions/design.md",
+    "openspec/changes/add-sbp-subscriptions/proposal.md",
+    "openspec/changes/add-sbp-subscriptions/specs/sbp-subscriptions/spec.md",
+    "openspec/changes/add-sbp-subscriptions/tasks.md"
+  ],
+  "sensors": {
+    "chars": 62486,
+    "significance_route": true,
+    "invariant_AD005_ref": true,
+    "alternatives": true,
+    "negative_consequences": true,
+    "reversibility": true,
+    "rollback": true,
+    "acceptance": true,
+    "nfr_numeric": true,
+    "human_decision": true,
+    "placeholders": 1,
+    "adr_files": 1
+  },
+  "deterministic": {
+    "spine_gate_exit": 0,
+    "spine_gate_route": "Fast",
+    "spine_gate_fails": [],
+    "spine_gate_tail": "Гейт: .\nМаршрут: Fast (auto: score 1 (api_contract_change); исключено по манифесту connect/.spineignore: 1 файлов)\n  [PASS] fitness * — Правил: 7, нарушений: 0 (error: 0, warn: 0); реестр: 7 правил (error: 5), отпечаток 72d0bf4f — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] delta_guard — изменённых файлов: 13, защищённых среди них: 0\n  [PASS] rule_weakened — реестр правил не ослаблен относительно bench-baseline — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] spine_lint * — находок: 0 (error: 0)\n  [SKIP] trace_check — нет каталога model/\n  [SKIP] model_validate — нет каталога model/\n  [SKIP] decision_quality — не включена: добавьте 'decision_quality' в [gate.required] нужного маршрута\n  [SKIP] semantic_quality — не включена: добавьте 'semantic_quality' в [gate.required] нужного маршрута\nИтог: PASS\nАттестация вердикта: sha256:559df1760e73b4625ba7addad70c3c66abb6d9af9d77c8410d190d9cb9e1fb17\n",
+    "spine_gate_base": "bench-baseline",
+    "spine_gate_skips": [
+      "decision_quality",
+      "model_validate",
+      "semantic_quality",
+      "trace_check"
+    ],
+    "invariants": {
+      "modified": [],
+      "removed": [],
+      "added": []
+    },
+    "contract_changed": true,
+    "contract_breaking": 0,
+    "contract_nonbreaking": 7,
+    "contract_tail": "contract_diff: 7 изменений (breaking: 0, non-breaking: 7)\nФормат: openapi[warn] #/paths/~1v1~1payments/post/responses/422 CD-005 — добавлен код ответа 422\n[warn] #/paths/~1v1~1payments~1{paymentId}/get/responses/404 CD-005 — добавлен код ответа 404\n[warn] #/paths/~1v1~1subscriptions CD-005 — добавлен путь «/v1/subscriptions»\n[warn] #/paths/~1v1~1subscriptions~1{subscriptionId} CD-005 — добавлен путь «/v1/subscriptions/{subscriptionId}»\n[warn] #/paths/~1v1~1subscriptions~1{subscriptionId}~1cancel CD-005 — добавлен путь «/v1/subscriptions/{subscriptionId}/cancel»\n[warn] #/paths/~1v1~1subscriptions~1{subscriptionId}~1charges CD-005 — добавлен путь «/v1/subscriptions/{subscriptionId}/charges»\n[warn] #/paths/~1v1~1subscriptions~1{subscriptionId}~1charges~1{chargeId} CD-005 — добавлен путь «/v1/subscriptions/{subscriptionId}/charges/{chargeId}»\nИтог: PASS\n",
+    "openspec_validate_exit": 0,
+    "protected_touched": [],
+    "delta_dirs": [
+      "add-sbp-subscriptions"
+    ]
+  },
+  "gate_class": "PASS_DELTA",
+  "hook_blocks": 0,
+  "contamination": [
+    "<HOME>/.arch-harness",
+    "<HOME>/.local",
+    "<HOME>/.local/bin/arch-be",
+    "<HOME>/.local/bin/arch-be.bak-20260925-075933\\n<HOME>/.local/bin/arch.bak-20260902",
+    "<HOME>/.local/bin/arch-be.bak-20260925-075933\\n<HOME>/.local/bin/arch.bak-20260902\\nError",
+    "<SPINE_BANK>",
+    "<SPINE_BANK>/assets/rubrics",
+    "<SPINE_BANK>/src",
+    "<SPINE_BANK>/src/bootstrap.rs:1079",
+    "<SPINE_BANK>/src/evidence.rs",
+    "<SPINE_BANK>/src/evidence.rs:1103",
+    "<SPINE_BANK>/src/evidence.rs:1120",
+    "<SPINE_BANK>/src/evidence.rs:116",
+    "<SPINE_BANK>/src/evidence.rs:1323",
+    "<SPINE_BANK>/src/evidence.rs:141",
+    "<SPINE_BANK>/src/evidence.rs:155",
+    "<SPINE_BANK>/src/evidence.rs:159",
+    "<SPINE_BANK>/src/evidence.rs:1601",
+    "<SPINE_BANK>/src/evidence.rs:2012",
+    "<SPINE_BANK>/src/evidence.rs:2020",
+    "<SPINE_BANK>/src/evidence.rs:645",
+    "<SPINE_BANK>/src/evidence.rs:646",
+    "<SPINE_BANK>/src/rehearsal.rs:137",
+    "<SPINE_BANK>/src/rehearsal.rs:441",
+    "<SPINE_BANK>/src/rehearsal.rs:997",
+    "<SPINE_BANK>/src\\",
+    "<SPINE_BANK>/target/release/arch-be",
+    "<SPINE_BANK>/target/release/arch-be\\n===",
+    "<HOME>/Загрузки/.../cells/wc2xy6c/home"
+  ],
+  "judge": {},
+  "note": "только детерминированный слой: судья для этой кампании не запускался"
+}

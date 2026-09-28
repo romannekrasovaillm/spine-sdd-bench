@@ -1,0 +1,229 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >-
+    v0.2 — аддитивное расширение под рекуррентные C2B-списания по согласию плательщика (мандаты, ADR-008).
+    Обратная совместимость с v0.1: существующие пути, обязательные поля и значения Payment.status не изменены
+    и не удалены; все новые поля — опциональные, все новые схемы и пути добавлены. Технические подсостояния
+    наружу не выставляются.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      description: >-
+        Регистрация мандата плательщика (согласия на рекуррентные списания). Платёж не создаётся;
+        мандат переходит в PENDING_CONSENT до подтверждения плательщиком. Идемпотентно по Idempotency-Key.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Мандат зарегистрирован (ожидает согласия плательщика)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние мандата
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      description: >-
+        Отзыв/приостановка мандата инициатором. Идемпотентно по mandateId: повторный отзыв возвращает
+        текущее состояние мандата, а не ошибку. После REVOKED новые списания по мандату невозможны.
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRevokeRequest'}
+      responses:
+        '200':
+          description: Мандат отозван (или уже был в терминальном состоянии)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/payments:
+    post:
+      operationId: createRecurringPayment
+      description: >-
+        Инициация рекуррентного списания в рамках действующего мандата (merchant-initiated).
+        Guard-проверки (мандат ACTIVE, лимиты, период, срок) выполняются до обращения к ОПКЦ;
+        нарушение — 422 без финансового действия. Идемпотентно по Idempotency-Key.
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecurringPaymentRequest'}
+      responses:
+        '201':
+          description: >-
+            Списание зарегистрировано и отправлено в ОПКЦ. Возвращается ресурс Payment той же
+            статусной машины, что и для QR-платежей (QR_ISSUED не используется).
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+    get:
+      operationId: listMandatePayments
+      description: История списаний по мандату (для сверки и отображения подписки).
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - {in: query, name: limit, required: false, schema: {type: integer, default: 50}}
+      responses:
+        '200':
+          description: Список списаний по мандату
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/MandatePaymentList'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        initiationType:
+          type: string
+          enum: [QR, MANDATE]
+          default: QR
+          description: >-
+            Опционально (v0.2). QR — существующий сценарий; MANDATE — рекуррентное списание
+            по мандату (ответ на createRecurringPayment).
+        mandateId:
+          type: string
+          description: Опционально (v0.2). Присутствует для платежей, инициированных по мандату.
+    MandateRequest:
+      type: object
+      required: [tspId, payerRef, limits]
+      properties:
+        tspId: {type: string}
+        payerRef:
+          type: string
+          description: >-
+            Токенизированный или маскированный идентификатор плательщика. Полные ПДн не передаются
+            и не хранятся (152-ФЗ, минимизация; ADR-006).
+        purpose: {type: string, description: Назначение рекуррентных списаний}
+        limits: {$ref: '#/components/schemas/MandateLimits'}
+        validUntil: {type: string, format: date-time, description: Срок действия мандата (опц.)}
+        merchantOrderId: {type: string, description: Сквозной идентификатор подписки у ТСП (опц.)}
+    MandateLimits:
+      type: object
+      required: [maxAmountPerDebit, period]
+      properties:
+        maxAmountPerDebit: {type: integer, description: Максимум за одно списание, копейки}
+        maxTotalAmount: {type: integer, description: Максимум за период, копейки (опц.)}
+        maxDebitsPerPeriod: {type: integer, description: Максимум списаний за период (опц.)}
+        period:
+          type: string
+          enum: [DAY, WEEK, MONTH, YEAR, TOTAL]
+          description: Период, к которому относятся лимиты
+        currency: {type: string, default: RUB}
+    Mandate:
+      type: object
+      required: [mandateId, tspId, status, limits, createdAt]
+      properties:
+        mandateId: {type: string}
+        tspId: {type: string}
+        status:
+          type: string
+          enum: [CREATED, PENDING_CONSENT, ACTIVE, SUSPENDED, DECLINED, REVOKED, EXPIRED]
+        limits: {$ref: '#/components/schemas/MandateLimits'}
+        purpose: {type: string}
+        payerRef: {type: string}
+        validUntil: {type: string, format: date-time, nullable: true}
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time, nullable: true}
+        revokedAt: {type: string, format: date-time, nullable: true}
+        revokedBy:
+          type: string
+          enum: [TSP, PAYER, BANK]
+          nullable: true
+        consentRef:
+          type: string
+          description: Референс на неизменяемое доказательство согласия плательщика (аудит, ADR-006)
+        debitsUsed: {type: integer, description: Списаний в текущем периоде}
+    MandateRevokeRequest:
+      type: object
+      properties:
+        reason: {type: string}
+    RecurringPaymentRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: Сумма списания в копейках}
+        currency: {type: string, default: RUB}
+        merchantOrderId: {type: string, description: Идентификатор счёта/периода у ТСП}
+        paymentPurpose: {type: string}
+    MandatePaymentList:
+      type: object
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Payment'}

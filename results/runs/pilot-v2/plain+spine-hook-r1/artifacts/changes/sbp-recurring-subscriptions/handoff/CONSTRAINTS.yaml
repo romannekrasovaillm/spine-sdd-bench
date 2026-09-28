@@ -1,0 +1,73 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+  # --- Рекуррентные списания (ADR-008, AD-009, AD-010) ---
+  - name: subscription-charge-requires-active-mandate
+    type: must_contain
+    glob: "docs/adr/ADR-008-*.md"
+    pattern: 'только при согласии в состоянии `ACTIVE`'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+    rationale: 'AD-009: рекуррентное списание допустимо только по действующему согласию'
+    fix_hint: 'вернуть формулировку инварианта AD-009 в ADR-008'
+  - name: mandate-audit-and-pdn-minimal
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'неизменяемом аудит-логе'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+    rationale: 'AD-010: доказуемость согласия и неизменяемый аудит'
+    fix_hint: 'вернуть формулировку AD-010 в спайн'
+  - name: nfr-subscription-revocation-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'Блокировка новых списаний после отзыва'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+    rationale: 'AD-009/NFR §7: отзыв согласия обязан блокировать новые списания за измеримое время'
+    fix_hint: 'добавить бюджет распространения отзыва в docs/nfr.md §7'
+  - name: ears_acceptance_criteria
+    type: must_contain
+    glob: 'docs/**/*.md'
+    pattern: '(?m)^\s*[-*]?\s*\**\s*(When|While|If|Where)\b'
+    severity: warn
+    owner: solution-architect
+    expiry: 2027-09-28
+    rationale: 'критерии приёмки без EARS-формы непроверяемы формально'
+    fix_hint: 'переписать критерии приёмки в EARS-нотации (When/While/If/Where)'

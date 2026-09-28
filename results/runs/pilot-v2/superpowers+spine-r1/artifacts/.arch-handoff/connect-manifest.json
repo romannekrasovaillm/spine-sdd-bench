@@ -1,0 +1,12 @@
+{
+  "arch_be": "0.3.11",
+  "host": "qwen",
+  "installed_at": "2026-09-28T13:24:31.195416056+03:00",
+  "paths": [
+    ".qwen/settings.json",
+    ".qwen/skills/**"
+  ],
+  "sha256": {
+    ".qwen/settings.json": "ce4ffa68b919d0b5320afcbdaf27e1a8409fbea308c220b72da4b1a8f0187be0"
+  }
+}

@@ -1,0 +1,18 @@
+$ arch-be gate --route critical --base bench-baseline
+
+Гейт: .
+Маршрут: Critical (явный --route Critical)
+  [PASS] fitness * — Правил: 13, нарушений: 0 (error: 0, warn: 0); реестр: 13 правил (error: 11), отпечаток 1860bd8f — файл: .arch-handoff/CONSTRAINTS.yaml
+  [PASS] delta_guard * — изменённых файлов: 36, защищённых среди них: 1 — покрытие: ARCHITECTURE-SPINE.md ← 'sbp-recurring-c2b'
+  [PASS] rule_weakened * — реестр правил не ослаблен относительно bench-baseline — файл: .arch-handoff/CONSTRAINTS.yaml
+  [PASS] spine_lint * — находок: 0 (error: 0)
+  [SKIP] trace_check * — нет каталога model/
+  [SKIP] model_validate * — нет каталога model/
+  [PASS] sensors * — сенсоров прогнано: 4, провалов нет
+  [SKIP] nfr * — нет каталога model/ — нечего считать
+  [SKIP] evidence_verify * — нет EVIDENCE.yaml ни в корне, ни в активных change-dir
+  [SKIP] decision_quality — не включена: добавьте 'decision_quality' в [gate.required] нужного маршрута
+  [SKIP] semantic_quality — не включена: добавьте 'semantic_quality' в [gate.required] нужного маршрута
+Итог: INCOMPLETE — обязательные составляющие без входа: trace_check, nfr, model_validate, evidence_verify (exit 3)
+Не проверено (обязательно для маршрута Critical): trace_check, nfr, model_validate, evidence_verify
+Аттестация вердикта: sha256:4fa1a8597c137d113289002b8b19d8fd8f96a17ea80fe5bd42a40a57317ef4a6

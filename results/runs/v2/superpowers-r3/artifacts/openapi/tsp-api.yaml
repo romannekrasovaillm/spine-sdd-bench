@@ -1,0 +1,177 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0-draft
+  description: >-
+    Аддитивное расширение v0.2 (ADR-008): подписки СБП (согласия плательщика и рекуррентные списания).
+    Пути и схемы v0.1 не изменены; добавлены новые ресурсы mandates/debits и опциональные поля Payment.
+    Протокольные детали периода/лимитов — [ТРЕБУЕТ ПРОВЕРКИ] до документации НСПК.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      summary: Регистрация согласия плательщика на рекуррентные списания (v0.2, ADR-008)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидает подтверждения плательщиком
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      summary: Статус и параметры согласия (v0.2)
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/debits:
+    post:
+      operationId: createDebit
+      summary: Инициировать рекуррентное списание по согласию (v0.2)
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitRequest'}
+      responses:
+        '201':
+          description: Списание инициировано, ожидает подтверждения банка плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Debit'}
+  /v1/debits/{debitId}:
+    get:
+      operationId: getDebit
+      summary: Статус рекуррентного списания (v0.2)
+      parameters:
+        - {in: path, name: debitId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус списания
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Debit'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        origin:
+          type: string
+          description: Происхождение платежа (добавлено в v0.2, опционально)
+          enum: [QR, MANDATE]
+        mandateId:
+          type: string
+          description: Согласие, по которому инициировано списание (добавлено в v0.2, опционально)
+    MandateRequest:
+      type: object
+      required: [tspId, payerRef, maxAmountPerPeriod, period, validUntil]
+      properties:
+        tspId: {type: string}
+        payerRef: {type: string, description: Токенизированная ссылка на плательщика (не открытые ПДн)}
+        maxAmountPerPeriod: {type: integer, description: Лимит одного списания за период, копейки}
+        period: {type: string, description: "Период списаний (например MONTHLY) [ТРЕБУЕТ ПРОВЕРКИ]"}
+        maxTotalAmount: {type: integer, description: Общий лимит согласия, копейки}
+        validUntil: {type: string, format: date-time}
+        paymentPurpose: {type: string}
+        redirectUrl: {type: string}
+        merchantOrderId: {type: string}
+    Mandate:
+      type: object
+      required: [mandateId, status]
+      properties:
+        mandateId: {type: string}
+        status:
+          type: string
+          enum: [CREATED, PENDING_PAYER, ACTIVE, SUSPENDED, REVOKED, REJECTED, EXPIRED]
+        consentUrl: {type: string, description: Ссылка/QR для подтверждения согласия плательщиком}
+        maxAmountPerPeriod: {type: integer}
+        period: {type: string}
+        maxTotalAmount: {type: integer}
+        validUntil: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+        reasonCode: {type: string}
+    DebitRequest:
+      type: object
+      required: [amount, period]
+      properties:
+        amount: {type: integer, description: Сумма списания, копейки}
+        period: {type: string, description: "Идентификатор периода [ТРЕБУЕТ ПРОВЕРКИ]"}
+        merchantOrderId: {type: string}
+    Debit:
+      type: object
+      required: [debitId, paymentId, mandateId, amount, status]
+      properties:
+        debitId: {type: string}
+        paymentId: {type: string}
+        mandateId: {type: string}
+        amount: {type: integer}
+        status:
+          type: string
+          enum: [DEBIT_PENDING, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        errorCode: {type: string}
+        paidAt: {type: string, format: date-time}

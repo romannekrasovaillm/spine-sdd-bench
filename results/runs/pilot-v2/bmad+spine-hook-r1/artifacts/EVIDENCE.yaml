@@ -1,0 +1,56 @@
+route: Critical
+packed_at: 2026-09-28T14:18:38.887615457+03:00
+hash_alg: sha256
+items:
+- key: problem
+  path: docs/PROBLEM.md
+  hash: e55a0dff30b3d779101192a471d878e73ad84d39a04a11a7b5c3f5581cc8029f
+  size: 4434
+- key: spec_or_delta
+  path: docs/SPEC.md
+  hash: 45440a3a410b49cc8d5da9b63829524152a3575be3031be470720477a10025ef
+  size: 5939
+- key: risk_level
+  path: docs/RISK.md
+  hash: 99ebcd3d8b95b3d1f1e2df0debc5ffc4445467d46ab905623c2ea4dc645f138d
+  size: 5284
+- key: acceptance
+  path: docs/ACCEPTANCE.md
+  hash: 90d0fd8ed73e8ed2d821c4589c890602edf924445098ab6bbe0480311e763ac3
+  size: 6098
+- key: rollback
+  path: docs/ROLLBACK.md
+  hash: 8bfc6d18c154d211aa67acad38a65dce05fa2f991b78ca4c45a2c66edd663b8b
+  size: 4335
+- key: adr_or_pattern
+  path: docs/adr
+  hash: 38e701adf908f9acbd0b22b539b50a3dc2f0838dd4923778455e80200d39042b
+  size: 60264
+- key: spine
+  path: ARCHITECTURE-SPINE.md
+  hash: 36c4dde59c943987a0ac5df950fa179c3acdd489fbb97647b6466c40a0d7c9cf
+  size: 11982
+- key: decision_a3
+  path: docs/DECISION.md
+  hash: 7341ea0c2c68d9e03c2d041b6e4ffdb7614a2be25a368e7cb99e33ae30dae4d7
+  size: 5020
+- key: walking_skeleton
+  path: docs/WALKING-SKELETON.md
+  hash: e1af25450c35cf54f0a13aaf7340b1414cea2f70286d1a17340856ff31a02152
+  size: 3962
+- key: adversarial_review
+  path: docs/REVIEW.md
+  hash: a204e6af535d3603beffac8fb0de8516cec10ad6221e9fafcb3dc3be778209fb
+  size: 8531
+- key: rollback_rehearsal
+  path: .arch-handoff/REHEARSAL.json
+  hash: 613efc9d2b22129829ce07618eff060d21c578b91d3555d1d2c892d5a56e7121
+  size: 2151
+- key: validation
+  path: docs/VALIDATION.md
+  hash: 936f6ccc816b70e34f893c62c17dda52b3e191031be744196a7ccdc15de4dd45
+  size: 6088
+- key: fitness_report
+  path: reports/fitness.md
+  hash: 5f2ccc60363f7f435fd2f5dea9497c5109e0a11de00c1c347e1f619bf59b840d
+  size: 649

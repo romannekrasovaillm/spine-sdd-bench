@@ -1,0 +1,120 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.1.0
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано (статус PENDING)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отозвано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        mandateId: {type: string, description: "Опционально: списание по действующему согласию (подписка); при отсутствии — сценарий QR"}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        mandateId: {type: string, description: "Согласие, по которому выполнено списание (если применимо)"}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+    MandateRequest:
+      type: object
+      required: [maxAmountPerDebit, purpose]
+      properties:
+        maxAmountPerDebit: {type: integer, description: "Предел разового списания, копейки"}
+        maxAmountPerPeriod: {type: integer, description: "Предел списаний за период, копейки (опционально)"}
+        periodSeconds: {type: integer, description: "Длина периода лимита, секунды (опционально)"}
+        purpose: {type: string, description: "Назначение подписки, показывается плательщику"}
+        ttlSeconds: {type: integer, description: "Срок действия согласия, секунды (опционально)"}
+    Mandate:
+      type: object
+      required: [mandateId, status]
+      properties:
+        mandateId: {type: string}
+        status:
+          type: string
+          enum: [PENDING, ACTIVE, SUSPENDED, REVOKED, EXPIRED, FAILED]
+        maxAmountPerDebit: {type: integer}
+        maxAmountPerPeriod: {type: integer}
+        currency: {type: string, description: "ISO 4217 (RUB)"}
+        expiresAt: {type: string, format: date-time}

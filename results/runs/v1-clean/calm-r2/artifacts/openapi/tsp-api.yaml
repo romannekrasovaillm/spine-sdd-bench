@@ -1,0 +1,208 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: |
+    API ТСП платёжного шлюза СБП (C2B-приём). Версия пути /v1 сохранена;
+    изменения к v0.1.0 аддитивны (рекуррентные списания по согласию — ADR-008):
+    существующие /v1/payments и /v1/payments/{paymentId} не меняются по сигнатуре.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      summary: Создание платежа (QR/ссылка)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      summary: Статус платежа (и рекуррентного списания — charge)
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      summary: Создание согласия (первый платёж с согласием)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие запрошено (QR первого платежа)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      summary: Статус согласия
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/revoke:
+    post:
+      operationId: revokeConsent
+      summary: Отзыв согласия по инициативе ТСП (плательщик попросил остановить подписку)
+      parameters:
+        - in: path
+          name: consentId
+          required: true
+          schema: {type: string}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отозвано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/charges:
+    post:
+      operationId: createCharge
+      summary: Рекуррентное списание по согласию (без QR и действия плательщика)
+      parameters:
+        - in: path
+          name: consentId
+          required: true
+          schema: {type: string}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ChargeRequest'}
+      responses:
+        '201':
+          description: Списание создано (платёж типа RECURRING)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '404':
+          description: Согласие не найдено
+        '409':
+          description: Согласие не активно (REVOKED/EXPIRED/SUSPENDED)
+        '422':
+          description: Превышен лимит согласия
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        paymentType:
+          type: string
+          enum: [QR, RECURRING]
+          default: QR
+          description: Тип инициации. Для QR-платежей поле опционально (по умолчанию QR).
+        consentId:
+          type: string
+          description: Согласие (только для paymentType=RECURRING). Для QR-платежей не используется.
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentType:
+          type: string
+          enum: [QR, RECURRING]
+          default: QR
+        consentId:
+          type: string
+          description: Присутствует только для paymentType=RECURRING.
+    ConsentRequest:
+      type: object
+      required: [tspId, maxAmountPerCharge, period, purpose]
+      properties:
+        tspId: {type: string}
+        payerRef:
+          type: string
+          description: Токенизированная/маскированная ссылка на плательщика [ТРЕБУЕТ ПРОВЕРКИ — формат по протоколу НСПК]
+        maxAmountPerCharge:
+          type: integer
+          description: Максимальная сумма одного списания, в копейках
+        maxAmountPerPeriod:
+          type: integer
+          description: Опциональный лимит за период (копейки)
+        period:
+          type: string
+          enum: [MONTH, WEEK, DAY, UNBOUNDED]
+          description: Период, к которому относится maxAmountPerPeriod
+        purpose: {type: string}
+        expiresAt:
+          type: string
+          format: date-time
+          description: Срок действия согласия (ISO 8601 UTC)
+    Consent:
+      type: object
+      required: [consentId, status, maxAmountPerCharge, period]
+      properties:
+        consentId: {type: string}
+        status:
+          type: string
+          enum: [PENDING, ACTIVE, REVOKED, EXPIRED, SUSPENDED, FAILED]
+        maxAmountPerCharge: {type: integer}
+        maxAmountPerPeriod: {type: integer}
+        period:
+          type: string
+          enum: [MONTH, WEEK, DAY, UNBOUNDED]
+        purpose: {type: string}
+        expiresAt: {type: string, format: date-time}
+        qrUrl:
+          type: string
+          description: QR первого платежа с согласием (только в статусе PENDING)
+        qrImage: {type: string, description: QR первого платежа, PNG base64 (опц.)}
+        firstPaymentId: {type: string, description: Первый платёж, установивший согласие (после ACTIVE)}
+        createdAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+    ChargeRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: integer
+          description: Сумма списания в копейках (> 0, ≤ maxAmountPerCharge)
+        purpose: {type: string}
+        merchantOrderId: {type: string}

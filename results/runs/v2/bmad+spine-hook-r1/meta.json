@@ -1,0 +1,58 @@
+{
+  "condition": "bmad+spine-hook",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-bmad+spine-hook-r1",
+  "base_sha": "0bd4becbebae236c7ab618f43d1def3400ff897b",
+  "wall_s": 817.0,
+  "turn_ok": true,
+  "records": 123,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 95,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": [
+      "Stop"
+    ]
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 79,
+  "tool_names": [
+    "edit",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "tool_call",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "M\t.qwen/settings.json",
+    "M\tARCHITECTURE-SPINE.md",
+    "A\tchanges/sbp-subscriptions/DELTA.md",
+    "A\tchanges/sbp-subscriptions/HANDOFF.md",
+    "A\tchanges/sbp-subscriptions/proposal.md",
+    "A\tdocs/adr/ADR-008-podpiski-sbp-soglasie-na-rekurrentnye-c2b-spisaniya.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "A\tdocs/spec/mandate-state-machine.md",
+    "M\tdocs/spec/state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Idempotency requirement",
+  "description": "Требование AD-003: повторная доставка не изменяет завершённое состояние; двойное списание исключено.",
+  "type": "object",
+  "properties": {
+    "double-debits": { "type": "integer" },
+    "keys": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["double-debits"],
+  "additionalProperties": true
+}

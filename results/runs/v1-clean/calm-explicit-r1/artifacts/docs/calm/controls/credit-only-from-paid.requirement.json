@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.bank.ru/controls/credit-only-from-paid.json",
+  "title": "Credit only from confirmed status",
+  "description": "Зачисление в АБС только из подтверждённого статуса PAID (AD-005).",
+  "type": "object",
+  "properties": {
+    "source-status": { "type": "string" },
+    "blocked-from": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

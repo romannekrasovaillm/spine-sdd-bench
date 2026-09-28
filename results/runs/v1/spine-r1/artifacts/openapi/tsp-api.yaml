@@ -1,0 +1,155 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.1.0
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Согласие создано (ожидает активации плательщиком)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие отозвано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/charges:
+    post:
+      operationId: createCharge
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ChargeRequest'}
+      responses:
+        '201':
+          description: Рекуррентное списание инициировано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        mandateId: {type: string, description: Идентификатор согласия, если платёж — рекуррентное списание (опционально)}
+    MandateRequest:
+      type: object
+      required: [tspId, payerRef, amountLimit, periodicity, expiryDate]
+      properties:
+        tspId: {type: string}
+        payerRef: {type: string, description: Токенизированный идентификатор плательщика (минимум ПДн)}
+        amountLimit: {type: integer, description: Максимальная сумма одного списания, в копейках}
+        periodicity: {type: string, enum: [DAILY, WEEKLY, MONTHLY, CUSTOM]}
+        startDate: {type: string, description: ISO 8601 дата начала}
+        expiryDate: {type: string, description: ISO 8601 дата окончания}
+        purpose: {type: string, description: Назначение согласия (для плательщика)}
+    Mandate:
+      type: object
+      required: [mandateId, tspId, status, amountLimit, periodicity, expiryDate]
+      properties:
+        mandateId: {type: string}
+        tspId: {type: string}
+        status: {type: string, enum: [PENDING_ACTIVATION, ACTIVE, SUSPENDED, REVOKED, EXPIRED, FAILED]}
+        amountLimit: {type: integer}
+        periodicity: {type: string, enum: [DAILY, WEEKLY, MONTHLY, CUSTOM]}
+        expiryDate: {type: string}
+        payerRef: {type: string}
+        createdAt: {type: string}
+    ChargeRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: Сумма списания в копейках (не более amountLimit)}
+        purpose: {type: string}
+    Charge:
+      type: object
+      required: [chargeId, mandateId, amount, status]
+      properties:
+        chargeId: {type: string, description: Идентификатор списания (равен paymentId)}
+        mandateId: {type: string}
+        amount: {type: integer}
+        status: {type: string, enum: [CREATED, PAID, CREDITED, COMPLETED, FAILED]}

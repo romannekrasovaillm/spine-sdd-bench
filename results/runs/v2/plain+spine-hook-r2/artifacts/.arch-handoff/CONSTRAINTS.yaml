@@ -1,0 +1,93 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+  # --- Рекуррентные согласия (ADR-008..011, AD-009). Карточки правила. ---
+  - name: consent-state-machine-present
+    type: file_exists
+    path: docs/spec/consent-state-machine.md
+    severity: error
+    ad: AD-009
+    adr: ADR-008
+    rationale: Без формальной машины согласия нельзя доказать законность списания и остановить его по отзыву.
+    fix_hint: Восстановить docs/spec/consent-state-machine.md (или оформить замену через ADR).
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-09-28
+    effort_hours: 0.5
+  - name: recurring-consent-invariant-present
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009'
+    severity: error
+    ad: AD-009
+    adr: ADR-008
+    rationale: Инвариант «списание только по действующему согласию» обязан оставаться в спайне.
+    fix_hint: Вернуть блок AD-009 в ARCHITECTURE-SPINE.md или оформить замену через Superseded-ADR.
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-09-28
+    effort_hours: 0.5
+  - name: charge-idempotency-business-key
+    type: must_contain
+    glob: "docs/spec/consent-state-machine.md"
+    pattern: '\(consentId, billingId\)'
+    severity: error
+    ad: AD-009
+    adr: ADR-009
+    rationale: Дедуп по бизнес-ключу — защита от двойного списания при разных Idempotency-Key.
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-09-28
+    effort_hours: 0.5
+  - name: recurring-contract-paths-present
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/consents'
+    severity: error
+    ad: AD-009
+    adr: ADR-010
+    rationale: Контракт согласий — точка интеграции ТСП; пропажа пути ломает потребителей.
+    owner: владелец API ТСП
+    expiry: 2027-09-28
+    effort_hours: 0.5
+  - name: recurring-nfr-section-present
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'Рекуррентные платежи'
+    severity: error
+    ad: AD-009
+    adr: ADR-009
+    rationale: У рекуррентного функционала должны быть измеримые цели (активация, отзыв, дедуп, окно биллинга).
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-09-28
+    effort_hours: 0.5

@@ -1,0 +1,142 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Согласие (подписка) зарегистрировано, ожидает активации плательщиком
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия (подписки)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/cancel:
+    post:
+      operationId: cancelSubscription
+      parameters:
+        - in: path
+          name: subscriptionId
+          required: true
+          schema: {type: string}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отозвано (идемпотентно)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        paymentType:
+          type: string
+          enum: [oneOff, recurring]
+          default: oneOff
+          description: Тип платежа; по умолчанию oneOff (обратная совместимость)
+        subscriptionId:
+          type: string
+          description: Обязателен при paymentType=recurring — ссылка на активное согласие
+        periodKey:
+          type: string
+          description: Ключ расчётного окна для плановых списаний (идемпотентность {subscriptionId}:{periodKey})
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentType:
+          type: string
+          enum: [oneOff, recurring]
+          description: Тип платежа
+        subscriptionId:
+          type: string
+          description: Согласие, по которому проведено рекуррентное списание (если применимо)
+    SubscriptionRequest:
+      type: object
+      required: [tspId, amountLimit, period]
+      properties:
+        tspId: {type: string}
+        amountLimit: {type: integer, description: Максимальная сумма одного списания, копейки}
+        period: {type: string, description: Период списаний, ISO 8601 duration, напр. P1M}
+        totalLimit: {type: integer, description: Суммарный потолок по согласию, копейки (опц.)}
+        expiresAt: {type: string, format: date-time, description: Срок действия согласия (опц.)}
+        merchantSubscriptionId: {type: string, description: Сквозной идентификатор ТСП (опц.)}
+    Subscription:
+      type: object
+      required: [subscriptionId, status]
+      properties:
+        subscriptionId: {type: string}
+        status:
+          type: string
+          enum: [PENDING_ACTIVATION, ACTIVE, SUSPENDED, REVOKED, EXPIRED]
+        tspId: {type: string}
+        amountLimit: {type: integer}
+        period: {type: string}
+        totalLimit: {type: integer}
+        expiresAt: {type: string, format: date-time}
+        merchantSubscriptionId: {type: string}

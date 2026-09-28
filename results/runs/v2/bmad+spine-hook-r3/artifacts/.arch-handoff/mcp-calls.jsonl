@@ -1,0 +1,9 @@
+{"ts":"2026-09-28T15:44:40.013720613+03:00","tool":"significance_score","verdict":"ok","duration_ms":0,"session_id":"9c0995d800dbe1d1","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:44:40.014168651+03:00","tool":"kb_search","verdict":"ok","duration_ms":0,"session_id":"9c0995d800dbe1d1","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:44:40.017907170+03:00","tool":"rules_suggest","verdict":"ok","duration_ms":3,"session_id":"9c0995d800dbe1d1","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:44:44.992035297+03:00","tool":"kb_search","verdict":"ok","duration_ms":0,"session_id":"9c0995d800dbe1d1","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:47:00.887852068+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"9c0995d800dbe1d1","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:47:11.364015326+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"9c0995d800dbe1d1","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:47:15.217300473+03:00","tool":"contract_diff","verdict":"ok","duration_ms":0,"session_id":"9c0995d800dbe1d1","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:49:18.524088638+03:00","tool":"architect_review","verdict":"pass","duration_ms":48,"session_id":"9c0995d800dbe1d1","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:49:43.365552848+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"9c0995d800dbe1d1","host":"qwen-cli-mcp-client-spine"}

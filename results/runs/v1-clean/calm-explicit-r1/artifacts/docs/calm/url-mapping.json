@@ -1,0 +1,9 @@
+{
+  "https://schemas.bank.ru/controls/consent-limit-enforcement.json": "controls/consent-limit-enforcement.requirement.json",
+  "https://schemas.bank.ru/controls/idempotency.json": "controls/idempotency.requirement.json",
+  "https://schemas.bank.ru/controls/consent-revocation.json": "controls/consent-revocation.requirement.json",
+  "https://schemas.bank.ru/controls/nps-compliance.json": "controls/nps-compliance.requirement.json",
+  "https://schemas.bank.ru/controls/pdn-minimization.json": "controls/pdn-minimization.requirement.json",
+  "https://schemas.bank.ru/controls/audit-trail.json": "controls/audit-trail.requirement.json",
+  "https://schemas.bank.ru/controls/credit-only-from-paid.json": "controls/credit-only-from-paid.requirement.json"
+}

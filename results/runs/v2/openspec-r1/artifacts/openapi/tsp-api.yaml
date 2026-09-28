@@ -1,0 +1,278 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Мерчант-API СБП-шлюза. Версия 0.2.0 — аддитивное расширение поверх 0.1.0
+    (рекуррентные списания по согласию плательщика; ADR-008 / AD-009). Удалённых
+    и переименованных путей/полей нет; все новые поля — опциональные; поведение
+    разовых платежей и возвратов не изменяется. Ломающие изменения — только /v2.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      summary: Регистрация согласия плательщика на рекуррентные списания
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано (подтверждение ОПКЦ — асинхронно)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/revoke:
+    post:
+      operationId: revokeConsent
+      summary: Отзыв согласия; прекращает все будущие списания
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Согласие отозвано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Создание подписки по действующему согласию
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Подписка создана
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус и параметры подписки
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/suspend:
+    post:
+      operationId: suspendSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Подписка приостановлена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/resume:
+    post:
+      operationId: resumeSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Подписка возобновлена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/charges:
+    get:
+      operationId: listCharges
+      summary: История списаний по подписке
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Список списаний
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ChargeList'}
+    post:
+      operationId: createCharge
+      summary: On-demand списание; идемпотентно по ключу периода (subscriptionId, billingPeriod)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ChargeRequest'}
+      responses:
+        '201':
+          description: Списание создано (либо возвращено существующее за период)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+  /v1/charges/{chargeId}:
+    get:
+      operationId: getCharge
+      parameters:
+        - {in: path, name: chargeId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус списания
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+components:
+  parameters:
+    IdempotencyKey:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema: {type: string}
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        subscriptionId:
+          type: string
+          description: Опционально; привязка платежа к подписке (v0.2)
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        subscriptionId: {type: string, description: Опционально (v0.2)}
+        consentId: {type: string, description: Опционально (v0.2)}
+        initiator:
+          type: string
+          enum: [PAYER, MERCHANT]
+          default: PAYER
+          description: PAYER — разовый платёж; MERCHANT — рекуррентное списание (v0.2)
+    ConsentRequest:
+      type: object
+      required: [tspId]
+      properties:
+        tspId: {type: string}
+        maxAmount: {type: integer, description: Максимальная сумма отдельного списания, копейки}
+        validUntil: {type: string, format: date-time, description: Срок действия согласия}
+    Consent:
+      type: object
+      required: [consentId, tspId, status]
+      properties:
+        consentId: {type: string}
+        tspId: {type: string}
+        status:
+          type: string
+          enum: [PENDING, ACTIVE, REVOKED, EXPIRED]
+        validUntil: {type: string, format: date-time}
+        createdAt: {type: string, format: date-time}
+    SubscriptionRequest:
+      type: object
+      required: [consentId, amount, period]
+      properties:
+        consentId: {type: string}
+        amount: {type: integer, description: Сумма списания в копейках}
+        period:
+          type: string
+          enum: [DAY, WEEK, MONTH, YEAR]
+          description: Периодичность списания
+        maxAmount: {type: integer, description: Лимит отдельного списания, копейки}
+    Subscription:
+      type: object
+      required: [subscriptionId, consentId, tspId, amount, status]
+      properties:
+        subscriptionId: {type: string}
+        consentId: {type: string}
+        tspId: {type: string}
+        amount: {type: integer, description: Сумма списания в копейках}
+        currency: {type: string, default: RUB}
+        period: {type: string, enum: [DAY, WEEK, MONTH, YEAR]}
+        status:
+          type: string
+          enum: [ACTIVE, SUSPENDED, REVOKED, EXPIRED]
+        nextChargeAt: {type: string, format: date-time}
+        createdAt: {type: string, format: date-time}
+    ChargeRequest:
+      type: object
+      required: [billingPeriod]
+      properties:
+        billingPeriod:
+          type: string
+          description: Ключ периода списания; вместе с subscriptionId обеспечивает идемпотентность
+        amount: {type: integer, description: Опционально; переопределение в пределах лимита, копейки}
+    Charge:
+      type: object
+      required: [chargeId, subscriptionId, amount, status]
+      properties:
+        chargeId: {type: string}
+        subscriptionId: {type: string}
+        paymentId: {type: string}
+        billingPeriod: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, PAID, CREDITED, COMPLETED, FAILED]
+        initiator: {type: string, enum: [MERCHANT], default: MERCHANT}
+        errorCode: {type: string, nullable: true}
+        createdAt: {type: string, format: date-time}
+        paidAt: {type: string, format: date-time, nullable: true}
+    ChargeList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Charge'}

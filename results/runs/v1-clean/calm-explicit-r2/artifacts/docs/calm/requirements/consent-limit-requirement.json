@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Consent limit enforcement requirement",
+  "description": "Требование AD-009: списание по согласию только в рамках активного согласия с лимитами, проверка атомарна с созданием.",
+  "type": "object",
+  "properties": {
+    "rule": { "type": "string" },
+    "max-debits-over-limit": { "type": "integer" },
+    "atomic-guard": { "type": "boolean" },
+    "limits": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["rule", "atomic-guard"],
+  "additionalProperties": true
+}

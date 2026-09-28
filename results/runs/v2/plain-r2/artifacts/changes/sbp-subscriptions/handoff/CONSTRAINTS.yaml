@@ -1,0 +1,71 @@
+# Fitness-правила изменения «СБП-подписки» (handoff-пакет).
+# Этап: решение/спека (до кода). При старте реализации — активировать секцию
+# «Код» и добавить сборку/линтеры/тесты кодового харнесса (навык fitness-functions).
+rules:
+  # --- Документы (проверяются сейчас, `arch control check`) ---
+  - name: adr-008-subscriptions-present
+    type: file_exists
+    path: docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md
+    severity: error
+  - name: spine-consent-invariant-present
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009'
+    severity: error
+  - name: consent-state-machine-present
+    type: must_contain
+    glob: "docs/spec/state-machine.md"
+    pattern: 'Машина согласия'
+    severity: error
+  - name: debit-only-by-active-consent
+    type: must_contain
+    glob: "docs/spec/state-machine.md"
+    pattern: 'Списание невозможно ни из одного состояния, кроме `ACTIVE`'
+    severity: error
+  - name: subscriptions-nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'Инициация списания от срока'
+    severity: error
+  - name: tsp-api-consents-contract
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/consents'
+    severity: error
+  - name: ears-acceptance-criteria
+    type: must_contain
+    glob: 'docs/**/*.md'
+    pattern: '(?m)^\s*[-*]?\s*\**\s*(When|While|If|Where)\b'
+    severity: warn
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+
+  # --- Код (активировать при появлении кодовой базы; примеры) ---
+  # - name: no-direct-abs-or-nspk-from-core
+  #   type: must_not_contain
+  #   glob: "src/core/**/*"
+  #   pattern: '(nspk|opkc|abs)::|/v1/opkc|НСПК'
+  #   severity: error            # AD-001/AD-004: только через адаптеры
+  # - name: consent-transition-single-transaction
+  #   type: command_succeeds
+  #   command: "grep -q 'consent' tests/consent_atomicity.rs"   # fitness AD-002/AD-009
+  #   timeout_secs: 300
+  #   severity: error
+  # - name: no-debit-without-active-consent
+  #   type: command_succeeds
+  #   command: "cargo test --quiet consent_guard"
+  #   timeout_secs: 600
+  #   severity: error            # AD-009: списание без ACTIVE невозможно
+  # - name: debit-idempotent-by-period
+  #   type: command_succeeds
+  #   command: "cargo test --quiet debit_idempotency"
+  #   timeout_secs: 600
+  #   severity: error            # AD-003/AD-009: consentId + billingPeriod
+  # - name: credit-only-from-paid
+  #   type: command_succeeds
+  #   command: "cargo test --quiet credit_only_from_paid"
+  #   timeout_secs: 600
+  #   severity: error            # AD-005

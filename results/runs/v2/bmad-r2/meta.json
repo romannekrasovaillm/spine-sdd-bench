@@ -1,0 +1,58 @@
+{
+  "condition": "bmad",
+  "rep": 2,
+  "mode": "tui",
+  "session": "b-bmad-r2",
+  "base_sha": "e55c4e71d423854a5b713733a4164b8d1a4d52f7",
+  "wall_s": 732.5,
+  "turn_ok": true,
+  "records": 195,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 29,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 107,
+  "tool_names": [
+    "agent",
+    "edit",
+    "grep_search",
+    "list_agents",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tdocs/adr/ADR-008-podpiski-sbp-soglasie-platelshchika-mandate-i-rekurrentnye-spisaniya.md",
+    "A\tdocs/changes/sbp-subscriptions/.memlog.md",
+    "A\tdocs/changes/sbp-subscriptions/CONTRACT-DIFF.md",
+    "A\tdocs/changes/sbp-subscriptions/HANDOFF.md",
+    "A\tdocs/changes/sbp-subscriptions/IMPACT.md",
+    "A\tdocs/changes/sbp-subscriptions/reviews/review-adversarial.md",
+    "A\tdocs/changes/sbp-subscriptions/reviews/review-rubric.md",
+    "A\tdocs/changes/sbp-subscriptions/reviews/review-verification.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/rfp/vendor-rfp.md",
+    "M\tdocs/solutioning.md",
+    "M\tdocs/spec/state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

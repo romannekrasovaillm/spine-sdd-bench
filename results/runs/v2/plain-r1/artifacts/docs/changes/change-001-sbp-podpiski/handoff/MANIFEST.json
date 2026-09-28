@@ -1,0 +1,23 @@
+{
+  "created_at": "2026-09-28T00:00:00+00:00",
+  "change": "CHANGE-001",
+  "title": "СБП-подписки (рекуррентные C2B-списания по согласию плательщика)",
+  "status": "pending-ratification",
+  "activation_gate": "Ратификация ADR-008 (H1) и получение регламента НСПК по подпискам (H2)",
+  "task": "Реализовать поверх walking skeleton платёжного шлюза СБП механизм рекуррентных списаний по согласию плательщика: (1) REST API ТСП — регистрация/статус/отзыв согласия, инициация списания (Idempotency-Key), списание моделируется как Payment; (2) статусная машина Mandate (CREATED→PENDING_PAYER→ACTIVE→EXPIRED/REVOKED/REJECTED) с транзакционным outbox и аудит-логом; (3) проверки AD-009 (списание только при ACTIVE, срок, лимит; отзыв блокирует новые списания); (4) обязательные нотификации плательщику (AD-010); (5) durable-планировщик списаний; (6) расширение мок-адаптера ОПКЦ операциями/событиями подписок (реальный протокол НСПК НЕ реализуется); (7) зачисление только из PAID (AD-005), идемпотентно; (8) фиче-флаг на ТСП. Spine-инварианты AD-001..AD-010 обязательны.",
+  "model": "deepseek",
+  "sources": [
+    "docs/adr/ADR-008-sbp-podpiski-rekurrentnye-spisaniya-po-soglasiyu-platelshchika.md",
+    "ARCHITECTURE-SPINE.md",
+    "docs/contracts/tsp-api.md",
+    "docs/contracts/opkc-adapter.md",
+    "openapi/tsp-api.yaml",
+    "docs/spec/mandate-debit-lifecycle.md",
+    "docs/nfr.md",
+    "docs/changes/change-001-sbp-podpiski/README.md",
+    "docs/changes/change-001-sbp-podpiski/contracts-delta.md",
+    "docs/changes/change-001-sbp-podpiski/acceptance-and-rollback.md"
+  ],
+  "epic_context_chars": 4800,
+  "epic_context_tokens_approx": 1200
+}

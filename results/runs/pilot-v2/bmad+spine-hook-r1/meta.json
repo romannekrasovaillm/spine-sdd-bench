@@ -1,0 +1,74 @@
+{
+  "condition": "bmad+spine-hook",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-bmad+spine-hook-r1",
+  "base_sha": "0bd4becbebae236c7ab618f43d1def3400ff897b",
+  "wall_s": 1324.3,
+  "turn_ok": true,
+  "records": 270,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 95,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": [
+      "Stop"
+    ]
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 163,
+  "tool_names": [
+    "agent",
+    "edit",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "tool_call",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "M\t.arch-handoff/MANIFEST.json",
+    "A\t.arch-handoff/REHEARSAL.json",
+    "A\t.arch-handoff/ROLLBACK.yaml",
+    "A\t.arch-handoff/TASK-subscriptions.md",
+    "M\t.arch-handoff/adr/ADR-007-proposed-a3.md",
+    "A\t.arch-handoff/adr/ADR-008-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelshchika-podpiski-sbp.md",
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "M\t.qwen/settings.json",
+    "M\tARCHITECTURE-SPINE.md",
+    "A\tEVIDENCE.yaml",
+    "M\tREADME.md",
+    "A\tchanges/sbp-recurrent-c2b/DELTA.md",
+    "A\tchanges/sbp-recurrent-c2b/PROPOSAL.md",
+    "A\tdocs/ACCEPTANCE.md",
+    "A\tdocs/DECISION.md",
+    "A\tdocs/PROBLEM.md",
+    "A\tdocs/RISK.md",
+    "A\tdocs/ROLLBACK.md",
+    "A\tdocs/SPEC.md",
+    "A\tdocs/VALIDATION.md",
+    "A\tdocs/WALKING-SKELETON.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelshchika-podpiski-sbp.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "A\tdocs/solutioning-subscriptions.md",
+    "M\tdocs/spec/state-machine.md",
+    "M\topenapi/tsp-api.yaml",
+    "A\treports/fitness.md"
+  ]
+}

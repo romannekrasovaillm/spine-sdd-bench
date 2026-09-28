@@ -1,0 +1,29 @@
+{
+  "created_at": "2026-09-28T14:24:00+03:00",
+  "change": "add-sbp-recurring-payments",
+  "route": "critical",
+  "harness": "qwen-code",
+  "package_dir": ".arch-handoff-recurring",
+  "task": "Реализовать рекуррентные C2B-списания по согласию плательщика (подписки СБП) поверх принятого решения: согласие (жизненный цикл, зеркало реестра СБП), списание как платёж с consentId, предусловие ACTIVE+лимиты (AD-009), идемпотентность попытки (AD-011), приоритет отзыва и компенсация (AD-010), планировщик с ретраями, API /v1/consents* по контракту 0.2.0, нотификации, сверка. Реальный протокол НСПК не реализуется (внешний вход [ТРЕБУЕТ ПРОВЕРКИ]).",
+  "sources": [
+    "ARCHITECTURE-SPINE.md",
+    "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-soglasie-platelschika-kak-preduslovie-i-model-ispolneniya-spisaniy.md",
+    "docs/adr/ADR-009-transport-podpisok-sbp-oblast-vendorskogo-adaptera-opkc.md",
+    "docs/adr/ADR-002-model-konsistentnosti-platezha-konechnyy-avtomat-s-idempotentnostyu-na-urovne-shlyuza.md",
+    "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md",
+    "docs/adr/ADR-007-proposed-a3.md",
+    "openapi/tsp-api.yaml",
+    "openspec/changes/add-sbp-recurring-payments/proposal.md",
+    "openspec/changes/add-sbp-recurring-payments/design.md",
+    "openspec/changes/add-sbp-recurring-payments/specs/sbp-recurring-payments/spec.md",
+    "openspec/changes/add-sbp-recurring-payments/tasks.md",
+    "changes/add-sbp-recurring-payments/DELTA.md"
+  ],
+  "epic_context_chars": 5496,
+  "epic_context_tokens": 1375,
+  "note": "Отдельный каталог, чтобы не перезаписать принятый пакет .arch-handoff/ (walking skeleton разового C2B-приёма). Гейт по умолчанию читает .arch-handoff/CONSTRAINTS.yaml — при apply слить правила из этого пакета или перегенерировать handoff командой arch-be. Требуется A3 и документация НСПК.",
+  "adr_included": [
+    "ADR-008-rekurrentnye-c2b-spisaniya-soglasie-platelschika-kak-preduslovie-i-model-ispolneniya-spisaniy.md",
+    "ADR-009-transport-podpisok-sbp-oblast-vendorskogo-adaptera-opkc.md"
+  ]
+}

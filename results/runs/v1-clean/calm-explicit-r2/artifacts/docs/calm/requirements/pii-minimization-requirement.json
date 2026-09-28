@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PII minimization requirement",
+  "description": "Требование AD-006/AD-007 и 152-ФЗ: ПДн плательщика минимизированы, маскированы наружу, зашифрованы в покое.",
+  "type": "object",
+  "properties": {
+    "exposed-field": { "type": "string" },
+    "log-masking": { "type": "boolean" },
+    "encryption-at-rest": { "type": "boolean" }
+  },
+  "required": ["exposed-field", "log-masking", "encryption-at-rest"],
+  "additionalProperties": true
+}

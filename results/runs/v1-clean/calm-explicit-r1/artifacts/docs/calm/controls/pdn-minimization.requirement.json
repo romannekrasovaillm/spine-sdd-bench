@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.bank.ru/controls/pdn-minimization.json",
+  "title": "PDn minimization (152-FZ)",
+  "description": "Минимизация персональных данных согласия, маскирование в логах, шифрование в покое.",
+  "type": "object",
+  "properties": {
+    "store": { "type": "string" },
+    "masking": { "type": "string" },
+    "encryption-at-rest": { "type": "boolean" }
+  },
+  "additionalProperties": true
+}

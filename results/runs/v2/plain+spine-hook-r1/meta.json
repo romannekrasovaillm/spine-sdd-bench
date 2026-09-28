@@ -1,0 +1,55 @@
+{
+  "condition": "plain+spine-hook",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-plain+spine-hook-r1",
+  "base_sha": "74aea725794a94cbab0e108f6b5f45bf3aefed6e",
+  "wall_s": 848.0,
+  "turn_ok": true,
+  "records": 193,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 66,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": [
+      "Stop"
+    ]
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 118,
+  "tool_names": [
+    "edit",
+    "read_file",
+    "run_shell_command",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "M\t.qwen/settings.json",
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tchanges/sbp-subscriptions/DELTA.md",
+    "A\tchanges/sbp-subscriptions/SOLUTIONING.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelschika-mandat-kak-otdelnyy-agregat-rekurrentnoe-spisanie-kak-platyozh-sbp.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "A\tdocs/spec/mandate-state-machine.md",
+    "M\tdocs/spec/state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

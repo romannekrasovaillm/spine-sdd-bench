@@ -1,0 +1,568 @@
+{
+  "$schema": "https://calm.finos.org/release/1.2/meta/calm.json",
+  "unique-id": "recurring-c2b-consent",
+  "name": "Рекуррентные C2B-списания по согласию плательщика (подписки СБП)",
+  "description": "Архитектура изменения поверх СБП-шлюза (C2B-приём): согласие плательщика (consent) как сущность первого класса и рекуррентные дебиты без QR и действия клиента. Соответствует ADR-008 и инварианту AD-009.",
+  "metadata": [
+    {
+      "calm-version": "1.2.0",
+      "architecture-version": "0.2.0",
+      "owner": "solution-architect (платёжный контур)",
+      "business-domain": "Платёжный шлюз СБП",
+      "related-adr": "ADR-008",
+      "related-invariant": "AD-009"
+    }
+  ],
+  "nodes": [
+    {
+      "unique-id": "tsp",
+      "node-type": "actor",
+      "name": "ТСП / мерчант",
+      "description": "Торгово-сервисное предприятие (онлайн-кинотеатры, ЖКХ, связь), инициирует согласия и рекуррентные дебиты, получает вебхуки."
+    },
+    {
+      "unique-id": "payer",
+      "node-type": "actor",
+      "name": "Плательщик (физлицо)",
+      "description": "Подписывает согласие один раз в приложении своего банка; при дебитах не участвует."
+    },
+    {
+      "unique-id": "payer-bank",
+      "node-type": "ecosystem",
+      "name": "Банк плательщика",
+      "description": "Предъявляет согласие плательщику для подписания и исполняет рекуррентные списания со счёта плательщика."
+    },
+    {
+      "unique-id": "opkc-nspk",
+      "node-type": "ecosystem",
+      "name": "ОПКЦ СБП (НСПК)",
+      "description": "Внешний оператор: регистрирует согласия, координирует подписание и рекуррентные дебиты, уведомляет шлюз событиями."
+    },
+    {
+      "unique-id": "abs",
+      "node-type": "system",
+      "name": "АБС",
+      "description": "Автоматизированная банковская система: счета ТСП, зачисление по подтверждённому статусу дебита."
+    },
+    {
+      "unique-id": "sbp-gateway",
+      "node-type": "system",
+      "name": "СБП-шлюз (платёжный контур)",
+      "description": "Контейнер платёжного контура банка-эквайера, изолированный trust-зоной (AD-006)."
+    },
+    {
+      "unique-id": "tsp-api",
+      "node-type": "service",
+      "name": "API ТСП",
+      "description": "Входящий REST/JSON слой для ТСП: согласия и платежи (разовые и рекуррентные).",
+      "interfaces": [
+        {
+          "unique-id": "tsp-api-consents",
+          "url": "https://api.bank.ru/sbp/v1/consents"
+        },
+        {
+          "unique-id": "tsp-api-payments",
+          "url": "https://api.bank.ru/sbp/v1/payments"
+        }
+      ]
+    },
+    {
+      "unique-id": "payment-state-machine",
+      "node-type": "service",
+      "name": "Статусная машина платежа",
+      "description": "Единый источник истины состояния платежа (AD-002). Рекуррентный дебит — вариант платежа без QR_ISSUED/EXPIRED."
+    },
+    {
+      "unique-id": "consent-state-machine",
+      "node-type": "service",
+      "name": "Статусная машина согласия",
+      "description": "Единый источник истины состояния согласия: REQUESTED → PENDING_SIGN → ACTIVE, терминальные REVOKED/EXPIRED/DECLINED."
+    },
+    {
+      "unique-id": "opkc-adapter",
+      "node-type": "service",
+      "name": "Адаптер ОПКЦ",
+      "description": "Единственный компонент, знающий протокол НСПК (AD-004); нормализует операции/события согласия и дебитов.",
+      "interfaces": [
+        {
+          "unique-id": "opkc-adapter-mtls",
+          "url": "https://opkc-adapter.internal:8443"
+        }
+      ]
+    },
+    {
+      "unique-id": "abs-adapter",
+      "node-type": "service",
+      "name": "Адаптер АБС",
+      "description": "Единственный путь к АБС (AD-001): зачисление на счёт ТСП по подтверждённому статусу дебита.",
+      "interfaces": [
+        {
+          "unique-id": "abs-adapter-api",
+          "url": "https://abs-adapter.internal:9443"
+        }
+      ]
+    },
+    {
+      "unique-id": "notifier",
+      "node-type": "service",
+      "name": "Нотификатор ТСП",
+      "description": "Доставка вебхуков ТСП (payment.*, refund.*, consent.*) с ретраями и DLQ (ADR-004)."
+    },
+    {
+      "unique-id": "gateway-db",
+      "node-type": "database",
+      "name": "БД шлюза",
+      "description": "Платежи + согласия + транзакционный outbox + неизменяемый аудит-лог (AD-001, AD-002)."
+    },
+    {
+      "unique-id": "antifraud-aml",
+      "node-type": "service",
+      "name": "Антифрод / AML",
+      "description": "Внешний контур комплаенса банка: проверка ТСП, пороговые суммы, suspicious activity (115-ФЗ)."
+    }
+  ],
+  "relationships": [
+    {
+      "unique-id": "tsp-to-tsp-api",
+      "description": "Вызывает API ТСП для создания согласий и платежей",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "tsp" },
+          "destination": { "node": "tsp-api" }
+        }
+      },
+      "protocol": "HTTPS"
+    },
+    {
+      "unique-id": "payer-signs-consent",
+      "description": "Просматривает и подписывает согласие в приложении банка плательщика",
+      "relationship-type": {
+        "interacts": {
+          "actor": "payer",
+          "nodes": ["payer-bank"]
+        }
+      }
+    },
+    {
+      "unique-id": "payer-bank-to-opkc",
+      "description": "Передаёт подпись согласия и исполняет списания через ОПКЦ",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "payer-bank" },
+          "destination": { "node": "opkc-nspk" }
+        }
+      },
+      "protocol": "mTLS"
+    },
+    {
+      "unique-id": "opkc-to-payer-bank",
+      "description": "Инициирует списание со счёта плательщика в банке плательщика",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "opkc-nspk" },
+          "destination": { "node": "payer-bank" }
+        }
+      },
+      "protocol": "mTLS"
+    },
+    {
+      "unique-id": "tsp-api-to-payment-sm",
+      "description": "Передаёт запросы платежа (в т.ч. рекуррентного дебита) в статусную машину платежа",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "tsp-api" },
+          "destination": { "node": "payment-state-machine" }
+        }
+      },
+      "protocol": "HTTPS"
+    },
+    {
+      "unique-id": "tsp-api-to-consent-sm",
+      "description": "Передаёт запросы согласия в статусную машину согласия",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "tsp-api" },
+          "destination": { "node": "consent-state-machine" }
+        }
+      },
+      "protocol": "HTTPS"
+    },
+    {
+      "unique-id": "payment-sm-to-db",
+      "description": "Читает и пишет состояние платежа в БД шлюза (атомарно + outbox)",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "payment-state-machine" },
+          "destination": { "node": "gateway-db" }
+        }
+      },
+      "protocol": "JDBC"
+    },
+    {
+      "unique-id": "consent-sm-to-db",
+      "description": "Читает и пишет состояние согласия в БД шлюза (атомарно + outbox)",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "consent-state-machine" },
+          "destination": { "node": "gateway-db" }
+        }
+      },
+      "protocol": "JDBC"
+    },
+    {
+      "unique-id": "payment-sm-to-opkc-adapter",
+      "description": "Инициирует рекуррентный дебит через адаптер ОПКЦ",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "payment-state-machine" },
+          "destination": { "node": "opkc-adapter" }
+        }
+      },
+      "protocol": "HTTPS"
+    },
+    {
+      "unique-id": "consent-sm-to-opkc-adapter",
+      "description": "Регистрирует, опрашивает и отзывает согласие через адаптер ОПКЦ",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "consent-state-machine" },
+          "destination": { "node": "opkc-adapter" }
+        }
+      },
+      "protocol": "HTTPS"
+    },
+    {
+      "unique-id": "opkc-adapter-to-opkc",
+      "description": "Обменивается сообщениями протокола участника с ОПКЦ (запросы наружу, события внутрь)",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "opkc-adapter" },
+          "destination": { "node": "opkc-nspk" }
+        }
+      },
+      "protocol": "mTLS"
+    },
+    {
+      "unique-id": "payment-sm-to-abs-adapter",
+      "description": "Передаёт команду зачисления на счёт ТСП по подтверждённому статусу дебита",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "payment-state-machine" },
+          "destination": { "node": "abs-adapter" }
+        }
+      },
+      "protocol": "AMQP"
+    },
+    {
+      "unique-id": "abs-adapter-to-abs",
+      "description": "Выполняет зачисление на счёт ТСП в АБС (идемпотентно по paymentId)",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "abs-adapter" },
+          "destination": { "node": "abs" }
+        }
+      },
+      "protocol": "HTTPS"
+    },
+    {
+      "unique-id": "payment-sm-to-notifier",
+      "description": "Ставит события платежа в очередь нотификаций ТСП",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "payment-state-machine" },
+          "destination": { "node": "notifier" }
+        }
+      },
+      "protocol": "AMQP"
+    },
+    {
+      "unique-id": "consent-sm-to-notifier",
+      "description": "Ставит события согласия в очередь нотификаций ТСП",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "consent-state-machine" },
+          "destination": { "node": "notifier" }
+        }
+      },
+      "protocol": "AMQP"
+    },
+    {
+      "unique-id": "notifier-to-tsp",
+      "description": "Доставляет вебхуки ТСП (payment.*, refund.*, consent.*)",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "notifier" },
+          "destination": { "node": "tsp" }
+        }
+      },
+      "protocol": "HTTPS"
+    },
+    {
+      "unique-id": "payment-sm-to-antifraud",
+      "description": "Передаёт операции по порогам в антифрод/AML",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "payment-state-machine" },
+          "destination": { "node": "antifraud-aml" }
+        }
+      },
+      "protocol": "HTTPS"
+    },
+    {
+      "unique-id": "consent-sm-to-antifraud",
+      "description": "Передаёт согласия по порогам в антифрод/AML",
+      "relationship-type": {
+        "connects": {
+          "source": { "node": "consent-state-machine" },
+          "destination": { "node": "antifraud-aml" }
+        }
+      },
+      "protocol": "HTTPS"
+    },
+    {
+      "unique-id": "sbp-gateway-composed",
+      "description": "Состав платёжного контура шлюза",
+      "relationship-type": {
+        "composed-of": {
+          "container": "sbp-gateway",
+          "nodes": ["tsp-api", "payment-state-machine", "consent-state-machine", "opkc-adapter", "abs-adapter", "notifier"]
+        }
+      }
+    }
+  ],
+  "flows": [
+    {
+      "unique-id": "consent-creation-and-signing-flow",
+      "name": "Создание и подписание согласия",
+      "description": "ТСП создаёт запрос согласия; плательщик подписывает в банке плательщика; согласие переходит в ACTIVE; ТСП получает вебхук consent.signed.",
+      "transitions": [
+        {
+          "relationship-unique-id": "tsp-to-tsp-api",
+          "sequence-number": 1,
+          "description": "ТСП создаёт запрос согласия (POST /v1/consents, Idempotency-Key)",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "tsp-api-to-consent-sm",
+          "sequence-number": 2,
+          "description": "Запрос поступает в статусную машину согласия (REQUESTED)",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "consent-sm-to-opkc-adapter",
+          "sequence-number": 3,
+          "description": "Регистрация согласия через адаптер ОПКЦ",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "opkc-adapter-to-opkc",
+          "sequence-number": 4,
+          "description": "Запрос регистрации согласия в ОПКЦ",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "opkc-adapter-to-opkc",
+          "sequence-number": 5,
+          "description": "ОПКЦ возвращает sign-ссылку/QR (переход в PENDING_SIGN)",
+          "direction": "destination-to-source"
+        },
+        {
+          "relationship-unique-id": "consent-sm-to-db",
+          "sequence-number": 6,
+          "description": "Сохранение PENDING_SIGN и outbox-события",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "payer-bank-to-opkc",
+          "sequence-number": 7,
+          "description": "Банк плательщика передаёт подпись согласия в ОПКЦ",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "opkc-adapter-to-opkc",
+          "sequence-number": 8,
+          "description": "ОПКЦ доставляет событие consent.signed в шлюз",
+          "direction": "destination-to-source"
+        },
+        {
+          "relationship-unique-id": "consent-sm-to-db",
+          "sequence-number": 9,
+          "description": "Переход согласия в ACTIVE + outbox",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "consent-sm-to-notifier",
+          "sequence-number": 10,
+          "description": "Нотификатор доставляет вебхук consent.signed ТСП",
+          "direction": "source-to-destination"
+        }
+      ],
+      "controls": {
+        "consent-lifecycle-audit": {
+          "description": "Каждый переход согласия фиксируется в неизменяемом аудит-логе",
+          "requirements": [
+            {
+              "requirement-url": "https://schemas.bank.ru/controls/audit-trail.json",
+              "config": { "scope": "consent-lifecycle", "immutable": true }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "unique-id": "recurring-debit-flow",
+      "name": "Рекуррентный дебит по согласию",
+      "description": "ТСП инициирует дебит по активному согласию без QR и действия клиента; ОПКЦ списывает со счёта плательщика; шлюз зачисляет на счёт ТСП и нотифицирует.",
+      "transitions": [
+        {
+          "relationship-unique-id": "tsp-to-tsp-api",
+          "sequence-number": 1,
+          "description": "ТСП инициирует рекуррентный дебит (POST /v1/payments, paymentType=RECURRING, consentId, Idempotency-Key)",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "tsp-api-to-payment-sm",
+          "sequence-number": 2,
+          "description": "Запрос поступает в статусную машину платежа (CREATED)",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "payment-sm-to-db",
+          "sequence-number": 3,
+          "description": "Guard AD-009: проверка согласия ACTIVE и суммы в пределах лимита/срока в БД шлюза",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "payment-sm-to-opkc-adapter",
+          "sequence-number": 4,
+          "description": "Инициация дебита через адаптер ОПКЦ (initiateRecurringPayment)",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "opkc-adapter-to-opkc",
+          "sequence-number": 5,
+          "description": "Запрос рекуррентного дебита в ОПКЦ",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "opkc-to-payer-bank",
+          "sequence-number": 6,
+          "description": "ОПКЦ списывает со счёта плательщика в банке плательщика",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "opkc-adapter-to-opkc",
+          "sequence-number": 7,
+          "description": "ОПКЦ подтверждает списание событием payment.paid",
+          "direction": "destination-to-source"
+        },
+        {
+          "relationship-unique-id": "payment-sm-to-abs-adapter",
+          "sequence-number": 8,
+          "description": "Зачисление на счёт ТСП по подтверждённому статусу (AD-005)",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "abs-adapter-to-abs",
+          "sequence-number": 9,
+          "description": "Проводка зачисления в АБС (идемпотентно по paymentId)",
+          "direction": "source-to-destination"
+        },
+        {
+          "relationship-unique-id": "payment-sm-to-notifier",
+          "sequence-number": 10,
+          "description": "Нотификатор доставляет вебхук payment.completed ТСП",
+          "direction": "source-to-destination"
+        }
+      ],
+      "controls": {
+        "credit-only-from-paid": {
+          "description": "Зачисление только из подтверждённого статуса PAID (AD-005)",
+          "requirements": [
+            {
+              "requirement-url": "https://schemas.bank.ru/controls/credit-only-from-paid.json",
+              "config": { "source-status": "PAID", "blocked-from": ["CREATED", "QR_ISSUED"] }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "controls": {
+    "consent-limit-enforcement": {
+      "description": "Рекуррентный дебит только по активному согласию в пределах лимита и срока (AD-009)",
+      "requirements": [
+        {
+          "requirement-url": "https://schemas.bank.ru/controls/consent-limit-enforcement.json",
+          "config": {
+            "guard": "consent.status == ACTIVE AND amount <= remainingLimit AND now <= expiresAt",
+            "enforcement-point": "before-initiateRecurringPayment",
+            "authoritative-check": "OPKC"
+          }
+        }
+      ]
+    },
+    "idempotency": {
+      "description": "Идемпотентность на всех новых поверхностях (создание/отзыв согласия, инициация дебита, события ОПКЦ) — AD-003",
+      "requirements": [
+        {
+          "requirement-url": "https://schemas.bank.ru/controls/idempotency.json",
+          "config": {
+            "keys": {
+              "consent-create": "Idempotency-Key",
+              "consent-revoke": "Idempotency-Key",
+              "debit-initiate": "Idempotency-Key",
+              "opkc-events": "eventId"
+            }
+          }
+        }
+      ]
+    },
+    "consent-revocation-propagation": {
+      "description": "Отзыв согласия немедленно запрещает новые дебиты (AD-009)",
+      "requirements": [
+        {
+          "requirement-url": "https://schemas.bank.ru/controls/consent-revocation.json",
+          "config": {
+            "target-latency": "p95 < 5s",
+            "post-revoke-debits": 0
+          }
+        }
+      ]
+    },
+    "nps-compliance": {
+      "description": "Соответствие 161-ФЗ (НПС) для согласий и рекуррентных списаний",
+      "requirements": [
+        {
+          "requirement-url": "https://schemas.bank.ru/controls/nps-compliance.json",
+          "config": {
+            "regulations": ["161-ФЗ", "Положение Банка России о защите информации при переводах"],
+            "legal-object": "consent"
+          }
+        }
+      ]
+    },
+    "pdn-minimization": {
+      "description": "Минимизация ПДн согласия (152-ФЗ): хранится только необходимое для сверки, маскирование в логах",
+      "requirements": [
+        {
+          "requirement-url": "https://schemas.bank.ru/controls/pdn-minimization.json",
+          "config": {
+            "store": "minimal-for-reconciliation",
+            "masking": "logs",
+            "encryption-at-rest": true
+          }
+        }
+      ]
+    },
+    "audit-trail": {
+      "description": "Неизменяемый аудит-лог всех финансовых переходов и действий с согласием (AD-007)",
+      "requirements": [
+        {
+          "requirement-url": "https://schemas.bank.ru/controls/audit-trail.json",
+          "config": { "scope": ["payment", "consent"], "immutable": true, "export": "SIEM" }
+        }
+      ]
+    }
+  }
+}

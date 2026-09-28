@@ -1,0 +1,51 @@
+{
+  "condition": "calm",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-calm-r1",
+  "base_sha": "7b0b7633e6f45f18c91999161fdccc7ea23824ec",
+  "wall_s": 606.7,
+  "turn_ok": true,
+  "records": 92,
+  "solver": "deepseek-v4-pro",
+  "judge": "glm-5.2",
+  "inventory": {
+    "project_skills": 1,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 56,
+  "tool_names": [
+    "edit",
+    "glob",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelshchika.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "A\tdocs/recurrent/solutioning.md",
+    "M\tdocs/rfp/vendor-rfp.md",
+    "M\tdocs/solutioning.md",
+    "A\tdocs/spec/consent-state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

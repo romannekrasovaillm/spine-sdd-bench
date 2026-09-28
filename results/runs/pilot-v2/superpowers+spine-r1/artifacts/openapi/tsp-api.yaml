@@ -1,0 +1,324 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Мерчант-API платёжного шлюза СБП (C2B-приём). Версия 0.2 добавляет подписки
+    (рекуррентные списания по согласию плательщика) строго аддитивно: пути и поля
+    v0.1 не изменены и не удалены, существующие потребители не ломаются.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      summary: Создать платёж (динамический QR / ссылка)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '400':
+          description: Некорректный запрос
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '409':
+          description: Конфликт идемпотентности
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      summary: Запрос статуса платежа
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '404':
+          description: Платёж не найден
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Создать подписку и инициировать согласие плательщика
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Подписка создана, ожидается подтверждение согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '400':
+          description: Некорректный запрос
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '409':
+          description: Конфликт идемпотентности
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      summary: Статус подписки
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Подписка
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '403':
+          description: Ресурс принадлежит другому ТСП
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '404':
+          description: Подписка не найдена
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/suspend:
+    post:
+      operationId: suspendSubscription
+      summary: Приостановить подписку (будущие списания не создаются)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка приостановлена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '403':
+          description: Ресурс принадлежит другому ТСП
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '409':
+          description: Конфликт идемпотентности
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/resume:
+    post:
+      operationId: resumeSubscription
+      summary: Возобновить подписку
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка возобновлена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '403':
+          description: Ресурс принадлежит другому ТСП
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '409':
+          description: Конфликт идемпотентности
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/revoke:
+    post:
+      operationId: revokeSubscription
+      summary: Отозвать согласие и остановить будущие списания
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка отозвана
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '403':
+          description: Ресурс принадлежит другому ТСП
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '409':
+          description: Конфликт идемпотентности
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/charges:
+    post:
+      operationId: createCharge
+      summary: Инициировать списание по согласию (в пределах лимитов мандата)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ChargeRequest'}
+      responses:
+        '201':
+          description: Списание принято
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+        '403':
+          description: Ресурс принадлежит другому ТСП (привязка к аутентифицированному ТСП)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '409':
+          description: Конфликт идемпотентности
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '422':
+          description: Списание недопустимо (мандат не активен, превышен лимит, режим FIXED)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+    get:
+      operationId: listCharges
+      summary: Список списаний по подписке
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Список списаний
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Charge'}
+components:
+  schemas:
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: {type: string, format: uri}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        subscriptionId: {type: string, description: 'Опц.: привязать платёж к подписке (v0.2)'}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        subscriptionId: {type: string, description: 'Опц.: подписка-источник (v0.2)'}
+        chargeId: {type: string, description: 'Опц.: charge-источник для рекуррентного списания (v0.2)'}
+        origin: {type: string, enum: [QR, SUBSCRIPTION], description: 'Опц.: происхождение платежа (v0.2)'}
+    SubscriptionRequest:
+      type: object
+      required: [tspId, amountMode, currency, period]
+      properties:
+        tspId: {type: string}
+        amountMode: {type: string, enum: [FIXED, VARIABLE]}
+        amount: {type: integer, description: 'Обязательно при amountMode=FIXED (копейки); сервер отвергает запрос без него'}
+        maxAmount: {type: integer, description: 'Обязательно при amountMode=VARIABLE — лимит одного списания (копейки)'}
+        maxAmountPerPeriod: {type: integer, description: 'Лимит суммы за период (копейки) — обязателен при VARIABLE'}
+        currency: {type: string, default: RUB}
+        period: {type: string, enum: [WEEKLY, MONTHLY, QUARTERLY, ANNUAL], description: 'Периодичность плановых списаний'}
+        dayOfPeriod: {type: integer, minimum: 1, maximum: 28, description: 'День периода для планового списания (1–28, чтобы период существовал всегда)'}
+        expiresAt: {type: string, format: date-time, description: 'Срок действия согласия'}
+        merchantOrderId: {type: string}
+        description: {type: string}
+    Subscription:
+      type: object
+      required: [subscriptionId, status, amountMode, currency]
+      properties:
+        subscriptionId: {type: string}
+        status:
+          type: string
+          enum: [PENDING_CONSENT, ACTIVE, PAUSED, REVOKED, EXPIRED, FAILED_CONSENT]
+        amountMode: {type: string, enum: [FIXED, VARIABLE]}
+        amount: {type: integer}
+        maxAmount: {type: integer}
+        maxAmountPerPeriod: {type: integer}
+        currency: {type: string}
+        consentUrl: {type: string, description: 'Ссылка/QR для подтверждения согласия плательщиком'}
+        mandateRef: {type: string, description: 'Ссылка на мандат в ОПКЦ (после активации)'}
+        nextChargeAt: {type: string, format: date-time}
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+        merchantOrderId: {type: string}
+    ChargeRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: Сумма в копейках; не больше maxAmount и maxAmountPerPeriod мандата}
+        billingReference: {type: string, description: 'Опц.: корреляционная ссылка ТСП (не идентификатор периода; periodKey вычисляет шлюз из расписания)'}
+        description: {type: string}
+    Charge:
+      type: object
+      required: [chargeId, subscriptionId, amount, status]
+      properties:
+        chargeId: {type: string}
+        subscriptionId: {type: string}
+        paymentId: {type: string}
+        amount: {type: integer}
+        status:
+          type: string
+          enum: [SCHEDULED, INITIATED, PAID, CREDITED, COMPLETED, FAILED]
+        billingPeriod: {type: string}
+        dunning: {type: boolean, description: 'Идут повторные попытки'}
+        createdAt: {type: string, format: date-time}
+        completedAt: {type: string, format: date-time}
+        errorCode: {type: string}

@@ -1,0 +1,131 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Запрос согласия создан
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/revoke:
+    post:
+      operationId: revokeConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отозвано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        initiationType:
+          type: string
+          enum: [QR, CONSENT]
+          default: QR
+          description: Тип инициации платежа. CONSENT — списание по согласию
+        consentId:
+          type: string
+          description: Обязателен при initiationType=CONSENT
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        initiationType:
+          type: string
+          enum: [QR, CONSENT]
+        consentId: {type: string}
+    ConsentRequest:
+      type: object
+      required: [maxAmount, validUntil]
+      properties:
+        maxAmount: {type: integer, description: Максимальная сумма списания в копейках}
+        currency: {type: string, default: RUB}
+        validUntil: {type: string, format: date-time, description: Срок действия согласия (ISO 8601 UTC)}
+        maxDebitsPerPeriod: {type: integer, description: 'Лимит частоты списаний за период [ТРЕБУЕТ ПРОВЕРКИ]'}
+        purpose: {type: string, description: Назначение подписки}
+    Consent:
+      type: object
+      required: [consentId, status, maxAmount, validUntil]
+      properties:
+        consentId: {type: string}
+        status:
+          type: string
+          enum: [PENDING_APPROVAL, ACTIVE, EXPIRED, REVOKED, SUSPENDED]
+        maxAmount: {type: integer}
+        currency: {type: string}
+        validUntil: {type: string, format: date-time}
+        maxDebitsPerPeriod: {type: integer}
+        purpose: {type: string}

@@ -1,0 +1,52 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: изменение решения «рекуррентные C2B-списания» (ADR-008 / AD-009) до кода.
+# После ратификации ADR и старта реализации handoff перегенерирует констрейнты под кодовый харнесс.
+rules:
+  - name: adr-008-present
+    type: file_exists
+    path: docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md
+    severity: error
+  - name: spine-ad-009-present
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009'
+    severity: error
+  - name: consent-required-for-charge
+    type: must_contain
+    glob: "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md"
+    pattern: 'согласи'
+    severity: error
+  - name: openapi-v2-additive
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '0.2.0'
+    severity: error
+  - name: nfr-subscriptions-section
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'NFR подписок'
+    severity: error
+  - name: adapter-charge-contract
+    type: must_contain
+    glob: "docs/contracts/opkc-adapter.md"
+    pattern: 'createCharge'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+  - name: handoff-epic-context
+    type: file_exists
+    path: .arch-handoff/subscriptions/ARCHITECTURE.md
+    severity: warn

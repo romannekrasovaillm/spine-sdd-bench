@@ -1,0 +1,70 @@
+{
+  "condition": "bmad+spine",
+  "rep": 2,
+  "mode": "tui",
+  "session": "b-bmad+spine-r2",
+  "base_sha": "55b3d12f97a0b32556d5d67e4ad1685feb2dda68",
+  "wall_s": 772.6,
+  "turn_ok": true,
+  "records": 205,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 95,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 115,
+  "tool_names": [
+    "edit",
+    "read_file",
+    "run_shell_command",
+    "tool_call",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "M\t.qwen/settings.json",
+    "A\tACCEPTANCE.md",
+    "M\tARCHITECTURE-SPINE.md",
+    "A\tDECISION.md",
+    "A\tEVIDENCE.yaml",
+    "A\tPROBLEM.md",
+    "M\tREADME.md",
+    "A\tRISK.md",
+    "A\tROLLBACK.md",
+    "A\tVALIDATION.md",
+    "A\tWALKING-SKELETON.md",
+    "A\tchanges/subscriptions-c2b/DELTA.md",
+    "A\tchanges/subscriptions-c2b/IMPACT.md",
+    "A\tdocs/REVIEW.md",
+    "A\tdocs/SPEC.md",
+    "A\tdocs/adr/ADR-008-podpiski-sbp-soglasie-platelshchika-kak-istochnik-istiny.md",
+    "A\tdocs/adr/ADR-009-ispolnenie-rekurrentnyh-spisanij-planer-idempotentnost-otzyv.md",
+    "A\tdocs/adr/ADR-010-evolyuciya-kontraktov-podpiski-additivno.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/rfp/vendor-rfp.md",
+    "M\tdocs/solutioning.md",
+    "M\tdocs/spec/state-machine.md",
+    "A\tdocs/spec/subscription-state-machine.md",
+    "M\topenapi/tsp-api.yaml",
+    "A\treports/fitness.md"
+  ]
+}

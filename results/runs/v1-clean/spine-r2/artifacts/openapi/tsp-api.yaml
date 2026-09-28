@@ -1,0 +1,141 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.1.0
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/cancel:
+    post:
+      operationId: cancelConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отменено ТСП
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        paymentType:
+          type: string
+          enum: [one_time, recurring]
+          default: one_time
+          description: Тип платежа; recurring — рекуррентное списание по согласию
+        consentId:
+          type: string
+          description: Обязателен при paymentType=recurring
+        billingReference:
+          type: string
+          description: Ключ дедупликации списания за расчётный период (recurring)
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentType:
+          type: string
+          enum: [one_time, recurring]
+        consentId: {type: string}
+        billingReference: {type: string}
+    ConsentRequest:
+      type: object
+      required: [tspId, maxAmount]
+      properties:
+        tspId: {type: string}
+        maxAmount: {type: integer, description: Максимальная сумма одного списания, копейки}
+        maxAmountPerPeriod: {type: integer, description: Лимит за период, копейки}
+        period:
+          type: string
+          enum: [day, week, month]
+        expiresAt: {type: string, format: date-time, description: Срок действия согласия}
+        payerRef: {type: string, description: Минимизированный идентификатор плательщика}
+    Consent:
+      type: object
+      required: [consentId, status, maxAmount]
+      properties:
+        consentId: {type: string}
+        status:
+          type: string
+          enum: [PENDING, ACTIVE, SUSPENDED, EXPIRED, CANCELLED, REVOKED]
+        maxAmount: {type: integer}
+        maxAmountPerPeriod: {type: integer}
+        period:
+          type: string
+          enum: [day, week, month]
+        expiresAt: {type: string, format: date-time}
+        createdAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}

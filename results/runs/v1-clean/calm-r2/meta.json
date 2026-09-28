@@ -1,0 +1,50 @@
+{
+  "condition": "calm",
+  "rep": 2,
+  "mode": "tui",
+  "session": "b-calm-r2",
+  "base_sha": "4916216bbe8873b2ee9be8df1241b745b7efbf54",
+  "wall_s": 711.6,
+  "turn_ok": true,
+  "records": 91,
+  "solver": "deepseek-v4-pro",
+  "judge": "glm-5.2",
+  "inventory": {
+    "project_skills": 1,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 58,
+  "tool_names": [
+    "edit",
+    "glob",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-po-soglasiyu-podpiski-sbp.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/rfp/vendor-rfp.md",
+    "M\tdocs/solutioning.md",
+    "A\tdocs/spec/consent-lifecycle.md",
+    "M\tdocs/spec/state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

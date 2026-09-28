@@ -1,0 +1,14 @@
+{"ts":"2026-09-28T15:25:22.408897913+03:00","tool":"significance_score","verdict":"ok","duration_ms":0,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:25:22.411959957+03:00","tool":"spine_lint","verdict":"pass","duration_ms":2,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:25:22.428526299+03:00","tool":"fitness_check","verdict":"pass","duration_ms":16,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:25:22.434737271+03:00","tool":"delta_guard","verdict":"pass","duration_ms":5,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:33:11.176027158+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:33:37.167964583+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":1,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:33:37.170319391+03:00","tool":"contract_diff","verdict":"ok","duration_ms":1,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:33:50.453391243+03:00","tool":"contract_diff","verdict":"ok","duration_ms":3,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:33:50.454599866+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:35:51.797681846+03:00","tool":"fitness_check","verdict":"fail","duration_ms":21,"rules":["mandate-revocation-blocks-debits-documented"],"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:35:51.799611732+03:00","tool":"spine_lint","verdict":"pass","duration_ms":1,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:38:24.033804760+03:00","tool":"architect_review","verdict":"pass","duration_ms":41,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:38:24.034228912+03:00","tool":"adr_registry","verdict":"error","duration_ms":0,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:38:32.410607844+03:00","tool":"adr_registry","verdict":"pass","duration_ms":4,"session_id":"97b55610929e2b74","host":"qwen-cli-mcp-client-spine"}

@@ -1,0 +1,80 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+  # --- Рекуррентные списания (add-sbp-subscriptions, Critical) ---
+  - name: spine-consent-aggregate
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+    rationale: 'согласие — второй агрегат (ADR-008); инвариант должен оставаться в спайне'
+    fix_hint: 'восстановить блок AD-009 или эскалировать изменение спайна на A3'
+  - name: spine-debit-idempotency-key
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'periodKey'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+    rationale: 'ключ идемпотентности списания (subscriptionId, periodKey) — защита от двойного списания'
+    fix_hint: 'восстановить ключ периода в Rule блока AD-003'
+  - name: spine-recurring-no-weakening-paid
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-010'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+    rationale: 'рекуррентное списание не ослабляет AD-005 и проходит антифрод'
+  - name: adr-008-recurring-topology
+    type: file_exists
+    path: docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-soglasie-kak-vtoroy-agregat-platyozhnogo-kontura.md
+    severity: error
+  - name: adr-009-recurring-safety
+    type: file_exists
+    path: docs/adr/ADR-009-idempotentnost-i-semantika-otzyva-soglasiya-pri-rekurrentnyh-spisaniyah.md
+    severity: error
+  - name: recurring-api-endpoints-present
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/subscriptions'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+    rationale: 'контракт подписок присутствует; расширение аддитивно (ADR-009)'
+    fix_hint: 'добавить аддитивные эндпоинты подписок, не ломая v0.1'

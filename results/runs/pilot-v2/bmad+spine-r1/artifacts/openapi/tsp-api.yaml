@@ -1,0 +1,197 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: |
+    Контракт мерчант-API СБП-шлюза. Версия 0.2.0 — аддитивное расширение 0.1.0
+    (рекуррентные C2B-списания / подписки СБП, ADR-008, AD-009/AD-010):
+    добавлены пути /v1/mandates*, опциональные поля paymentMethod/mandateId,
+    новые события вебхуков и коды ошибок. Существующие пути, схемы и значения
+    status не изменялись — обратная совместимость сохранена (contract_diff: breaking = 0, неломающие CD-005 на добавленные пути/коды).
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      summary: Создание платежа (одиночный QR/ссылка или рекуррентное списание)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж/списание зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '409':
+          description: Конфликт идемпотентности
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '422':
+          description: Согласие не активно / лимит превышен (для paymentMethod=recurring)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      summary: Регистрация согласия плательщика (подписка СБП, ADR-008)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '409':
+          description: Конфликт идемпотентности
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '422':
+          description: Некорректные условия согласия
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      summary: Состояние согласия
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '404':
+          description: Согласие не найдено
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      summary: Отзыв согласия (ТСП-инициированный); новые списания блокируются
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '202':
+          description: Отзыв принят
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '404':
+          description: Согласие не найдено
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        paymentMethod:
+          type: string
+          enum: [oneoff, recurring]
+          default: oneoff
+          description: oneoff — QR/ссылка (по умолчанию); recurring — рекуррентное списание по согласию
+        mandateId:
+          type: string
+          description: Идентификатор согласия; обязателен при paymentMethod=recurring
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentMethod:
+          type: string
+          enum: [oneoff, recurring]
+          description: Признак рекуррентного списания
+        mandateId:
+          type: string
+          description: Согласие, по которому выполнено списание (для paymentMethod=recurring)
+    MandateRequest:
+      type: object
+      required: [tspId, maxAmountPerDebit, period]
+      properties:
+        tspId: {type: string}
+        maxAmountPerDebit: {type: integer, description: Максимальная сумма одного списания, копейки}
+        period:
+          type: string
+          enum: [DAILY, WEEKLY, MONTHLY, ON_DEMAND]
+        maxTotalAmount: {type: integer, description: Общий лимит по согласию, копейки}
+        validUntil: {type: string, format: date-time, description: Срок действия согласия}
+        paymentPurpose: {type: string}
+        redirectUrl: {type: string, description: Возврат плательщика после подтверждения согласия}
+        merchantOrderId: {type: string}
+    Mandate:
+      type: object
+      required: [mandateId, status]
+      properties:
+        mandateId: {type: string}
+        status:
+          type: string
+          enum: [PENDING, ACTIVE, SUSPENDED, REVOKED, EXPIRED]
+        tspId: {type: string}
+        maxAmountPerDebit: {type: integer}
+        period:
+          type: string
+          enum: [DAILY, WEEKLY, MONTHLY, ON_DEMAND]
+        maxTotalAmount: {type: integer}
+        validUntil: {type: string, format: date-time}
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+    Problem:
+      type: object
+      required: [type, title, status, code]
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code:
+          type: string
+          description: MANDATE_NOT_ACTIVE | MANDATE_LIMIT_EXCEEDED | MANDATE_NOT_FOUND | IDEMPOTENCY_CONFLICT | ...
+        traceId: {type: string}
+        idempotencyKey: {type: string}

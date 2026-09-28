@@ -1,0 +1,40 @@
+route: Critical
+packed_at: 2026-09-28T14:41:13.384292452+03:00
+hash_alg: sha256
+items:
+- key: problem
+  path: DELTA.md
+  hash: 90d9126f320addab89a9247511e4114710773fda4f49c06840fccf5cf89d9e48
+  size: 10268
+- key: spec_or_delta
+  path: DELTA.md
+  hash: 90d9126f320addab89a9247511e4114710773fda4f49c06840fccf5cf89d9e48
+  size: 10268
+- key: risk_level
+  path: RISK.md
+  hash: c224fcbe3318890da5eb145ba201b4571bb27631400728fe6e42e3e8f6c9c2ff
+  size: 2230
+- key: acceptance
+  path: ACCEPTANCE.md
+  hash: 681cf5dcb69d43ce613208007c20e7e112b41909fb742152e0e45d3694d3a036
+  size: 3936
+- key: rollback
+  path: ROLLBACK.md
+  hash: 0005b7e0878d5372544d219eafdaa6013d27d8850c43f01a200196eba7d63466
+  size: 2407
+- key: adr_or_pattern
+  path: ADR.md
+  hash: 968c3e549ae4cbb804f2421cb44267121a3271b9f6165808297beb7bbf2c25ae
+  size: 1491
+- key: spine
+  path: ARCHITECTURE-SPINE.md
+  hash: 461974715edce3b98f4849054dac9cda4fb787769d51e2c11f06caea8fff78df
+  size: 555
+- key: adversarial_review
+  path: REVIEW.md
+  hash: 34228488a3d37042ff2ed4181253307d6e4f53e5fff9f83f1c336903a7e515d0
+  size: 4441
+- key: fitness_report
+  path: FITNESS.md
+  hash: 2a7b22620720b18cbf96eb3e9094638aa939ca8301390c2da7d7fa49dd73d696
+  size: 2914

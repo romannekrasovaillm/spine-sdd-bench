@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Credit only from PAID requirement",
+  "description": "Требование AD-005: зачисление платежа/списания только из подтверждённого НСПК статуса PAID.",
+  "type": "object",
+  "properties": {
+    "rule": { "type": "string" },
+    "unreachable-from": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["rule"],
+  "additionalProperties": true
+}

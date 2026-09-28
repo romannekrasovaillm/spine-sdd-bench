@@ -1,0 +1,209 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Мерчант-API СБП-шлюза. v0.2 аддитивно расширяет v0.1 подписками СБП
+    (рекуррентные списания по согласию плательщика): новые пути /v1/subscriptions*,
+    опциональные поля subscriptionId/periodKey в платеже, новые события вебхуков.
+    Ломающих изменений относительно v0.1 нет; потребители v0.1 продолжают работать.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      summary: Регистрация платежа; при наличии subscriptionId — рекуррентное списание
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '409':
+          description: Конфликт идемпотентности или повтор списания за закрытый период
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '422':
+          description: Мандат не активен, лимит превышен или списание недопустимо
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Создание подписки (мандата) и запуск подтверждения согласия плательщика
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Подписка создана, ожидается подтверждение согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние подписки
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/pause:
+    post:
+      operationId: pauseSubscription
+      summary: Приостановить списания (согласие не отзывается)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка приостановлена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/resume:
+    post:
+      operationId: resumeSubscription
+      summary: Возобновить списания по действующему согласию
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка возобновлена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/cancel:
+    post:
+      operationId: cancelSubscription
+      summary: Отменить подписку (отзыв/прекращение согласия), списания прекращаются
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка отменена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/payments:
+    get:
+      operationId: listSubscriptionPayments
+      summary: Список списаний по подписке (для наблюдаемости и разбора)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Список списаний
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Payment'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        subscriptionId:
+          type: string
+          description: >
+            Идентификатор подписки (мандата). Если указан — платёж является
+            рекуррентным списанием по согласию плательщика (ADR-008).
+        periodKey:
+          type: string
+          description: >
+            Ключ периода списания (например, 2026-09). Защищает от повторного
+            списания за один период (ADR-010). Формат — по сервису СБП.
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        subscriptionId: {type: string, description: Заполнен для рекуррентных списаний}
+        periodKey: {type: string}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+    SubscriptionRequest:
+      type: object
+      required: [tspId, maxAmountPerCharge, merchantSubscriptionId]
+      properties:
+        tspId: {type: string}
+        merchantSubscriptionId: {type: string, description: Сквозной идентификатор подписки у ТСП}
+        maxAmountPerCharge: {type: integer, description: Лимит разового списания, копейки}
+        maxAmountPerPeriod: {type: integer, description: Лимит списаний за период, копейки}
+        period: {type: string, enum: [DAY, WEEK, MONTH], description: Периодичность списаний}
+        maxChargesPerPeriod: {type: integer}
+        paymentPurpose: {type: string}
+        redirectUrl: {type: string, description: Возврат плательщика после подтверждения согласия}
+    Subscription:
+      type: object
+      required: [subscriptionId, status]
+      properties:
+        subscriptionId: {type: string}
+        merchantSubscriptionId: {type: string}
+        status:
+          type: string
+          enum: [PENDING_CONSENT, ACTIVE, PAUSED, REVOKED, EXPIRED]
+        maxAmountPerCharge: {type: integer}
+        maxAmountPerPeriod: {type: integer}
+        period: {type: string, enum: [DAY, WEEK, MONTH]}
+        consentConfirmedAt: {type: string, format: date-time}
+        expiresAt: {type: string, format: date-time}
+    Problem:
+      type: object
+      description: Problem Details (RFC 9457)
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}

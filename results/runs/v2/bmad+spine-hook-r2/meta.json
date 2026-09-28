@@ -1,0 +1,60 @@
+{
+  "condition": "bmad+spine-hook",
+  "rep": 2,
+  "mode": "tui",
+  "session": "b-bmad+spine-hook-r2",
+  "base_sha": "4ba750100093edfc57aac51a3310ac876bac511c",
+  "wall_s": 1004.8,
+  "turn_ok": true,
+  "records": 197,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 95,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": [
+      "Stop"
+    ]
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 115,
+  "tool_names": [
+    "agent",
+    "edit",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "tool_call",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "M\t.qwen/settings.json",
+    "M\tARCHITECTURE-SPINE.md",
+    "A\tchanges/sbp-recurring-c2b/DELTA.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-mandat-platelschika-i-planirovschik-spisaniy.md",
+    "A\tdocs/adr/ADR-009-soglasie-platelschika-mandat-poluchenie-hranenie-otzyv-i-zapret-spisaniy.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "A\tdocs/contracts/tsp-api-recurring-c2b.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "A\tdocs/nfr-recurring-c2b.md",
+    "A\tdocs/solutioning-recurring-c2b.md",
+    "M\tdocs/spec/state-machine.md",
+    "A\tdocs/spec/subscription-lifecycle.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

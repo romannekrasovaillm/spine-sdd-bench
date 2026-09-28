@@ -1,0 +1,60 @@
+{
+  "condition": "plain",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-plain-r1",
+  "base_sha": "a6eeb33a92f0eec73d900291f5707d3e6104d639",
+  "wall_s": 807.8,
+  "turn_ok": true,
+  "records": 189,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 0,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 110,
+  "tool_names": [
+    "edit",
+    "read_file",
+    "run_shell_command",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tchanges/sbp-recurring-subscriptions/DELTA.md",
+    "A\tchanges/sbp-recurring-subscriptions/HUMAN-DECISIONS.md",
+    "A\tchanges/sbp-recurring-subscriptions/IMPACT.md",
+    "A\tchanges/sbp-recurring-subscriptions/README.md",
+    "A\tchanges/sbp-recurring-subscriptions/SIGNIFICANCE.md",
+    "A\tchanges/sbp-recurring-subscriptions/handoff/ARCHITECTURE.md",
+    "A\tchanges/sbp-recurring-subscriptions/handoff/CONSTRAINTS.yaml",
+    "A\tchanges/sbp-recurring-subscriptions/handoff/MANIFEST.json",
+    "A\tchanges/sbp-recurring-subscriptions/handoff/RUBRIC.yaml",
+    "A\tchanges/sbp-recurring-subscriptions/handoff/TASK.md",
+    "A\tchanges/sbp-recurring-subscriptions/handoff/adr/ADR-008-recurring-c2b-subscriptions.md",
+    "A\tdocs/adr/ADR-008-recurring-c2b-subscriptions.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/rfp/vendor-rfp.md",
+    "M\tdocs/solutioning.md",
+    "A\tdocs/spec/mandate-lifecycle.md",
+    "M\tdocs/spec/state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

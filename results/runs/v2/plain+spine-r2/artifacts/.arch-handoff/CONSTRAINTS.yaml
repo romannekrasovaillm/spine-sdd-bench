@@ -1,0 +1,102 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+# Правила C-101…C-110 внесены дельтой changes/sbp-subscriptions (2026-09-28, AD-009…AD-011):
+# проверяют запись новых инвариантов и неразрушаемость контракта API ТСП.
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+  # --- C-101…C-110: рекуррентные списания (подписки), delta sbp-subscriptions ---
+  # C-101…C-104, C-107 — правила ТРАССИРУЕМОСТИ (проверяют, что инвариант записан в тексте),
+  # не проверки поведения: поведенческие проверки (guard, уникальность периода, отзыв)
+  # ставятся на гейте A4 шаблонами исполняемых правил (arch-be rules template).
+  - id: C-101
+    name: mandate-required-for-recurring-debit
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'только при мандате в статусе `ACTIVE`'
+    severity: error
+  - id: C-102
+    name: debit-unique-per-billing-period
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: '\(`mandateId`, `billingPeriod`\)'
+    severity: error
+  - id: C-103
+    name: revocation-blocks-new-debits
+    type: must_contain
+    glob: "docs/adr/ADR-009-*.md"
+    pattern: 'запрещает все \*\*новые инициации\*\* списаний'
+    severity: error
+  - id: C-104
+    name: credit-only-from-paid-preserved
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'зачисление по-прежнему возможно только из `PAID`'
+    severity: error
+  - id: C-105
+    name: tsp-api-payment-collection-path-preserved
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '(?m)^  /v1/payments:'
+    severity: error
+  - id: C-106
+    name: tsp-api-payment-status-enum-unchanged
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: 'enum: \[CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED\]'
+    severity: error
+  - id: C-107
+    name: retries-bounded-with-jitter
+    type: must_contain
+    glob: "docs/adr/ADR-011-*.md"
+    pattern: 'экспоненциальный backoff с джиттером'
+    severity: warn
+  - id: C-108
+    name: tsp-api-payment-item-path-preserved
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '(?m)^  /v1/payments/\{paymentId\}:'
+    severity: error
+  - id: C-109
+    name: tsp-api-payment-request-required-unchanged
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '(?m)^\s+required: \[amount, merchantOrderId\]'
+    severity: error
+  - id: C-110
+    name: debit-period-reserved-not-success-scoped
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'период резервируется при инициации'
+    severity: error

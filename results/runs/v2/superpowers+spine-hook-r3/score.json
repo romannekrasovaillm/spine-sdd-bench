@@ -1,0 +1,206 @@
+{
+  "files": [
+    ".arch-handoff/CONSTRAINTS.yaml",
+    "ARCHITECTURE-SPINE.md",
+    "README.md",
+    "changes/spb-subscriptions/DELTA.md",
+    "docs/adr/ADR-008-podpiski-sbp-soglasiye-i-spisaniya.md",
+    "docs/adr/ADR-009-reestr-soglasiy-i-otzyv.md",
+    "docs/contracts/tsp-api.md",
+    "docs/nfr.md",
+    "docs/solutioning-subscriptions.md",
+    "docs/solutioning.md",
+    "docs/spec/state-machine.md",
+    "docs/spec/subscription-consent.md",
+    "openapi/tsp-api.yaml"
+  ],
+  "sensors": {
+    "chars": 96549,
+    "significance_route": true,
+    "invariant_AD005_ref": true,
+    "alternatives": true,
+    "negative_consequences": true,
+    "reversibility": true,
+    "rollback": true,
+    "acceptance": true,
+    "nfr_numeric": true,
+    "human_decision": true,
+    "placeholders": 17,
+    "adr_files": 2
+  },
+  "deterministic": {
+    "spine_gate_exit": 0,
+    "spine_gate_route": "Fast",
+    "spine_gate_fails": [],
+    "spine_gate_tail": "Гейт: .\nМаршрут: Fast (auto: score 1 (api_contract_change))\n  [PASS] fitness * — Правил: 9, нарушений: 0 (error: 0, warn: 0); реестр: 9 правил (error: 7), отпечаток 20693de8 — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] delta_guard — изменённых файлов: 14, защищённых среди них: 1 — покрытие: ARCHITECTURE-SPINE.md ← 'spb-subscriptions'\n  [PASS] rule_weakened — реестр правил не ослаблен относительно bench-baseline — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] spine_lint * — находок: 0 (error: 0)\n  [SKIP] trace_check — нет каталога model/\n  [SKIP] model_validate — нет каталога model/\n  [SKIP] decision_quality — не включена: добавьте 'decision_quality' в [gate.required] нужного маршрута\n  [SKIP] semantic_quality — не включена: добавьте 'semantic_quality' в [gate.required] нужного маршрута\nИтог: PASS\nАттестация вердикта: sha256:aa1d386859ad6ede197d696ebd51c249e19fdc647e03cfa8342c37c739d0993b\n",
+    "spine_gate_base": "bench-baseline",
+    "spine_gate_skips": [
+      "decision_quality",
+      "model_validate",
+      "semantic_quality",
+      "trace_check"
+    ],
+    "invariants": {
+      "modified": [
+        "AD-008"
+      ],
+      "removed": [],
+      "added": [
+        "AD-009",
+        "AD-010",
+        "AD-011"
+      ]
+    },
+    "contract_changed": true,
+    "contract_breaking": 0,
+    "contract_nonbreaking": 5,
+    "contract_tail": "contract_diff: 5 изменений (breaking: 0, non-breaking: 5)\nФормат: openapi[warn] #/paths/~1v1~1payments/post/responses/409 CD-005 — добавлен код ответа 409\n[warn] #/paths/~1v1~1payments/post/responses/422 CD-005 — добавлен код ответа 422\n[warn] #/paths/~1v1~1payments~1{paymentId}/get/responses/404 CD-005 — добавлен код ответа 404\n[warn] #/paths/~1v1~1consents CD-005 — добавлен путь «/v1/consents»\n[warn] #/paths/~1v1~1consents~1{consentId} CD-005 — добавлен путь «/v1/consents/{consentId}»\nИтог: PASS\n",
+    "protected_touched": [
+      ".arch-handoff/CONSTRAINTS.yaml",
+      "ARCHITECTURE-SPINE.md"
+    ],
+    "delta_dirs": [
+      "spb-subscriptions"
+    ]
+  },
+  "gate_class": "PASS_DELTA",
+  "hook_blocks": 2,
+  "contamination": [
+    "<HOME>/.../memory/MEMORY.md\\n-",
+    "<HOME>/.local/bin/arch-be\\n<SPINE_BANK>/target/release/arch-be\\nls",
+    "<SPINE_BANK>",
+    "<SPINE_BANK>/",
+    "<SPINE_BANK>/changes",
+    "<SPINE_BANK>/changes/executable-invariants/DELTA.md",
+    "<SPINE_BANK>/changes/process-group-timeout/DELTA.md",
+    "<SPINE_BANK>/changes:\\nexecutable-invariants\\nmodule-decomposition\\nprocess-group-timeout\\nspine-core-boundary\\n\\n<SPINE_BANK>/changes/executable-invariants:\\nDELTA.md\\n\\n<SPINE_BANK>/changes/module-decomposition:\\nDELTA.md\\n\\n<SPINE_BANK>/changes/process-group-timeout:\\nDELTA.md\\n\\n<SPINE_BANK>/changes/spine-core-boundary:\\nDELTA.md\\n===\\nCONSTRAINTS.example.yaml\\ncorp-spine\\ncron\\nmcp.example.json\\nmcp.README.md\\nmermaid\\nspecs",
+    "<SPINE_BANK>/changes:\\nexecutable-invariants\\nmodule-decomposition\\nprocess-group-timeout\\nspine-core-boundary\\n\\n<SPINE_BANK>/changes/executable-invariants:\\nDELTA.md\\n\\n<SPINE_BANK>/changes/module-decomposition:\\nDELTA.md\\n\\n<SPINE_BANK>/changes/process-group-timeout:\\nDELTA.md\\n\\n<SPINE_BANK>/changes/spine-core-boundary:\\nDELTA.md\\n===\\nCONSTRAINTS.example.yaml\\ncorp-spine\\ncron\\nmcp.example.json\\nmcp.README.md\\nmermaid\\nspecs\\nError",
+    "<SPINE_BANK>/docs",
+    "<SPINE_BANK>/docs/openspec.md",
+    "<SPINE_BANK>/examples",
+    "<SPINE_BANK>/src/config.rs",
+    "<SPINE_BANK>/src/contract_diff/openapi.rs",
+    "<SPINE_BANK>/src/control/diff_triggers.rs",
+    "<SPINE_BANK>/src/control/report.rs",
+    "<SPINE_BANK>/src/control/types.rs",
+    "<SPINE_BANK>/src/delta.rs",
+    "<SPINE_BANK>/src/detectors.rs",
+    "<SPINE_BANK>/src/evidence.rs",
+    "<SPINE_BANK>/src/gate/components/mod.rs",
+    "<SPINE_BANK>/src/gate/mod.rs",
+    "<SPINE_BANK>/src/gate/route.rs",
+    "<SPINE_BANK>/src/openapi.rs"
+  ],
+  "decision_doc": "docs/adr/ADR-008-podpiski-sbp-soglasiye-i-spisaniya.md",
+  "spine_visible": true,
+  "judge_token": "dcbdbde5",
+  "dossier": {
+    "included": [
+      "docs/adr/ADR-008-podpiski-sbp-soglasiye-i-spisaniya.md",
+      "docs/adr/ADR-009-reestr-soglasiy-i-otzyv.md",
+      "changes/spb-subscriptions/DELTA.md"
+    ],
+    "omitted": [
+      "docs/solutioning-subscriptions.md",
+      "docs/solutioning.md",
+      "docs/nfr.md",
+      "docs/contracts/tsp-api.md",
+      "openapi/tsp-api.yaml",
+      "docs/spec/state-machine.md",
+      "docs/spec/subscription-consent.md",
+      "ARCHITECTURE-CORE.md",
+      ".arch-handoff/CONSTRAINTS.yaml",
+      "README.md"
+    ],
+    "truncated": [
+      "docs/adr/ADR-008-podpiski-sbp-soglasiye-i-spisaniya.md",
+      "docs/adr/ADR-009-reestr-soglasiy-i-otzyv.md",
+      "changes/spb-subscriptions/DELTA.md"
+    ],
+    "chars": 11201
+  },
+  "judge": {
+    "solution_architecture": {
+      "total": 3.87,
+      "decision": "pass",
+      "criteria": {
+        "enterprise_scope": 4,
+        "architecture_solutioning": 4,
+        "workflow_executability": 3,
+        "validation": 5,
+        "governance_audit": 4,
+        "sdd_contract": 4,
+        "human_decision_control": 4,
+        "risk_adaptive_autonomy": 4,
+        "discovery_framing": 3,
+        "nfr_tradeoffs": 4,
+        "brownfield": 4,
+        "portability": 3,
+        "org_transformation": 4,
+        "cross_team_governance": 3,
+        "low_entry_cost": 4
+      },
+      "flags": {},
+      "independence": null,
+      "unjudged": 0,
+      "exit": 0,
+      "parts": {
+        "solution_architecture_part_a": {
+          "total": 4.0,
+          "decision": "pass",
+          "exit": 0,
+          "unjudged": 0,
+          "raw": "(8/15), маршрут Critical обосновывает требование полного solutioning-процесса; обратимость каждого значимого решения оценена явно (costly для ADR-008 и ADR-009, reversible до запуска), последствия размыва охвачены планом отката. До 5: сами триггеры значимости не перечислены в тексте (лишь «декларированные»), blast radius по каждому решению оценён косвенно, через последствия и план отката. |\n\n**Взвешенный итог:** 4.00/5\n**Вердикт:** Главный риск: пакет сам признаёт «дельты недостаточно» — полное решение, контракты и спецификации вынесены в исключённые из досье файлы, а стык с ОПКЦ помечен [ТРЕБУЕТ ПРОВЕРКИ], поэтому как самостоятельный реализуемый контракт документ не готов. Сильные стороны — дисциплина ADR с обратимостью и expiry, дельта-форма, измеримые критерии приёмки с негативными сценариями и оформленная точка A3 — делают его зрелым пакетом решения, но не полным спецификационным контрактом.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 19:25:18\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_a-20260928-192518.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-dcbdbde5.json\n"
+        },
+        "solution_architecture_part_b": {
+          "total": 3.58,
+          "decision": "pass",
+          "exit": 0,
+          "unjudged": 0,
+          "raw": "ый адаптер ОПКЦ (ADR-004), зачисление из подтверждённого статуса (ADR-005), сага возвратов (ADR-005). Их не нужно изобретать заново.\". Максимум переиспользования принятых паттернов, новая сущность (согласие) обоснована необходимостью сценария, приёмка на моках и готовый инструментарий (cli gate, openapi_lint, contract_diff) снижают порог старта; фиче-флаг позволяет не включать реестр. Однако стоимость старта и владения (включая ежечасную сверку) численно не оценена. |\n\n**Взвешенный итог:** 3.58/5\n**Вердикт:** Главный риск — вся модель согласий опирается на непроверенный протокол ОПКЦ/НСПК ([ТРЕБУЕТ ПРОВЕРКИ]) и принимает остаточное окно гонки «отзыв против списания», компенсируемое только сверкой. Решение дисциплинированно (владельцы, измеримые NFR, фиче-флаг, триггеры отката, гейт A3) и близко к готовности, но до подтверждения протокола и получения человеческого решения A3 запускать его нельзя.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 19:27:55\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_b-20260928-192755.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-dcbdbde5.json\n"
+        }
+      },
+      "raw": "{\"solution_architecture_part_a\": {\"total\": 4.0, \"decision\": \"pass\", \"exit\": 0, \"unjudged\": 0, \"raw\": \"(8/15), маршрут Critical обосновывает требование полного solutioning-процесса; обратимость каждого значимого решения оценена явно (costly для ADR-008 и ADR-009, reversible до запуска), последствия размыва охвачены планом отката. До 5: сами триггеры значимости не перечислены в тексте (лишь «декларированные»), blast radius по каждому решению оценён косвенно, через последствия и план отката. |\\n\\n**Взвешенный итог:** 4.00/5\\n**Вердикт:** Главный риск: пакет сам признаёт «дельты недостаточно» — полное решение, контракты и спецификации вынесены в исключённые из досье файлы, а стык с ОПКЦ помечен [ТРЕБУЕТ ПРОВЕРКИ], поэтому как самостоятельный реализуемый контракт документ не готов. Сильные стороны — дисциплина ADR с обратимостью и expiry, дельта-форма, измеримые критерии приёмки с негативными сценариями и оформленная точка A3 — делают его зрелым пакетом решения, но не полным спецификационным контрактом.\\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\\n**Дата:** 2026-09-28 19:25:18\\n\\nРешение рубрики: годно (pass) — код выхода 0\\n\\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_a-20260928-192518.md\\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-dcbdbde5.json\\n\"}, \"solution_architecture_part_b\": {\"total\": 3.58, \"decision\": \"pass\", \"exit\": 0, \"unjudged\": 0, \"raw\": \"ый адаптер ОПКЦ (ADR-004), зачисление из подтверждённого статуса (ADR-005), сага возвратов (ADR-005). Их не нужно изобретать заново.\\\". Максимум переиспользования принятых паттернов, новая сущность (согласие) обоснована необходимостью сценария, приёмка на моках и готовый инструментарий (cli gate, openapi_lint, contract_diff) снижают порог старта; фиче-флаг позволяет не включать реестр. Однако стоимость старта и владения (включая ежечасную сверку) численно не оценена. |\\n\\n**Взвешенный итог:** 3.58/5\\n**Вердикт:** Главный риск — вся модель согласий опирается на непроверенный протокол ОПКЦ/НСПК ([ТРЕБУЕТ ПРОВЕРКИ]) и принимает остаточное окно гонки «отзыв против списания», компенсируемое только сверкой. Решение дисциплинированно (владельцы, измеримые NFR, фиче-флаг, триггеры отката, гейт A3) и близко к готовности, но до подтверждения протокола и получения человеческого решения A3 запускать его нельзя.\\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\\n**Дата:** 2026-09-28 19:27:55\\n\\nРешение рубрики: годно (pass) — код выхода 0\\n\\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_b-20260928-192755.md\\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-dcbdbde5.json\\n\"}}"
+    },
+    "architecture_gates": {
+      "total": 3.9,
+      "decision": "pass",
+      "criteria": {
+        "a0_architecture_fit": 4,
+        "a1_impact_assessment": 4,
+        "a2_solutioning_trigger": 3,
+        "a3_human_decision": 4,
+        "a4_conformance_evidence": 4,
+        "a5_drift_check": 4
+      },
+      "flags": {},
+      "independence": "launched_cross_family",
+      "unjudged": 0,
+      "exit": 0,
+      "raw": "спорта) и укладка аргументирована переиспользованием принятых механизмов; заявлен автоматический контроль \"cli gate — PASS (fitness, delta guard, CORE lint, анти-ослабление)\", но результата прогона нет (чекбокс не закрыт), а формального architecture exception с обоснованием и сроком для зон неопределённости нет — только маркеры [ТРЕБУЕТ ПРОВЕРКИ]. |\n| a1_impact_assessment | 2.00 | 4 |  | Цитата: \"Owner: solution-architect (платёжный контур) + ИБ/комплаенс\". Затронутые системы и домены перечислены (шлюз, реестр согласий в БД, ОПКЦ/НСПК, API ТСП v0.1/v0.2), владельцы названы для обоих ADR, данные и ПДн-риски отмечены (\"хранение идентификатора плательщика требует минимизации и защиты (ПДн)\"), blast radius частично раскрыт через сценарии отказа (\"падение ОПКЦ останавливает весь приём подписок\") и последствия декомиссии (\"действующие согласия нельзя «выключить» молча\"); однако оценки стоимости изменения нет, а полная карта влияния вынесена в исключённый по бюджету файл solutioning-subscriptions.md и в досье не подтверждена. |\n| a2_solutioning_trigger | 1.00 | 3 |  | Цитата: \"Route: Critical (значимость 8/15 по декларированным триггерам; полный Solutioning — `docs/solutioning-subscriptions.md`; дельты недостаточно)\". Score по триггерам посчитан и записан, маршрут и его следствие (необходимость полного Solutioning) зафиксированы, но сам порог маршрутизации Fast/Standard/Critical, заданный заранее человеком, в пакете не показан — невозможно проверить, что Critical действительно следует из 8/15, а не из желаемого ответа. |\n| a3_human_decision | 3.00 | 4 |  | Цитата: \"Человеческое решение A3 по ADR-008/ADR-009 получено и записано (choice/rationale/rejected/expiry)\". Единственная точка A3 явно определена (\"Status: Proposed (ожидает человеческого решения A3)\"), формат machine-readable задан (choice/rationale/rejected/expiry), одно решение покрывает оба ADR без штамповки каждого шага, expiry-условия и срок ревизии (12 месяцев / первый P0) прописаны; однако само решение ещё не принято и не записано — фактическую структуру записи проверить нельзя. |\n| a4_conformance_evidence | 2.00 | 4 |  | Цитата: \"`openapi_lint openapi/tsp-api.yaml` — PASS; `contract_diff` v0.1 → v0.2 — ломающих изменений нет\". Выпуск явно обусловлен набором проверок: cli gate с fitness-функциями, контрактные тесты, приёмка на моках (идемпотентность дебета, лимиты, отзыв, негативные сценарии), сверка с нулевым расхождением; проверки привязаны к инвариантам AD-009/AD-010/AD-011 и измеримым EARS-требованиям. Но evidence ещё не собран (все чекбоксы открыты, статус Proposed), а привязка части проверок к конкретным ADR осталась в исключённых файлах (solutioning-subscriptions.md §6). |\n| a5_drift_check | 1.00 | 4 |  | Цитата: \"Сигналы отката (триггеры): любое списание по отозванному согласию (P0); расхождение сверки согласий с ОПКЦ > 0 по завершённым; доля отказов дебетов выше согласованного порога; инцидент ИБ\". Есть триггеры по инциденту и тренду, регулярная сверка по расписанию (\"Периодическая сверка согласий с ОПКЦ — ежечасная\", разбор расхождений по runbook с целью нуля) и плановая ревизия ADR (12 месяцев или первый P0) — это выше якоря 3; но контроль именно архитектурного дрейфа спека↔код через граф архитектуры не показан, сверка носит операционный характер. |\n\n**Взвешенный итог:** 3.90/5\n**Вердикт:** Пакет зрелый: контрольные точки A0/A3/A4 формализованы и выпуск явно обусловлен evidence, однако главный риск — досье доказывает дизайн гейтов, а не их исполнение: решение A3 не принято, порог A2 не задокументирован заранее, а полная карта влияния и критерии приёмки остались в исключённых по бюджету файлах. К выпуску решение не готово до закрытия A3, прогона cli gate и фиксации порога маршрутизации.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 19:31:20\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-architecture_gates-20260928-193120.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-dcbdbde5.json\n",
+      "attempts": 1
+    },
+    "neutral_architecture": {
+      "total": 4.11,
+      "decision": "pass",
+      "criteria": {
+        "drivers": 4,
+        "options": 3,
+        "rationale": 4,
+        "consequences": 4,
+        "impact_on_existing": 5,
+        "interface_compatibility": 4,
+        "measurable_quality": 4,
+        "verification_rollback": 5,
+        "open_questions": 4
+      },
+      "flags": {},
+      "independence": "launched_cross_family",
+      "unjudged": 0,
+      "exit": 0,
+      "raw": "статочный риск.\". Отрицательные последствия конкретны и с ценой: остаточное окно гонки с механизмом смягчения, «Новая модель данных и миграции; хранение идентификатора плательщика требует минимизации и защиты (ПДн)», cost после запуска с уведомлением плательщиков по регламенту; положительные тоже названы (аддитивный контракт, быстрый путь валидации), но адресность «для кого» проработана не для всех последствий. |\n| impact_on_existing | 3.00 | 5 |  | Цитата: \"**Уже принятые механизмы**: статусная машина + outbox (ADR-002), идемпотентность (ADR-003), единственный адаптер ОПКЦ (ADR-004), зачисление из подтверждённого статуса (ADR-005), сага возвратов (ADR-005). Их не нужно изобретать заново.\". Есть явный перечень затрагиваемых решений поимённо с переиспользованием, явно указано «принятые AD-001…AD-008 не изменяются», новые инварианты AD-009/AD-010/AD-011 помечены как Proposed, сверка согласий встроена в контур ADR-004, контракт v0.1 объявлен неприкосновенным — полный и явный разбор «что меняется / что не трогаем». |\n| interface_compatibility | 3.00 | 4 |  | Цитата: \"опциональные поля `consentId` и `debitPeriodId` в `POST /v1/payments`; события `consent.activated\\|revoked\\|expired\\|rejected`; коды ошибок согласия.\". Изменения контракта перечислены, версионирование явно (v0.1 → v0.2, OpenAPI 0.2.0), аддитивность подтверждена приёмкой «contract_diff v0.1 → v0.2 — ломающих изменений нет» и «контракт аддитивен»; но поведение существующих потребителей v0.1 (что они обязаны/не обязаны делать при переходе) описано не по каждому интерфейсу — только через утверждение об аддитивности. |\n| measurable_quality | 3.00 | 4 |  | Цитата: \"критерий: `POST /v1/consents` → `201` ≤ 500 мс p95 (без учёта времени ОПКЦ)\". Ключевые требования измеримы с числом, единицей и условиями: «≤ 5 с p95» для событий и отзыва, «списание... невозможно (0 случаев)», «расхождений 0», «сверка... ежечасная», RPO=0; проверка задана через моки и приёмку. Однако не всё закрыто: порог «доля отказов дебетов выше согласованного порога» без числа, измеримых целей доступности (SLA при падении ОПКЦ) в видимом тексте нет. |\n| verification_rollback | 3.00 | 5 |  | Цитата: \"**Сигналы отката (триггеры)**: любое списание по отозванному согласию (P0); расхождение сверки согласий с ОПКЦ > 0 по завершённым; доля отказов дебетов выше согласованного порога; инцидент ИБ. **Владелец решения**: дежурный руководитель (P0), архитектор платёжного контура + продукт (остальное).\". Есть и то, и другое: проверяемые критерии приёмки (cli gate, openapi_lint, contract_diff, нулевые расхождения, моки, негативные сценарии) и исполнимый план отката с условиями срабатывания, ответственными, процедурой декоммиссии согласий и сохранением реестра для аудита. |\n| open_questions | 3.00 | 4 |  | Цитата: \"Точный протокол подписок НСПК публично не раскрыт — все протокольные детали помечены `[ТРЕБУЕТ ПРОВЕРКИ]` (внешний вход, как в базовом решении).\". Нерешённое вынесено явно и системно: метки [ТРЕБУЕТ ПРОВЕРКИ], статус «Proposed (ожидает человеческого решения A3)» с приёмкой «Человеческое решение A3 по ADR-008/ADR-009 получено и записано», причина нерешённости названа (протокол не раскрыт публично). Но адресат-роль для разрешения протокольных вопросов и A3 поимённо не указан (только owner ADR), что удерживает от 5. |\n\n**Взвешенный итог:** 4.11/5\n**Вердикт:** Главный риск — решение принято без явного сравнения вариантов и критериев выбора (особенно ADR-008 «модель pull» без рассмотрения альтернатив), а весь протокол ОПКЦ держится на непроверенных допущениях [ТРЕБУЕТ ПРОВЕРКИ]; при этом пакет зрел по влиянию на существующие решения, приёмке/откату и измеримости — готов к человеческому решению A3, но не к запуску до верификации протокола.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 19:38:04\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-neutral_architecture-20260928-193804.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-dcbdbde5.json\n",
+      "attempts": 2
+    }
+  },
+  "judge_model": "glm-5.3"
+}

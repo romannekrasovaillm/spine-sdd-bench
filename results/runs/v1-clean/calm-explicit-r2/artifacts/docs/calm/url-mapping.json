@@ -1,0 +1,7 @@
+{
+  "https://standards.bank.example/calm/requirements/consent-limit-requirement.json": "requirements/consent-limit-requirement.json",
+  "https://standards.bank.example/calm/requirements/credit-from-paid-requirement.json": "requirements/credit-from-paid-requirement.json",
+  "https://standards.bank.example/calm/requirements/idempotency-requirement.json": "requirements/idempotency-requirement.json",
+  "https://standards.bank.example/calm/requirements/pii-minimization-requirement.json": "requirements/pii-minimization-requirement.json",
+  "https://standards.bank.example/calm/requirements/audit-logging-requirement.json": "requirements/audit-logging-requirement.json"
+}

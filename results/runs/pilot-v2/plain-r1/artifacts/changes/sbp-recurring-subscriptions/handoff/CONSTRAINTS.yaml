@@ -1,0 +1,43 @@
+# Fitness-правила для изменения «СБП-подписки» (execution: spine control check / gate).
+# Этап до выбора стека — проверки по контрактам и спецификациям; после старта реализации
+# команда добавляет command_succeeds (сборка/линтеры/тесты) и кодовые правила (ADR-002/009/010/011).
+rules:
+  - name: recurring-adr-present
+    type: file_exists
+    path: docs/adr/ADR-008-recurring-c2b-subscriptions.md
+    severity: error
+  - name: recurring-spine-invariants
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009|AD-010|AD-011'
+    severity: error
+  - name: recurring-contract-mandates
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/mandates'
+    severity: error
+  - name: recurring-contract-subscriptions
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/subscriptions'
+    severity: error
+  - name: mandate-active-only-invariant
+    type: must_contain
+    glob: "docs/spec/mandate-lifecycle.md"
+    pattern: 'AD-009'
+    severity: error
+  - name: no-double-charge-nfr
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'Двойные списания'
+    severity: error
+  - name: recurring-nfr-numeric
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '60 с \(p99\)'
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn

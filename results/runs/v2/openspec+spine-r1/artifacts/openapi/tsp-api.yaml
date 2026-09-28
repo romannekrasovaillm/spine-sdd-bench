@@ -1,0 +1,317 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Мерчант-API СБП-шлюза. Версия 0.2.0 — обратно совместимое расширение:
+    добавлены ресурсы согласий (рекуррентные списания, ADR-008/ADR-009) и
+    опциональное поле consentId у платежа. Существующие пути, поля, значения
+    перечислений и коды ответов не изменены; версия API остаётся /v1.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+
+  /v1/consents:
+    post:
+      operationId: createConsent
+      summary: Регистрация согласия плательщика на рекуррентные списания
+      description: >
+        ТСП инициирует согласие; плательщик подтверждает его в приложении своего
+        банка (вне API шлюза). Согласие проходит PENDING_PAYER → ACTIVE | REJECTED.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидается подтверждение плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '409':
+          description: Конфликт идемпотентности (тот же Idempotency-Key, другое тело)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+    get:
+      operationId: listConsents
+      summary: Список согласий ТСП
+      parameters:
+        - {in: query, name: tspId, required: true, schema: {type: string}}
+        - in: query
+          name: status
+          required: false
+          schema: {$ref: '#/components/schemas/ConsentStatus'}
+        - {in: query, name: cursor, required: false, schema: {type: string}}
+      responses:
+        '200':
+          description: Страница согласий
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: {$ref: '#/components/schemas/Consent'}
+                  nextCursor: {type: string, nullable: true}
+
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      summary: Статус согласия и его лимиты
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '404':
+          description: Согласие не найдено
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+
+  /v1/consents/{consentId}/cancel:
+    post:
+      operationId: cancelConsent
+      summary: Отмена согласия со стороны ТСП
+      description: >
+        Прекращает будущие списания по согласию. Отзыв плательщиком приходит
+        со стороны СБП и отражается тем же состоянием REVOKED (AD-010).
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отменено (или уже было отменено — идемпотентно)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '409':
+          description: Согласие в состоянии, не допускающем отмену
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+
+  /v1/consents/{consentId}/charges:
+    get:
+      operationId: listConsentCharges
+      summary: История списаний по согласию
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - {in: query, name: cursor, required: false, schema: {type: string}}
+      responses:
+        '200':
+          description: Страница списаний
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: {$ref: '#/components/schemas/ChargeAttempt'}
+                  nextCursor: {type: string, nullable: true}
+    post:
+      operationId: createConsentCharge
+      summary: Внеочередное (или повторное) списание в рамках согласия
+      description: >
+        Инициация списания в пределах лимитов действующего согласия. Идемпотентно
+        по Idempotency-Key; ключ попытки детерминирован от согласия, периода и
+        номера попытки (AD-011).
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ChargeRequest'}
+      responses:
+        '201':
+          description: Списание инициировано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ChargeAttempt'}
+        '422':
+          description: Согласие не действует или превышены лимиты
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        consentId:
+          type: string
+          nullable: true
+          description: Согласие, в рамках которого исполнено списание (для рекуррентных платежей; добавлено в 0.2.0)
+
+    ConsentStatus:
+      type: string
+      description: >
+        Состояние согласия. Источник истины — реестр СБП (НСПК); шлюз хранит
+        зеркало и синхронизирует его событиями и сверкой (AD-010).
+      enum: [PENDING_PAYER, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+
+    ConsentRequest:
+      type: object
+      required: [tspId, payerRef, purpose]
+      properties:
+        tspId: {type: string}
+        payerRef:
+          type: string
+          description: >
+            Идентификатор плательщика для СБП (телефон/токен по протоколу НСПК).
+            Точный формат — по документации НСПК [ТРЕБУЕТ ПРОВЕРКИ].
+        purpose: {type: string, description: Назначение списаний}
+        limits: {$ref: '#/components/schemas/ConsentLimits'}
+        validUntil:
+          type: string
+          format: date-time
+          nullable: true
+          description: Срок действия согласия (опц.; ограничение — по НСПК)
+
+    ConsentLimits:
+      type: object
+      description: >
+        Лимиты согласия. Проверяются при инициации каждой попытки списания в той
+        же транзакции (AD-009). Финальный набор и значения — по протоколу НСПК.
+      properties:
+        amount: {type: integer, description: Максимум на одно списание, копейки}
+        maxTotalAmount: {type: integer, description: Максимум суммарно за срок согласия, копейки}
+        maxChargesPerPeriod: {type: integer, description: Максимум списаний за период}
+        period:
+          type: string
+          enum: [DAY, WEEK, MONTH, QUARTER, YEAR]
+
+    Consent:
+      type: object
+      required: [consentId, status, tspId]
+      properties:
+        consentId: {type: string}
+        status: {$ref: '#/components/schemas/ConsentStatus'}
+        tspId: {type: string}
+        payerRefMasked:
+          type: string
+          nullable: true
+          description: Маскированный признак плательщика (ПДн минимизированы)
+        purpose: {type: string}
+        limits: {$ref: '#/components/schemas/ConsentLimits'}
+        consentUrl:
+          type: string
+          nullable: true
+          description: Ссылка/диплинк для передачи плательщику (если применимо)
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time, nullable: true}
+        revokedAt: {type: string, format: date-time, nullable: true}
+        validUntil: {type: string, format: date-time, nullable: true}
+        nextChargeAt: {type: string, format: date-time, nullable: true}
+
+    ChargeRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        billingPeriod:
+          type: string
+          description: >
+            Идентификатор периода списания (например, 2026-10). Входит в ключ
+            идемпотентности попытки (AD-011).
+        attemptSeq:
+          type: integer
+          description: Номер попытки в периоде (опц.; по умолчанию — следующая попытка)
+        description: {type: string}
+
+    ChargeAttempt:
+      type: object
+      required: [chargeId, consentId, amount, status]
+      properties:
+        chargeId: {type: string, description: Идентификатор операции списания (paymentId)}
+        consentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        billingPeriod: {type: string, nullable: true}
+        attemptSeq: {type: integer, nullable: true}
+        status:
+          type: string
+          enum: [CREATED, PAID, CREDITED, COMPLETED, FAILED, REFUNDED]
+        errorCode: {type: string, nullable: true}
+        createdAt: {type: string, format: date-time}
+        completedAt: {type: string, format: date-time, nullable: true}
+
+    Problem:
+      type: object
+      description: Ошибка в формате RFC 9457 Problem Details
+      required: [title, status]
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code:
+          type: string
+          description: >
+            Канонический код. Для рекуррентных списаний добавляются:
+            CONSENT_NOT_FOUND, CONSENT_NOT_ACTIVE, CONSENT_REVOKED,
+            CONSENT_EXPIRED, CONSENT_LIMIT_EXCEEDED, CHARGE_ALREADY_EXISTS.
+        traceId: {type: string}
+        idempotencyKey: {type: string, nullable: true}

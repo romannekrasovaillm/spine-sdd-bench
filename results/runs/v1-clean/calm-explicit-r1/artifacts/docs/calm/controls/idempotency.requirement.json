@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.bank.ru/controls/idempotency.json",
+  "title": "Idempotency of financial operations",
+  "description": "Идемпотентность создания/отзыва согласия, инициации дебита и обработки событий ОПКЦ (AD-003).",
+  "type": "object",
+  "properties": {
+    "keys": { "type": "object", "additionalProperties": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

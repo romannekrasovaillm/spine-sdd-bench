@@ -1,0 +1,70 @@
+{
+  "condition": "plain+spine",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-plain+spine-r1",
+  "base_sha": "3279f3608061e6a2a83b527a64e1a8d77565e64b",
+  "wall_s": 1732.1,
+  "turn_ok": true,
+  "records": 324,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 66,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 207,
+  "tool_names": [
+    "agent",
+    "edit",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "M\t.qwen/settings.json",
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tchanges/sbp-subscriptions/ACCEPTANCE.md",
+    "A\tchanges/sbp-subscriptions/ADR.md",
+    "A\tchanges/sbp-subscriptions/ARCHITECTURE-SPINE.md",
+    "A\tchanges/sbp-subscriptions/DELTA.md",
+    "A\tchanges/sbp-subscriptions/EVIDENCE.yaml",
+    "A\tchanges/sbp-subscriptions/FITNESS.md",
+    "A\tchanges/sbp-subscriptions/REVIEW.md",
+    "A\tchanges/sbp-subscriptions/RISK.md",
+    "A\tchanges/sbp-subscriptions/ROLLBACK.md",
+    "A\tchanges/sbp-subscriptions/SPINE.md",
+    "A\tchanges/sbp-subscriptions/review-history.md",
+    "A\tdocs/adr/ADR-008-podpiski-sbp-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelschika.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/rfp/vendor-rfp.md",
+    "A\tdocs/solutioning-subscriptions.md",
+    "M\tdocs/solutioning.md",
+    "M\tdocs/spec/state-machine.md",
+    "A\tdocs/spec/subscriptions.md",
+    "A\topenapi/tsp-api.v0.1.yaml",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

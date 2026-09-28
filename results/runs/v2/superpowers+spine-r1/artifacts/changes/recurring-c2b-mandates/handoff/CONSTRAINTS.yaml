@@ -1,0 +1,74 @@
+# Fitness-правила пакета передачи изменения recurring-c2b-mandates (маршрут Critical).
+# Группы: (1) наследуемые правила baseline-пакета; (2) новые правила изменения (текстовые звенья трассировки).
+# Исполняемые правила поведения (consent-before-auto-action, idempotency-key, unknown-outcome-no-resend)
+# вносятся при реализации — см. DELTA.md, раздел «Предлагаемые правила CONSTRAINTS.yaml».
+rules:
+  # --- наследуемые (baseline) ---
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+
+  # --- новые (изменение подписок) ---
+  - name: subscription-adrs-present
+    type: file_exists
+    path: docs/adr/ADR-008-model-sbp-podpisok-mandat-soglasie-kak-suschnost-spisanie-kak-platyozh.md
+    severity: error
+    rationale: 'ADR-008 фиксирует модель подписок до реализации'
+    skill: adr-authoring
+  - name: mandate-api-in-contract
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/mandates'
+    severity: error
+    rationale: 'контракт подписок аддитивен и присутствует в машиночитаемом виде'
+    skill: spine-contracts-gate
+  - name: period-idempotency-error-code
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: 'PERIOD_ALREADY_CHARGED'
+    severity: error
+    rationale: 'AD-010: повтор за период отвергается явным кодом'
+    fix_hint: 'добавить код PERIOD_ALREADY_CHARGED в ошибки контракта'
+  - name: consent-precondition-in-impact
+    type: must_contain
+    glob: "changes/recurring-c2b-mandates/IMPACT.md"
+    pattern: 'AD-009'
+    severity: error
+    rationale: 'инвариант «согласие — предусловие» прослеживается в анализе влияния'
+  - name: subscription-nfr-measurable
+    type: must_contain
+    glob: "changes/recurring-c2b-mandates/NFR.md"
+    pattern: '99,9'
+    severity: error
+    rationale: 'NFR подписок измеримы, а не «как хорошо»'
+    skill: nfr-design
+  - name: change-package-no-gaps
+    type: must_not_contain
+    glob: "changes/recurring-c2b-mandates/*.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn

@@ -1,0 +1,184 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Мерчант-API СБП-шлюза. v0.2.0 — аддитивное расширение: согласия (СБП-подписки)
+    и рекуррентные списания (ADR-008, Status: Proposed). Обратная совместимость с v0.1
+    сохранена: существующие пути, поля и enum не удалены и не сужены.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      summary: Регистрация согласия (СБП-подписка)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '409':
+          description: Конфликт идемпотентного ключа (другое тело)
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/revoke:
+    post:
+      operationId: revokeConsent
+      summary: Отзыв согласия (необратим)
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '202':
+          description: Согласие отозвано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/debits:
+    post:
+      operationId: createDebit
+      summary: Ручной триггер списания (опциональный режим ТСП)
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitRequest'}
+      responses:
+        '201':
+          description: Списание создано как платёж
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '422':
+          description: Согласие не активно / лимит исчерпан / срок истёк
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        consentId:
+          type: string
+          nullable: true
+          description: Согласие для рекуррентного списания; null для разового платежа (v0.2, опционально)
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+    ConsentRequest:
+      type: object
+      required: [tspId, payerId, amount, currency, frequency, startDate]
+      properties:
+        tspId: {type: string}
+        payerId: {type: string, description: Идентификатор плательщика по каналу НСПК}
+        amount: {type: integer, description: Сумма периодического списания, копейки}
+        currency: {type: string, default: RUB}
+        frequency:
+          type: string
+          enum: [MONTHLY, WEEKLY, DAILY, ON_DEMAND]
+        startDate: {type: string, format: date}
+        endDate: {type: string, format: date, nullable: true}
+        maxAmount: {type: integer, nullable: true, description: Потолок списания, если сумма переменная}
+        paymentPurpose: {type: string}
+        redirectUrl: {type: string, format: uri, nullable: true}
+        merchantOrderId: {type: string, nullable: true}
+    Consent:
+      type: object
+      required: [consentId, status]
+      properties:
+        consentId: {type: string}
+        status:
+          type: string
+          enum: [PENDING_PAYER, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+        amount: {type: integer}
+        frequency:
+          type: string
+          enum: [MONTHLY, WEEKLY, DAILY, ON_DEMAND]
+        maxAmount: {type: integer, nullable: true}
+        authUrl: {type: string, nullable: true, description: Ссылка/канал авторизации плательщика}
+        nextDebitDate: {type: string, format: date, nullable: true}
+        activatedAt: {type: string, format: date-time, nullable: true}
+        revokedAt: {type: string, format: date-time, nullable: true}
+        merchantOrderId: {type: string, nullable: true}
+        debits:
+          type: array
+          nullable: true
+          items: {$ref: '#/components/schemas/Debit'}
+    DebitRequest:
+      type: object
+      required: [billingPeriod]
+      properties:
+        billingPeriod: {type: string, description: "Период списания, напр. 2026-11"}
+        amount: {type: integer, nullable: true}
+        reason: {type: string, nullable: true}
+    Debit:
+      type: object
+      required: [paymentId, billingPeriod, status]
+      properties:
+        paymentId: {type: string}
+        billingPeriod: {type: string}
+        amount: {type: integer}
+        status:
+          type: string
+          enum: [CREATED, PAID, CREDITED, COMPLETED, FAILED]

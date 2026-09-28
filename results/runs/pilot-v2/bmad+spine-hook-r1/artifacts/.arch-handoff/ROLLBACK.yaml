@@ -1,0 +1,26 @@
+# План отката (машиночитаемый) — репетируется на гейте A4:
+# `arch-be control gate A4 . --rehearse`. Шаги с внешними/деструктивными
+# эффектами репетиция отклоняет (docs/control.md).
+#
+# Кейс: пакет изменения «Рекуррентные C2B-списания (подписки СБП)» поверх
+# принятого решения. Изменение архитектурное (кода нет): новые документы,
+# правка ARCHITECTURE-SPINE.md, CONSTRAINTS.yaml и контракта ТСП v0.2
+# (аддитивно). Внешних side-effect'ов и прод-данных срез не затрагивает.
+#
+# Откат: (1) выключение фиче-флага recurrence.enabled и заморозка новых
+# согласий; (2) возврат артефактов к baseline (spine, правила, контракт,
+# документы). Граница честности: откат НЕ отменяет уже проведённые платежи —
+# они корректируются возвратом-сагой (ADR-005); для этого среза проводок нет.
+baseline_commit: "0bd4becbebae236c7ab618f43d1def3400ff897b"
+steps:
+  - name: якорь-доступен
+    run: git cat-file -t 0bd4becbebae236c7ab618f43d1def3400ff897b
+  - name: спайн-на-базлайне-читается
+    run: test -f ARCHITECTURE-SPINE.md
+  - name: контракт-на-базлайне-читается
+    run: test -f openapi/tsp-api.yaml
+  - name: правила-на-базлайне-читаются
+    run: test -f .arch-handoff/CONSTRAINTS.yaml
+  - name: документы-отката-на-базлайне
+    run: test -f docs/solutioning.md
+verify: test -z "$(git status --porcelain --untracked-files=no)"

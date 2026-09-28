@@ -1,0 +1,216 @@
+{
+  "files": [
+    ".arch-handoff/ARCHITECTURE.md",
+    ".arch-handoff/CONSTRAINTS.yaml",
+    ".arch-handoff/MANIFEST.json",
+    ".arch-handoff/ROLLBACK.yaml",
+    ".arch-handoff/SPEC.md",
+    ".arch-handoff/TASK.md",
+    ".arch-handoff/adr/ADR-008-podpiski-sbp-domen-soglasiy-i-podpisok-iniciaciya-rekurrentnyh-spisaniy.md",
+    ".arch-handoff/adr/ADR-009-zaschita-dannyh-soglasiya-platelschika-i-garantiya-zapreta-spisaniy-posle-otzyva.md",
+    "ARCHITECTURE-SPINE.md",
+    "README.md",
+    "changes/sbp-recurring-subscriptions/DELTA.md",
+    "changes/sbp-recurring-subscriptions/SOLUTIONING.md",
+    "docs/adr/ADR-008-podpiski-sbp-domen-soglasiy-i-podpisok-iniciaciya-rekurrentnyh-spisaniy.md",
+    "docs/adr/ADR-009-zaschita-dannyh-soglasiya-platelschika-i-garantiya-zapreta-spisaniy-posle-otzyva.md",
+    "docs/contracts/opkc-adapter.md",
+    "docs/contracts/tsp-api.md",
+    "docs/nfr.md",
+    "docs/rfp/vendor-rfp.md",
+    "docs/spec/state-machine.md",
+    "openapi/tsp-api.yaml"
+  ],
+  "sensors": {
+    "chars": 189785,
+    "significance_route": true,
+    "invariant_AD005_ref": true,
+    "alternatives": true,
+    "negative_consequences": true,
+    "reversibility": true,
+    "rollback": true,
+    "acceptance": true,
+    "nfr_numeric": true,
+    "human_decision": true,
+    "placeholders": 9,
+    "adr_files": 4
+  },
+  "deterministic": {
+    "spine_gate_exit": 0,
+    "spine_gate_route": "Fast",
+    "spine_gate_fails": [],
+    "spine_gate_tail": "Гейт: .\nМаршрут: Fast (auto: score 1 (api_contract_change))\n  [PASS] fitness * — Правил: 14, нарушений: 0 (error: 0, warn: 0); реестр: 14 правил (error: 12), отпечаток 53f43296 — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] delta_guard — изменённых файлов: 20, защищённых среди них: 1 — покрытие: ARCHITECTURE-SPINE.md ← 'sbp-recurring-subscriptions'\n  [PASS] rule_weakened — реестр правил не ослаблен относительно bench-baseline — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] spine_lint * — находок: 0 (error: 0)\n  [SKIP] trace_check — нет каталога model/\n  [SKIP] model_validate — нет каталога model/\n  [SKIP] decision_quality — не включена: добавьте 'decision_quality' в [gate.required] нужного маршрута\n  [SKIP] semantic_quality — не включена: добавьте 'semantic_quality' в [gate.required] нужного маршрута\nИтог: PASS\nАттестация вердикта: sha256:29a3fe5be88c9f26fd795f6336a4e2f0e6868f93f5e6e239de15cac0018efe1d\n",
+    "spine_gate_base": "bench-baseline",
+    "spine_gate_skips": [
+      "decision_quality",
+      "model_validate",
+      "semantic_quality",
+      "trace_check"
+    ],
+    "invariants": {
+      "modified": [
+        "AD-008"
+      ],
+      "removed": [],
+      "added": [
+        "AD-009",
+        "AD-010"
+      ]
+    },
+    "contract_changed": true,
+    "contract_breaking": 0,
+    "contract_nonbreaking": 6,
+    "contract_tail": "contract_diff: 6 изменений (breaking: 0, non-breaking: 6)\nФормат: openapi[warn] #/paths/~1v1~1consents CD-005 — добавлен путь «/v1/consents»\n[warn] #/paths/~1v1~1consents~1{consentId} CD-005 — добавлен путь «/v1/consents/{consentId}»\n[warn] #/paths/~1v1~1consents~1{consentId}~1revoke CD-005 — добавлен путь «/v1/consents/{consentId}/revoke»\n[warn] #/paths/~1v1~1subscriptions CD-005 — добавлен путь «/v1/subscriptions»\n[warn] #/paths/~1v1~1subscriptions~1{subscriptionId} CD-005 — добавлен путь «/v1/subscriptions/{subscriptionId}»\n[warn] #/paths/~1v1~1subscriptions~1{subscriptionId}~1debits CD-005 — добавлен путь «/v1/subscriptions/{subscriptionId}/debits»\nИтог: PASS\n",
+    "protected_touched": [
+      ".arch-handoff/CONSTRAINTS.yaml",
+      "ARCHITECTURE-SPINE.md"
+    ],
+    "delta_dirs": [
+      "sbp-recurring-subscriptions"
+    ]
+  },
+  "gate_class": "PASS_DELTA",
+  "hook_blocks": 0,
+  "contamination": [
+    "<HOME>/.arch-ml/plugins/arch-core/skills/",
+    "<HOME>/.arch-ml/plugins/arch-core/skills/adr-authoring/SKILL.md",
+    "<HOME>/.arch-ml/plugins/arch-core/skills/delta-spec/SKILL.md",
+    "<HOME>/.arch-ml/plugins/arch-core/skills/nfr-design/SKILL.md",
+    "<HOME>/.arch-ml/plugins/arch-core/skills/readiness-gate/SKILL.md",
+    "<HOME>/.arch-ml/plugins/arch-core/skills/significance-routing/SKILL.md",
+    "<HOME>/.arch-ml/plugins/arch-core/skills/spine-invariants/SKILL.md",
+    "<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/banking/presets/bank-profile/config.toml\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/aiml/presets/ml-researcher/config.toml\\n<HOME>/.arch-ml/worktrees/sanitize-ad7/banking/presets/bank-profile/config.toml\\n<HOME>/.arch-ml/worktrees/sanitize-ad7/aiml/presets/ml-researcher/config.toml\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/s4-addr/banking/presets/bank-profile/config.toml\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/s4-addr/aiml/presets/ml-researcher/config.toml\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/grounded-probe/banking/presets/bank-profile/config.toml\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/grounded-probe/aiml/presets/ml-researcher/config.toml\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/sft-v13-arm/banking/presets/bank-profile/config.toml\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/sft-v13-arm/aiml/presets/ml-researcher/config.toml\\n---\\n---config",
+    "<HOME>/.cargo/bin/theseus\\n",
+    "<HOME>/.kimi-code/bin/kimi\\n===handoff",
+    "<HOME>/.local/bin/arch",
+    "<HOME>/.local/bin/arch\\n<HOME>/.nvm/versions/node/v22.23.1/bin/qwen\\n---\\n78fe2af72ad10b5a0a42c6dca9cfeacd517e5ebcf4f1870f80ffdaca05fa82b8\\n---PATH",
+    "<HOME>/.local/bin/hermes\\n",
+    "<HOME>/Загрузки/.../cells/w3gmqa5/home/.arch-harness/assets/prompts",
+    "<HOME>/Загрузки/.../cells/w3gmqa5/home/.qwen",
+    "<HOME>/Загрузки/.../home",
+    "<HOME>/Загрузки/.../home/.arch-harness",
+    "<HOME>/Загрузки/.../home?",
+    "<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/reverse-discovery/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/agents-md-authoring/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/dsh-harness-patterns/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/fitness-functions/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/c4-mermaid/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/skill-authoring/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/nfr-design/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/readiness-gate/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/significance-routing/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/handoff-packaging/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/rubric-judging/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/delta-spec/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/semantic-review/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/spine-invariants/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/adr-authoring/SKILL.md\\n<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core/skills/adversarial-review/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/reverse-discovery/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/agents-md-authoring/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/dsh-harness-patterns/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/fitness-functions/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/c4-mermaid/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/skill-authoring/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/nfr-design/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/readiness-gate/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/significance-routing/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/handoff-packaging/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/rubric-judging/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/delta-spec/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/spine-invariants/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/adr-authoring/SKILL.md\\n<HOME>/.arch-ml/plugins/arch-core/skills/adversarial-review/SKILL.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/assets/plugins/arch-core/skills/reverse-discovery/SKILL.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/assets/plugins/arch-core/skills/agents-md-authoring/SKILL.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/assets/plugins/arch-core/skills/dsh-harness-patterns/SKILL.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/assets/plugins/arch-core/skills/fitness-functions/SKILL.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/assets/plugins/arch-core/skills/c4-mermaid/SKILL.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/assets/plugins/arch-core/skills/skill-authoring/SKILL.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/assets/plugins/arch-core/skills/nfr-design/SKILL.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/assets/plugins/arch-core/skills/readiness-gate/SKILL.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/assets/plugins/arch-core/skills/significance-routing/SKILL.md\\n===plugins",
+    "<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core\\n<HOME>/.arch-ml/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/sanitize-ad7/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/s4-addr/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/grounded-probe/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/sft-v13-arm/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/laguna-fleet-2/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/sft-decode-diagnosis/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/laguna-passrate-probe/assets/plugins/arch-core",
+    "<HARNESS>/runs-v2/cells/wz2v9z7/home/.arch-harness/plugins/arch-core\\n<HOME>/.arch-ml/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/sanitize-ad7/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/s4-addr/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/grounded-probe/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/sft-v13-arm/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/laguna-fleet-2/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/sft-decode-diagnosis/assets/plugins/arch-core\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/laguna-passrate-probe/assets/plugins/arch-core\\nError"
+  ],
+  "decision_doc": "docs/adr/ADR-008-podpiski-sbp-domen-soglasiy-i-podpisok-iniciaciya-rekurrentnyh-spisaniy.md",
+  "spine_visible": true,
+  "judge_token": "d26c52ca",
+  "dossier": {
+    "included": [
+      "docs/adr/ADR-008-podpiski-sbp-domen-soglasiy-i-podpisok-iniciaciya-rekurrentnyh-spisaniy.md",
+      "docs/adr/ADR-009-zaschita-dannyh-soglasiya-platelschika-i-garantiya-zapreta-spisaniy-posle-otzyva.md",
+      "changes/sbp-recurring-subscriptions/DELTA.md"
+    ],
+    "omitted": [
+      "changes/sbp-recurring-subscriptions/SOLUTIONING.md",
+      "docs/nfr.md",
+      "docs/contracts/opkc-adapter.md",
+      "docs/contracts/tsp-api.md",
+      "openapi/tsp-api.yaml",
+      "docs/spec/state-machine.md",
+      "ARCHITECTURE-CORE.md",
+      ".arch-handoff/CONSTRAINTS.yaml",
+      ".arch-handoff/ARCHITECTURE.md",
+      ".arch-handoff/MANIFEST.json",
+      ".arch-handoff/ROLLBACK.yaml",
+      ".arch-handoff/SPEC.md",
+      ".arch-handoff/TASK.md",
+      ".arch-handoff/adr/ADR-008-podpiski-sbp-domen-soglasiy-i-podpisok-iniciaciya-rekurrentnyh-spisaniy.md",
+      ".arch-handoff/adr/ADR-009-zaschita-dannyh-soglasiya-platelschika-i-garantiya-zapreta-spisaniy-posle-otzyva.md",
+      "README.md",
+      "docs/rfp/vendor-rfp.md"
+    ],
+    "truncated": [
+      "docs/adr/ADR-008-podpiski-sbp-domen-soglasiy-i-podpisok-iniciaciya-rekurrentnyh-spisaniy.md",
+      "docs/adr/ADR-009-zaschita-dannyh-soglasiya-platelschika-i-garantiya-zapreta-spisaniy-posle-otzyva.md",
+      "changes/sbp-recurring-subscriptions/DELTA.md"
+    ],
+    "chars": 11773
+  },
+  "judge": {
+    "solution_architecture": {
+      "total": 3.95,
+      "decision": "pass",
+      "criteria": {
+        "enterprise_scope": 4,
+        "architecture_solutioning": 4,
+        "workflow_executability": 3,
+        "validation": 4,
+        "governance_audit": 5,
+        "sdd_contract": 3,
+        "human_decision_control": 4,
+        "risk_adaptive_autonomy": 5,
+        "discovery_framing": 4,
+        "nfr_tradeoffs": 3,
+        "brownfield": 5,
+        "portability": 4,
+        "org_transformation": 3,
+        "cross_team_governance": 4,
+        "low_entry_cost": 4
+      },
+      "flags": {},
+      "independence": null,
+      "unjudged": 0,
+      "exit": 0,
+      "parts": {
+        "solution_architecture_part_a": {
+          "total": 3.99,
+          "decision": "pass",
+          "exit": 0,
+          "unjudged": 0,
+          "raw": "нован отличием от Fast/Standard (\"дельты Fast/Standard недостаточно\"), обратимость и blast radius оценены для каждого значимого решения: \"**reversible** на старте (до боевой эксплуатации): фича за фиче-флагом... **costly** после боевой эксплуатации\", в ADR-009 — \"irreversible по существу: требования 152-ФЗ/161-ФЗ обязательны\"; процесс не одинаков для всех задач — маршрут вычисляется, а не назначается по умолчанию. |\n\n**Взвешенный итог:** 3.99/5\n**Вердикт:** Главный риск — незакрытая точка A3 и внешний вход по протоколу НСПК: пока не выбраны policy in-flight, модель владения подпиской и лимиты, документ остаётся сильным solution-пакетом «Proposed», но не контрактом для реализации, а полнота контрактов и трассировки недоказуема из-за исключённых файлов досье. Готовность высокая для этапа Solutioning (маршрутизация, ADR-дисциплина, аудит и fitness-тесты образцовы), к реализации — после закрытия A3.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 20:15:33\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_a-20260928-201533.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-d26c52ca.json\n"
+        },
+        "solution_architecture_part_b": {
+          "total": 3.87,
+          "decision": "pass",
+          "exit": 0,
+          "unjudged": 0,
+          "raw": "здаёт новую границу доверия.\". Максимум переиспользования утверждённых паттернов (автомат платежа ADR-002, меры ADR-003/006 «без дублирования», «новых зон нет»), новые сущности обоснованы отбраковкой альтернатив (вариант C — «избыточно»), прагматично отложено ненужное («банковский планировщик расписаний в первую волну **не строим**»). Не хватает явной оценки стоимости старта и владения — операционные расходы упомянуты, но не посчитаны. |\n\n**Взвешенный итог:** 3.87/5\n**Вердикт:** Архитектурно зрелое brownfield-решение с образцовой обратимостью и переиспользованием, но готовность блокируют три риска: протокол НСПК-сервиса согласий остаётся непроверенным внешним входом, числовые NFR-бюджеты и контракты с соседними командами вынесены за пределы показанного досье, а операционная модель (кто эксплуатирует поддомен согласий, on-call) не назначена — до закрытия A3 и этих пробелов в бой запускать нельзя.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 20:18:14\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_b-20260928-201814.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-d26c52ca.json\n"
+        }
+      },
+      "raw": "{\"solution_architecture_part_a\": {\"total\": 3.99, \"decision\": \"pass\", \"exit\": 0, \"unjudged\": 0, \"raw\": \"нован отличием от Fast/Standard (\\\"дельты Fast/Standard недостаточно\\\"), обратимость и blast radius оценены для каждого значимого решения: \\\"**reversible** на старте (до боевой эксплуатации): фича за фиче-флагом... **costly** после боевой эксплуатации\\\", в ADR-009 — \\\"irreversible по существу: требования 152-ФЗ/161-ФЗ обязательны\\\"; процесс не одинаков для всех задач — маршрут вычисляется, а не назначается по умолчанию. |\\n\\n**Взвешенный итог:** 3.99/5\\n**Вердикт:** Главный риск — незакрытая точка A3 и внешний вход по протоколу НСПК: пока не выбраны policy in-flight, модель владения подпиской и лимиты, документ остаётся сильным solution-пакетом «Proposed», но не контрактом для реализации, а полнота контрактов и трассировки недоказуема из-за исключённых файлов досье. Готовность высокая для этапа Solutioning (маршрутизация, ADR-дисциплина, аудит и fitness-тесты образцовы), к реализации — после закрытия A3.\\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\\n**Дата:** 2026-09-28 20:15:33\\n\\nРешение рубрики: годно (pass) — код выхода 0\\n\\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_a-20260928-201533.md\\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-d26c52ca.json\\n\"}, \"solution_architecture_part_b\": {\"total\": 3.87, \"decision\": \"pass\", \"exit\": 0, \"unjudged\": 0, \"raw\": \"здаёт новую границу доверия.\\\". Максимум переиспользования утверждённых паттернов (автомат платежа ADR-002, меры ADR-003/006 «без дублирования», «новых зон нет»), новые сущности обоснованы отбраковкой альтернатив (вариант C — «избыточно»), прагматично отложено ненужное («банковский планировщик расписаний в первую волну **не строим**»). Не хватает явной оценки стоимости старта и владения — операционные расходы упомянуты, но не посчитаны. |\\n\\n**Взвешенный итог:** 3.87/5\\n**Вердикт:** Архитектурно зрелое brownfield-решение с образцовой обратимостью и переиспользованием, но готовность блокируют три риска: протокол НСПК-сервиса согласий остаётся непроверенным внешним входом, числовые NFR-бюджеты и контракты с соседними командами вынесены за пределы показанного досье, а операционная модель (кто эксплуатирует поддомен согласий, on-call) не назначена — до закрытия A3 и этих пробелов в бой запускать нельзя.\\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\\n**Дата:** 2026-09-28 20:18:14\\n\\nРешение рубрики: годно (pass) — код выхода 0\\n\\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_b-20260928-201814.md\\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-d26c52ca.json\\n\"}}"
+    },
+    "architecture_gates": {
+      "total": 3.6,
+      "decision": "pass",
+      "criteria": {
+        "a0_architecture_fit": 4,
+        "a1_impact_assessment": 3,
+        "a2_solutioning_trigger": 4,
+        "a3_human_decision": 4,
+        "a4_conformance_evidence": 4,
+        "a5_drift_check": 2
+      },
+      "flags": {},
+      "independence": "launched_cross_family",
+      "unjudged": 0,
+      "exit": 0,
+      "raw": "ия\". Укладка в конкретные утверждённые решения доказана содержательно: новые агрегаты подчинены AD-002/AD-003, автомат платежа переиспользуется по ADR-002, защита по ADR-003/ADR-006, аудит по AD-007, новые правила помечены как \"AD-009, AD-010 (CORE, new)\". Исключение не оформлялось, но оно и не требуется — укладка показана механизмом, а не декларацией; не хватает только формальной проверки соответствия (automated conformance) против constitution. |\n| a1_impact_assessment | 2.00 | 3 |  | Цитата: \"Новый сервис СБП (автоплатежи/согласия) у НСПК, ТСП, АБС, антифрод\". Затронутые системы и данные перечислены (сущности согласия/подписки, ПДн, контракты ОПКЦ, openapi/tsp-api.yaml), владельцы решения названы (solution-architect платёжного контура, ИБ/КИИ/DPO, продукт/бизнес), но blast radius явно не оценен — нет карты «кто пострадает при отказе» по системам (только общее «ошибочное/двойное списание — инцидент и регуляторный риск»), и оценка стоимости изменения отсутствует. |\n| a2_solutioning_trigger | 1.00 | 4 |  | Цитата: \"Score: 8 → маршрут Critical\". Score по триггерам посчитан и записан, каждый сработавший триггер обоснован в таблице (api_contract_change, data_contract_change, cross_domain_integration, consistency_model_change, financial_impact, significant_nfr, security_boundary_change, criticality_or_exception), маршрут следует из score, а не из желаемого ответа. Однако порог маршрутизации Fast/Standard/Critical, заданный человеком заранее, в пакете не показан — виден только результат, но не правило. |\n| a3_human_decision | 3.00 | 4 |  | Цитата: \"Status: Proposed (ждёт человеческого решения A3 по ADR-008/ADR-009)\". Единственная обязательная человеческая точка корректно выделена (не штамп на каждый шаг): раздел «Что решает человек (A3)» перечисляет 7 конкретных вопросов с подготовленными альтернативами (pull ТСП vs банковский планировщик; зачислить и вернуть vs отклонить), отвергнутые варианты сохранены в таблицах опций ADR. Но само решение ещё не принято и не зафиксировано machine-readable записью с choice, rationale, constraints, rejected options и expiry — срок актуальности решения нигде не указан. |\n| a4_conformance_evidence | 2.00 | 4 |  | Цитата: \"Fitness-тест: «после `REVOKED` любой запрос списания → отказ, списаний 0»\". Доказательства спланированы до выпуска и привязаны к конкретным решениям: чек-лист покрывает гарантию запрета списаний после отзыва (ADR-009 п.4), гонку «отзыв ↔ in-flight списание», лимиты согласия, доставку вебуков at-least-once с дедупликацией по eventId, репетицию отката. Минус: пункты ещё не отмечены выполненными, и нет явного условия «выпуск невозможен без собранного evidence bundle» — обусловленность релиза evidence не зафиксирована. |\n| a5_drift_check | 1.00 | 2 |  | Цитата: \"нужны контрактные проверки и мониторинг\". Пост-деплой контроль дрейфа фактически не спроектирован: есть лишь признание потребности в мониторинге делегированной ТСП идемпотентности, переиспользование сверки и неизменяемый аудит-лог, но не определён процесс дрейф-чеков с триггерами (инцидент/тренд/расписание), сравнение телеметрии и графа архитектуры со спекой, а также фиксация и чинка расхождения спека↔код как дефекта. |\n\n**Взвешенный итог:** 3.60/5\n**Вердикт:** Пакет зрел на стадии подготовки к A3: укладка в паттерны доказана механизмом, триггеры значимости посчитаны с записанным score, человеческая точка одна и хорошо подготовлена, fitness-проверки привязаны к решениям; главные риски — отсутствие blast radius и стоимости изменения (A1), непринятое решение без expiry (A3) и фактически неопределённый пост-деплой дрейф-контроль (A5). До выпуска решение не готово: нужны зафиксированное machine-readable решение A3, явный evidence-гейт релиза и процесс A5.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 19:07:44\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-architecture_gates-20260928-190744.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-d26c52ca.json\n",
+      "attempts": 3
+    },
+    "neutral_architecture": {
+      "total": 3.78,
+      "decision": "pass",
+      "criteria": {
+        "drivers": 4,
+        "options": 4,
+        "rationale": 4,
+        "consequences": 4,
+        "impact_on_existing": 4,
+        "interface_compatibility": 3,
+        "measurable_quality": 3,
+        "verification_rollback": 4,
+        "open_questions": 4
+      },
+      "flags": {},
+      "independence": "launched_cross_family",
+      "unjudged": 0,
+      "exit": 0,
+      "raw": "оэтому не 5. |\n| consequences | 3.00 | 4 |  | Цитата: \"Ограниченный состав данных усложняет ручной разбор инцидентов (нужны запросы к НСПК/банку плательщика).\". В ADR-009 обе стороны разобраны отдельно (Positive/Negative) и конкретно: coupling сервиса согласий с созданием платежа, рост аудита как эксплуатационная нагрузка, зависимость сроков от НСПК; для делегированной ТСП идемпотентности указано смягчение («нужны контрактные проверки и мониторинг»). Адресаты последствий (поддержка, эксплуатация) чаще подразумеваются, чем названы, и позитивные последствия ADR-008 усечены — 4. |\n| impact_on_existing | 3.00 | 4 |  | Цитата: \"Изменение добавляет в шлюз **второй источник платежей** (согласие плательщика и подписка вместо QR) и новый поддомен «Согласия и подписки», не ломая работающий C2B-приём.\". Существующие решения названы поимённо: AD-002/003/005 переиспользуются, ADR-002 (автомат платежа), ADR-003/006 (СКЗИ, trust-зоны) наследуются, новые AD-009/AD-010 явно помечены «(CORE, new)», плюс зафиксировано, что сознательно не затрагивается («новых зон нет», паритет одноразового приёма). Причины изменения части решений (меняет родительский CORE) вынесены в открытый вопрос, а не разобраны — 4. |\n| interface_compatibility | 3.00 | 3 |  | Цитата: \"Новые эндпоинты/поля в API ТСП (согласия, подписки, списания) — `openapi/tsp-api.yaml`\". Изменения контрактов перечислены (новые эндпоинты, поля, сущности в контракте адаптера ОПКЦ), совместимость заявлена («не ломая работающий C2B-приём»), для веб-уков задано поведение потребителей (at-least-once, дедупликация по eventId). Но анализ «что ломается / что сохраняется» для существующих потребителей и стратегия версионирования в видимом тексте отсутствуют — они в исключённых файлах (tsp-api.yaml, contracts), поэтому 3. |\n| measurable_quality | 3.00 | 3 |  | Цитата: \"Fitness-тест: «после `REVOKED` любой запрос списания → отказ, списаний 0»\". Часть требований измерима и проверяема: ноль списаний после отзыва, ноль двойных зачислений, дедупликация веб-уков по eventId, порог handoff_quality ≥ 4/5. Но заявленные бюджеты «активация согласия, отзыв, отсутствие списаний после отзыва» даны без чисел, единиц и условий измерения (детали — в исключённом docs/nfr.md), т.е. смешанное качество без условий измерения — 3. |\n| verification_rollback | 3.00 | 4 |  | Цитата: \"Откат (репетиция): включение/выключение флага не оставляет необработанных открытых операций, паритет одноразового приёма сохранён.\". Есть проверяемые критерии приёмки (гонка отзыва и in-flight списания, лимиты, веб-уки, репетиция отката) и исполнимый план отката через фиче-флаг с градацией reversible/costly/irreversible и триггерами пересмотра. Явного ответственного за срабатывание отката нет (owner ADR — не то же самое), поэтому 4. |\n| open_questions | 3.00 | 4 |  | Цитата: \"Policy по in-flight списанию при отзыве согласия (зачислить и вернуть vs отклонить) — комплаенс/бизнес.\". Открытые вопросы вынесены в отдельный раздел «Что решает человек (A3)», не смешаны с решённым, статус пакета явно ждёт A3; для части вопросов указан адресат (комплаенс/бизнес, продуктово-архитектурный) и причина (протокол НСПК — внешний вход). Не у каждого из семи пунктов есть адресат, причина и что именно он блокирует — 4. |\n\n**Взвешенный итог:** 3.78/5\n**Вердикт:** Главный риск: обоснование вариантов, контрактная совместимость и измеримые NFR-бюджеты вынесены в усечённые и исключённые файлы (SOLUTIONING.md, nfr.md, tsp-api.yaml), поэтому ключевые части пакета утверждаются по ссылке, а не по содержанию. Ядро (драйверы, ADR-008/009, приёмка, откат, открытые вопросы) проработано на хорошем уровне — решение готово к человеческой точке A3, но не к утверждению без раскрытия исключённого материала.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 19:14:38\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-neutral_architecture-20260928-191438.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-d26c52ca.json\n",
+      "attempts": 1
+    }
+  },
+  "judge_model": "glm-5.3"
+}

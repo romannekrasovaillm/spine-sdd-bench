@@ -1,0 +1,13 @@
+# План отката handoff-пакета (машиночитаемый) — репетируется на гейте A4:
+# `arch-be control gate A4 <repo> --rehearse`.
+# Модель отката пакета: работа исполнителя приходит коммитами поверх baseline;
+# откат кода — reset на якорь. Продуктовый откат рекуррентной функции
+# (фиче-флаг, отзыв согласий) описан в
+# openspec/changes/add-recurring-payments/ROLLBACK.md и ADR-008/ADR-009.
+baseline_commit: "051f512"
+steps:
+  - name: якорь-отката-доступен
+    run: git cat-file -t 051f512
+  - name: откат-на-baseline
+    run: git reset --hard 051f512
+verify: test -z "$(git status --porcelain --untracked-files=no)"

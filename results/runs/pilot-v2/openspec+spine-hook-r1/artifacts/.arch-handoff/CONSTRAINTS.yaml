@@ -1,0 +1,78 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+
+  # --- изменение add-sbp-subscriptions (ADR-008): подписки СБП ---
+  # На этапе решения это правила-звенья трассировки (must_contain = «упоминание есть»).
+  # Проверка поведения (command_succeeds) добавляется задачами 9.3/9.4, когда появится код.
+  # covers — id требования OpenSpec (openspec:<capability>#<hash>); hash выводится из текста
+  # требования, поэтому при правке текста спеки ссылку нужно обновить (arch-be control openspec-coverage).
+  - name: spine-mandate-invariants
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: '## AD-010. Однократность списания за период подписки'
+    severity: error
+    rationale: 'AD-010 (одно списание на период подписки) не должен исчезнуть из спайна молча'
+    owner: solution-architect
+    expiry: 2027-09-28
+    covers: ["openspec:sbp-subscriptions#3f707cab"]
+  - name: mandate-fail-closed-states
+    type: must_contain
+    glob: 'openspec/changes/add-sbp-subscriptions/specs/**/*.md'
+    pattern: 'MANDATE_UNKNOWN_STATE'
+    severity: error
+    rationale: 'AD-009: при неподтверждённом состоянии мандата списание запрещено (fail-closed)'
+    owner: solution-architect
+    expiry: 2027-09-28
+    covers: ["openspec:sbp-subscriptions#af02cddb"]
+  - name: charge-idempotency-key
+    type: must_contain
+    glob: 'docs/adr/ADR-008-*.md'
+    pattern: '\(mandateId, invoiceId\)'
+    severity: error
+    rationale: 'AD-010: ключ идемпотентности списания на период подписки зафиксирован в ADR-008'
+    owner: solution-architect
+    expiry: 2027-09-28
+  - name: ears_acceptance_criteria
+    type: must_contain
+    glob: 'docs/**/*.md'
+    pattern: '(?m)^\s*[-*]?\s*\**\s*(When|While|If|Where)\b'
+    severity: warn
+    rationale: 'критерии приёмки без EARS-формы непроверяемы формально'
+    fix_hint: 'переписать критерии приёмки в EARS-нотации (When/While/If/Where)'
+    skill: readiness-gate
+    owner: solution-architect
+    expiry: 2027-09-28

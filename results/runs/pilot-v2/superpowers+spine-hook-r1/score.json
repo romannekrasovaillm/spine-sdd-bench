@@ -1,0 +1,71 @@
+{
+  "files": [
+    ".arch-handoff/CONSTRAINTS.yaml",
+    "ARCHITECTURE-SPINE.md",
+    "changes/subscriptions-c2b/DELTA.md",
+    "changes/subscriptions-c2b/REVIEW.md",
+    "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelshchika.md",
+    "docs/adr/ADR-009-soglasie-platelshchika-zhiznennyy-cikl-i-otzyv.md",
+    "docs/contracts/opkc-adapter.md",
+    "docs/contracts/tsp-api.md",
+    "docs/nfr.md",
+    "docs/solutioning.md",
+    "docs/spec/state-machine.md",
+    "docs/spec/subscriptions.md",
+    "openapi/tsp-api.yaml"
+  ],
+  "sensors": {
+    "chars": 117492,
+    "significance_route": true,
+    "invariant_AD005_ref": true,
+    "alternatives": true,
+    "negative_consequences": true,
+    "reversibility": true,
+    "rollback": true,
+    "acceptance": true,
+    "nfr_numeric": true,
+    "human_decision": true,
+    "placeholders": 10,
+    "adr_files": 2
+  },
+  "deterministic": {
+    "spine_gate_exit": 0,
+    "spine_gate_route": "Fast",
+    "spine_gate_fails": [],
+    "spine_gate_tail": "Гейт: .\nМаршрут: Fast (auto: score 1 (api_contract_change))\n  [PASS] fitness * — Правил: 19, нарушений: 0 (error: 0, warn: 0); реестр: 19 правил (error: 16), отпечаток 298e7f31 — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] delta_guard — изменённых файлов: 14, защищённых среди них: 1 — покрытие: ARCHITECTURE-SPINE.md ← 'subscriptions-c2b'\n  [PASS] rule_weakened — реестр правил не ослаблен относительно bench-baseline — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] spine_lint * — находок: 0 (error: 0)\n  [SKIP] trace_check — нет каталога model/\n  [SKIP] model_validate — нет каталога model/\n  [SKIP] decision_quality — не включена: добавьте 'decision_quality' в [gate.required] нужного маршрута\n  [SKIP] semantic_quality — не включена: добавьте 'semantic_quality' в [gate.required] нужного маршрута\nИтог: PASS\nАттестация вердикта: sha256:bb05e245b8ee378ba7fa49a0a5f8b7905427ef4407fa10d014240e35532dca22\n",
+    "spine_gate_base": "bench-baseline",
+    "spine_gate_skips": [
+      "decision_quality",
+      "model_validate",
+      "semantic_quality",
+      "trace_check"
+    ],
+    "invariants": {
+      "modified": [
+        "AD-008"
+      ],
+      "removed": [],
+      "added": [
+        "AD-009",
+        "AD-010",
+        "AD-011"
+      ]
+    },
+    "contract_changed": true,
+    "contract_breaking": 0,
+    "contract_nonbreaking": 4,
+    "contract_tail": "contract_diff: 4 изменений (breaking: 0, non-breaking: 4)\nФормат: openapi[warn] #/paths/~1v1~1payments/post/responses/422 CD-005 — добавлен код ответа 422\n[warn] #/paths/~1v1~1mandates CD-005 — добавлен путь «/v1/mandates»\n[warn] #/paths/~1v1~1mandates~1{mandateId} CD-005 — добавлен путь «/v1/mandates/{mandateId}»\n[warn] #/paths/~1v1~1mandates~1{mandateId}~1revoke CD-005 — добавлен путь «/v1/mandates/{mandateId}/revoke»\nИтог: PASS\n",
+    "protected_touched": [
+      ".arch-handoff/CONSTRAINTS.yaml",
+      "ARCHITECTURE-SPINE.md"
+    ],
+    "delta_dirs": [
+      "subscriptions-c2b"
+    ]
+  },
+  "gate_class": "PASS_DELTA",
+  "hook_blocks": 1,
+  "contamination": [],
+  "judge": {},
+  "note": "только детерминированный слой: судья для этой кампании не запускался"
+}

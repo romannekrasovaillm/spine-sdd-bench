@@ -1,0 +1,139 @@
+{
+  "schema": "arch-be/rubric-report/v1",
+  "rubric": "adr_quality",
+  "target": "docs/adr/ADR-008-soglasie-platelshchika-agregat-platyozhnogo-kontura-podpiski-sbp.md",
+  "target_sha256": "658ebc6c0e9bfd354cc37ad697a186aace39abdd36322e1dedfdbba835f46058",
+  "judge_model": "qwen-code (agent)",
+  "author_model": "qwen-code (agent)",
+  "weighted_total": 4.6,
+  "verdict": "Риск — расхождение модели с реальным протоколом НСПК; решение пригодно для вынесения на A3.",
+  "unstable": false,
+  "evidence_not_found": 0,
+  "judge_config": {
+    "samples": 3,
+    "unstable_stdev": 1.0,
+    "evidence_min_similarity": 0.8,
+    "adaptive_samples": false
+  },
+  "independence": "none",
+  "author_source": "header",
+  "provenance": {
+    "mode": "declared",
+    "host": {
+      "name": "qwen-cli-mcp-client-spine",
+      "version": "0.0.1"
+    },
+    "session_id": "27e05f7ad0ebfe4d",
+    "session_calls_before": 10,
+    "prompt_issued_in_session": false,
+    "samples": [
+      {
+        "sha256": "09efda52d8c5e78d4354d4bf278a405bc07f4782451e4005e767db41aae96ec4",
+        "dropped": false
+      },
+      {
+        "sha256": "bcd81848d27cea1056b0d202b17f1f5bde0872f5bd209080b70298f1f24eb6f5",
+        "dropped": false
+      },
+      {
+        "sha256": "c882b0de593dd0a4fc44e83a9105cfbdff0db22958b50685a442c3e3b80c6e10",
+        "dropped": false
+      }
+    ]
+  },
+  "pack_kind": null,
+  "subject": null,
+  "pack_sha256": null,
+  "inputs": [],
+  "scores": [
+    {
+      "criterion_id": "context",
+      "weight": 2.0,
+      "score": 5,
+      "rationale": "Цитата: \"не хранит долгоживущего согласия\". Контекст называет проблему, силы (изоляция контура, единый источник истины, ПДн, КИИ) и внешний вход [ТРЕБУЕТ ПРОВЕРКИ]; понятно, почему решение потребовалось.",
+      "samples": [
+        5,
+        5,
+        4
+      ],
+      "stdev": 0.4714045207910317,
+      "flags": [],
+      "evidence_unconfirmed_ratio": 0.0,
+      "invalid_samples": 0,
+      "checked": [],
+      "evidence_channel": "prose"
+    },
+    {
+      "criterion_id": "alternatives",
+      "weight": 3.0,
+      "score": 5,
+      "rationale": "Цитата: \"Отдельный микросервис подписок со своей БД\". Четыре реальные альтернативы с причинами отказа, включая сохранение текущей модели и её цену.",
+      "samples": [
+        5,
+        5,
+        5
+      ],
+      "stdev": 0.0,
+      "flags": [],
+      "evidence_unconfirmed_ratio": 0.0,
+      "invalid_samples": 0,
+      "checked": [],
+      "evidence_channel": "prose"
+    },
+    {
+      "criterion_id": "negative_consequences",
+      "weight": 2.0,
+      "score": 4,
+      "rationale": "Цитата: \"потенциальная точка роста нагрузки\". Издержки адресны (ПДн, деплой, нагрузка); митигация названа частично.",
+      "samples": [
+        4,
+        5,
+        4
+      ],
+      "stdev": 0.4714045207910317,
+      "flags": [],
+      "evidence_unconfirmed_ratio": 0.0,
+      "invalid_samples": 0,
+      "checked": [],
+      "evidence_channel": "prose"
+    },
+    {
+      "criterion_id": "reversibility",
+      "weight": 2.0,
+      "score": 4,
+      "rationale": "Цитата: \"дешёвым откатом не будет\". Категория costly названа и путь назад описан, но репетиция отката не подтверждена.",
+      "samples": [
+        4,
+        4,
+        4
+      ],
+      "stdev": 0.0,
+      "flags": [],
+      "evidence_unconfirmed_ratio": 0.0,
+      "invalid_samples": 0,
+      "checked": [],
+      "evidence_channel": "prose"
+    },
+    {
+      "criterion_id": "status_discipline",
+      "weight": 1.0,
+      "score": 5,
+      "rationale": "Цитата: \"Status: Proposed\". Запись до реализации, номер стабилен, срок пересмотра (expiry) задан.",
+      "samples": [
+        5,
+        5,
+        4
+      ],
+      "stdev": 0.4714045207910317,
+      "flags": [],
+      "evidence_unconfirmed_ratio": 0.0,
+      "invalid_samples": 0,
+      "checked": [],
+      "evidence_channel": "prose"
+    }
+  ],
+  "invalid_samples_ratio": 0.0,
+  "decision": "pass",
+  "judged_at": "2026-09-28T15:18:55.844455782+03:00",
+  "note": "Split-judge без API-ключа; судья и автор — одна модель (independence: none). Независимое судейство выполняется отдельным контуром (rubric_handover) до гейта decision_quality."
+}

@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: |
+    Аддитивное расширение v0.2.0: добавлены ресурсы согласий (consent) и
+    списаний по согласию (debit) для подписок СБП. Существующие пути
+    /v1/payments* и схема Payment не изменены (обратная совместимость).
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/revoke:
+    post:
+      operationId: revokeConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '202':
+          description: Отзыв согласия инициирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/debits:
+    post:
+      operationId: createDebit
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitRequest'}
+      responses:
+        '201':
+          description: Списание по согласию зарегистрировано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Debit'}
+  /v1/consents/{consentId}/debits/{debitId}:
+    get:
+      operationId: getDebit
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - {in: path, name: debitId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус списания
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Debit'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+    ConsentRequest:
+      type: object
+      required: [tspId, payerRef, consentType]
+      properties:
+        tspId: {type: string}
+        payerRef: {type: string, description: Идентификатор плательщика (телефон E.164) — ПДн, маскируется при хранении}
+        consentType: {type: string, enum: [subscription, on_demand], description: subscription — рекуррентные списания; on_demand — разовые списания без QR}
+        amountLimitPerDebit: {type: integer, description: Максимум одного списания, копейки (опц.)}
+        amountLimitPerPeriod: {type: integer, description: Максимум за период, копейки (опц.)}
+        period: {type: string, enum: [day, week, month], description: Период лимита (опц.)}
+        expiresAt: {type: string, format: date-time, description: Срок действия согласия (опц.)}
+        merchantConsentRef: {type: string, description: Сквозной идентификатор согласия у ТСП (опц.)}
+    Consent:
+      type: object
+      required: [consentId, tspId, consentType, status]
+      properties:
+        consentId: {type: string}
+        tspId: {type: string}
+        payerRefMasked: {type: string, description: Маскированный идентификатор плательщика}
+        consentType: {type: string, enum: [subscription, on_demand]}
+        status: {type: string, enum: [CREATED, PENDING_CONFIRMATION, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]}
+        amountLimitPerDebit: {type: integer}
+        amountLimitPerPeriod: {type: integer}
+        period: {type: string, enum: [day, week, month]}
+        expiresAt: {type: string, format: date-time}
+        merchantConsentRef: {type: string}
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+    DebitRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: Сумма списания, копейки}
+        purpose: {type: string, description: Назначение платежа}
+        merchantDebitRef: {type: string, description: Сквозной идентификатор списания у ТСП (опц.)}
+    Debit:
+      type: object
+      required: [debitId, consentId, amount, status]
+      properties:
+        debitId: {type: string}
+        consentId: {type: string}
+        amount: {type: integer, description: Сумма списания, копейки}
+        status: {type: string, enum: [CREATED, SUBMITTED, PAID, CREDITED, COMPLETED, FAILED, REFUNDED]}
+        errorCode: {type: string, description: Код отклонения, если FAILED}
+        merchantDebitRef: {type: string}
+        createdAt: {type: string, format: date-time}
+        paidAt: {type: string, format: date-time}
+        creditedAt: {type: string, format: date-time}
+        completedAt: {type: string, format: date-time}

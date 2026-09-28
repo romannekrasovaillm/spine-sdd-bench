@@ -1,0 +1,198 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >-
+    Мерчант-API СБП-шлюза банка. Версия 0.2 добавляет подписки СБП (согласие
+    плательщика и дебеты по согласию) аддитивно поверх 0.1: существующие методы,
+    поля и события сохраняют смысл, ломающих изменений нет.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      summary: Создать платёж — разовый QR/ссылка или дебет по согласию (подписка)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '409':
+          description: Конфликт идемпотентности или недопустимое состояние согласия
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '422':
+          description: Отказ по лимитам согласия или бизнес-правилам
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      summary: Статус платежа (включая дебеты по согласию)
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '404':
+          description: Платёж не найден
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      summary: Зарегистрировать согласие плательщика (подписка СБП)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидается подтверждение плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '409':
+          description: Конфликт идемпотентности
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '422':
+          description: Некорректные лимиты или параметры согласия
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      summary: Статус согласия и израсходованные лимиты
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '404':
+          description: Согласие не найдено
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+    delete:
+      operationId: cancelConsent
+      summary: Прекратить согласие по инициативе ТСП (отзыв плательщика необратим)
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие прекращено
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '409':
+          description: Согласие не активно (отозвано/истекло)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        currency: {type: string, description: 'ISO 4217, по умолчанию RUB'}
+        qrType: {type: string, enum: [dynamic, static, link]}
+        paymentPurpose: {type: string}
+        consentId:
+          type: string
+          description: Согласие для дебета по подписке; несовместимо с qrType
+        debitPeriodId:
+          type: string
+          description: Идентификатор периода подписки (идемпотентность дебета)
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        consentId: {type: string, description: Присутствует для дебетов по согласию}
+        debitPeriodId: {type: string, description: Присутствует для дебетов по согласию}
+    ConsentLimits:
+      type: object
+      required: [currency, maxAmountPerDebit]
+      properties:
+        currency: {type: string, description: 'ISO 4217, по умолчанию RUB'}
+        maxAmountPerDebit: {type: integer, description: Максимальная разовая сумма, копейки}
+        maxAmountTotal: {type: integer, description: Суммарный лимит по согласию, копейки}
+        period: {type: string, enum: [DAILY, WEEKLY, MONTHLY]}
+        maxDebitsPerPeriod: {type: integer}
+    ConsentRequest:
+      type: object
+      required: [tspId, payerId, paymentPurpose, limits]
+      properties:
+        tspId: {type: string}
+        payerId: {type: string, description: Идентификатор плательщика у ТСП}
+        paymentPurpose: {type: string}
+        limits: {$ref: '#/components/schemas/ConsentLimits'}
+        validUntil: {type: string, format: date-time}
+        redirectUrl: {type: string, format: uri}
+        merchantOrderId: {type: string}
+    Consent:
+      type: object
+      required: [consentId, status]
+      properties:
+        consentId: {type: string}
+        status:
+          type: string
+          enum: [PENDING_PAYER, ACTIVE, REVOKED, EXPIRED, CANCELLED, REJECTED]
+        consentUrl: {type: string, format: uri, description: Ссылка для подтверждения плательщиком}
+        limits: {$ref: '#/components/schemas/ConsentLimits'}
+        amountDebitedTotal: {type: integer}
+        debitsInCurrentPeriod: {type: integer}
+        validUntil: {type: string, format: date-time}
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+    Problem:
+      type: object
+      required: [title, status, code]
+      properties:
+        type: {type: string, format: uri}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}
+        idempotencyKey: {type: string}

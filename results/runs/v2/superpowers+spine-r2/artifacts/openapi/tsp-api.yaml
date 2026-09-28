@@ -1,0 +1,149 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Версия 0.2.0 — обратно совместимое расширение под рекуррентные C2B-списания
+    по согласию плательщика (ADR-008..ADR-010): добавлены опциональные поля
+    платежа (type, consentId, billingPeriod) и новые пути /v1/consents.
+    Потребители версии 0.1.0 не затронуты: существующие пути, поля и значение
+    info.version 0.1.0 совместимы; ломающих изменений нет.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      summary: Создать платёж — разовый QR/ссылку либо рекуррентное списание по согласию
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      summary: Зарегистрировать намерение оформить согласие плательщика (подписка СБП)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано и ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/revoke:
+    post:
+      operationId: revokeConsent
+      summary: Отозвать согласие по инициативе ТСП (отзыв плательщика приходит из НСПК)
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отозвано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        type:
+          type: string
+          enum: [single, recurring]
+          default: single
+          description: Тип платежа; single — разовый QR/ссылка, recurring — списание по согласию
+        consentId:
+          type: string
+          description: Обязателен при type=recurring; согласие в статусе ACTIVE и в пределах лимитов (ADR-008)
+        billingPeriod:
+          type: string
+          description: Доменный ключ периода (например, "2026-09") для идемпотентности цикла (ADR-010); обязателен при type=recurring
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        type: {type: string, enum: [single, recurring], description: Тип платежа}
+        consentId: {type: string, nullable: true, description: Согласие, по которому создан рекуррентный платёж}
+        billingPeriod: {type: string, nullable: true, description: Период рекуррентного списания}
+    ConsentRequest:
+      type: object
+      required: [tspId, maxAmountPerDebit, validUntil]
+      properties:
+        tspId: {type: string}
+        maxAmountPerDebit: {type: integer, description: Лимит суммы одного списания, копейки}
+        maxAmountPerPeriod: {type: integer, description: Лимит суммы списаний за период, копейки}
+        maxDebitsPerPeriod: {type: integer, description: Лимит числа списаний за период}
+        validUntil: {type: string, format: date-time, description: Срок действия согласия}
+        purpose: {type: string, description: Назначение списаний}
+        merchantOrderId: {type: string}
+    Consent:
+      type: object
+      required: [consentId, status]
+      properties:
+        consentId: {type: string}
+        status:
+          type: string
+          enum: [PENDING, ACTIVE, SUSPENDED, REVOKED, EXPIRED]
+        maxAmountPerDebit: {type: integer}
+        maxAmountPerPeriod: {type: integer}
+        maxDebitsPerPeriod: {type: integer}
+        validUntil: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time, nullable: true}
+        revocationSource:
+          type: string
+          nullable: true
+          enum: [MERCHANT, PAYER, NSPK, SYSTEM]
+          description: Источник отзыва согласия

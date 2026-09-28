@@ -1,0 +1,190 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    v0.2 — аддитивное расширение для рекуррентных C2B-списаний по согласию
+    плательщика (ADR-008, AD-009). Существующие методы /v1/payments не изменены;
+    добавлены опциональные поля paymentType/consentId. Обратная совместимость сохранена.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/revoke:
+    post:
+      operationId: revokeConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отозвано (или уже было отозвано)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/debits:
+    post:
+      operationId: initiateDebit
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitRequest'}
+      responses:
+        '201':
+          description: Списание инициировано под согласием
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+    get:
+      operationId: listDebits
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Список списаний по согласию
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: {$ref: '#/components/schemas/Payment'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        paymentType:
+          type: string
+          enum: [ONE_OFF, RECURRENT]
+          default: ONE_OFF
+        consentId:
+          type: string
+          description: Согласие, под которым инициируется рекуррентное списание (только для paymentType=RECURRENT)
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentType:
+          type: string
+          enum: [ONE_OFF, RECURRENT]
+          default: ONE_OFF
+        consentId: {type: string}
+    AmountLimit:
+      type: object
+      required: [maxPerDebit, currency]
+      properties:
+        maxPerDebit: {type: integer, description: Максимум за одно списание, в копейках}
+        maxTotal: {type: integer, description: Максимум суммарно за период действия, в копейках (опц.)}
+        currency: {type: string, enum: [RUB]}
+    ConsentRequest:
+      type: object
+      required: [tspId, amountLimit, period]
+      properties:
+        tspId: {type: string}
+        payerRef: {type: string, description: Сквозной идентификатор плательщика на стороне ТСП}
+        amountLimit: {$ref: '#/components/schemas/AmountLimit'}
+        period: {type: string, description: Периодичность (ISO 8601 duration, напр. P1M)}
+        validity:
+          type: object
+          properties:
+            validFrom: {type: string, format: date-time}
+            validUntil: {type: string, format: date-time}
+        purpose: {type: string}
+    Consent:
+      type: object
+      required: [consentId, status]
+      properties:
+        consentId: {type: string}
+        status:
+          type: string
+          enum: [CONSENT_CREATED, CONSENT_ACTIVE, CONSENT_SUSPENDED, CONSENT_REVOKED, CONSENT_EXPIRED, CONSENT_FAILED]
+        consentUrl: {type: string, description: Ссылка для подтверждения плательщиком (только пока CONSENT_CREATED)}
+        amountLimit: {$ref: '#/components/schemas/AmountLimit'}
+        period: {type: string}
+        validFrom: {type: string, format: date-time}
+        validUntil: {type: string, format: date-time}
+        revokeReason: {type: string}
+    DebitRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        purpose: {type: string}

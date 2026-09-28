@@ -1,0 +1,69 @@
+{
+  "condition": "plain+spine-hook",
+  "rep": 2,
+  "mode": "tui",
+  "session": "b-plain+spine-hook-r2",
+  "base_sha": "da9536d7baaf7a747a1493d7feda3af8d996c1cd",
+  "wall_s": 985.1,
+  "turn_ok": true,
+  "records": 222,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 66,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": [
+      "Stop"
+    ]
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 134,
+  "tool_names": [
+    "edit",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "tool_call",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "M\t.qwen/settings.json",
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tchanges/sbp-recurring-consents/ACCEPTANCE.md",
+    "A\tchanges/sbp-recurring-consents/DELTA.md",
+    "A\tchanges/sbp-recurring-consents/EVIDENCE.yaml",
+    "A\tchanges/sbp-recurring-consents/HANDOFF.md",
+    "A\tchanges/sbp-recurring-consents/PROBLEM.md",
+    "A\tchanges/sbp-recurring-consents/REVIEW.md",
+    "A\tchanges/sbp-recurring-consents/RISK.md",
+    "A\tchanges/sbp-recurring-consents/ROLLBACK.md",
+    "A\tchanges/sbp-recurring-consents/SOLUTION.md",
+    "A\tchanges/sbp-recurring-consents/TASK.md",
+    "A\tchanges/sbp-recurring-consents/reports/fitness.md",
+    "A\tdocs/adr/ADR-008-soglasie-platelshchika-kak-otdelnyy-agregat-osnovanie-rekurrentnyh-spisaniy.md",
+    "A\tdocs/adr/ADR-009-zashchita-ot-dvoynogo-rekurrentnogo-spisaniya-biznes-klyuch.md",
+    "A\tdocs/adr/ADR-010-additivnoe-rasshirenie-api-tsp-v1-bez-lomayushchih-izmeneniy.md",
+    "A\tdocs/adr/ADR-011-gonka-otzyv-soglasiya-spisanie-v-polyote.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "A\tdocs/spec/consent-state-machine.md",
+    "M\tdocs/spec/state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

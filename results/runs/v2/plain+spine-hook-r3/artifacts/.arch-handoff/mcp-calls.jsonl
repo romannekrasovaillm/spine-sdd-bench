@@ -1,0 +1,11 @@
+{"ts":"2026-09-28T15:09:00.022720255+03:00","tool":"delta_guard","verdict":"pass","duration_ms":8,"session_id":"27e05f7ad0ebfe4d","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:09:00.023135765+03:00","tool":"significance_score","verdict":"ok","duration_ms":0,"session_id":"27e05f7ad0ebfe4d","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:09:42.368238410+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"27e05f7ad0ebfe4d","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:09:42.372330911+03:00","tool":"rules_suggest","verdict":"ok","duration_ms":3,"session_id":"27e05f7ad0ebfe4d","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:11:24.414370811+03:00","tool":"rubric_list","verdict":"error","duration_ms":0,"session_id":"27e05f7ad0ebfe4d","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:16:14.321094274+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"27e05f7ad0ebfe4d","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:16:14.322153662+03:00","tool":"contract_diff","verdict":"ok","duration_ms":0,"session_id":"27e05f7ad0ebfe4d","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:17:40.311931797+03:00","tool":"delta_guard","verdict":"pass","duration_ms":9,"session_id":"27e05f7ad0ebfe4d","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:17:46.146098818+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"27e05f7ad0ebfe4d","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:18:01.551876061+03:00","tool":"rubric_prompt","verdict":"ok","duration_ms":0,"session_id":"27e05f7ad0ebfe4d","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:18:55.844613907+03:00","tool":"rubric_verify","verdict":"ok","duration_ms":12,"session_id":"27e05f7ad0ebfe4d","host":"qwen-cli-mcp-client-spine","judging":{"target":"<HARNESS>/runs-v2/cells/wmzjxhf/ws/reports/rubric/ADR-008-soglasie-platelshchika-agregat-platyozhnogo-kontura-podpiski-sbp.json","rubric":"adr_quality","judge_model":"qwen-code (agent)","author_model":"qwen-code (agent)","independence":"none","session_calls_before":10}}

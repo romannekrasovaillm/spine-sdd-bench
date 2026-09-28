@@ -1,0 +1,34 @@
+{
+  "kind": "rollback_rehearsal",
+  "gate": "A4",
+  "passed": true,
+  "baseline_commit": "051f512",
+  "rehearsed_at": "2026-09-28T12:36:33.140429304+00:00",
+  "duration_secs": 0.176723584,
+  "steps": [
+    {
+      "name": "якорь-отката-доступен",
+      "status": "pass",
+      "exit_code": 0,
+      "detail": "commit"
+    },
+    {
+      "name": "откат-на-baseline",
+      "status": "pass",
+      "exit_code": 0,
+      "detail": "Указатель HEAD сейчас на коммите 051f512 case: исходный кейс"
+    }
+  ],
+  "verify": {
+    "name": "verify",
+    "status": "pass",
+    "exit_code": 0,
+    "detail": "команда завершилась без вывода"
+  },
+  "log": [
+    "репетиционный worktree: <TMP> (detached на 051f512)",
+    "[PASS] якорь-отката-доступен — commit",
+    "[PASS] откат-на-baseline — Указатель HEAD сейчас на коммите 051f512 case: исходный кейс",
+    "[PASS] verify — команда завершилась без вывода"
+  ]
+}

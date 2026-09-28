@@ -1,0 +1,100 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+
+  # --- Изменение sbp-recurring-c2b (подписки СБП). Дельта: changes/sbp-recurring-c2b/DELTA.md ---
+  # Правила поведения (первое исполняемое правило контура): шаблоны применены
+  # `arch-be rules template apply`; тесты — skeleton/rule_templates/.
+  - id: C-100
+    name: consent_before_auto_action
+    type: command_succeeds
+    command: 'python3 -m pytest -q -p no:cacheprovider skeleton/rule_templates/consent-before-auto-action/test_consent_before_auto_action.py'
+    timeout_secs: 120
+    severity: error
+    ad: AD-009
+    owner: solution-architect (платёжный контур)
+    expiry: 2026-12-31
+    rationale: 'инвариант «согласие раньше автодействия» (AD-009/AD-010) проверяется исполнением: счётчик автодействий не растёт без действующей записи о согласии, отзыв останавливает следующее срабатывание, при незавершённой операции новое списание не стартует'
+    fix_hint: 'перенести проверку со скелета на реальный сервис подписок: команда правила должна прогонять тесты кода шлюза, а не эталонной реализации из шаблона'
+    skill: fitness-functions
+  - id: C-101
+    name: debit_period_idempotency
+    type: command_succeeds
+    command: 'python3 -m pytest -q -p no:cacheprovider skeleton/rule_templates/idempotency-key/test_idempotency_key.py'
+    timeout_secs: 120
+    severity: error
+    ad: AD-003
+    owner: solution-architect (платёжный контур)
+    expiry: 2026-12-31
+    rationale: 'периодическое списание идемпотентно по ключу периода consentId+periodNumber (AD-011): повторная доставка с тем же ключом не создаёт второй эффект у внешней системы'
+    fix_hint: 'перенести проверку на настоящую точку входа дебета; ключ периода — consentId+periodNumber, не Idempotency-Key запроса ТСП'
+    skill: fitness-functions
+
+  # Правила трассируемости нового функционала (REQ → NFR → AD → контракт).
+  - id: C-102
+    name: subscription-nfr-measurable
+    type: must_contain
+    glob: "docs/nfr-subscriptions.md"
+    pattern: '99,95'
+    severity: error
+    ad: AD-010
+    owner: solution-architect (платёжный контур)
+    expiry: 2026-12-31
+  - id: C-103
+    name: consent-spec-present
+    type: file_exists
+    path: docs/spec/consent-state-machine.md
+    severity: error
+    ad: AD-009
+    owner: solution-architect (платёжный контур)
+    expiry: 2026-12-31
+  - id: C-104
+    name: subscription-solutioning-present
+    type: file_exists
+    path: docs/solutioning-subscriptions.md
+    severity: error
+    ad: AD-009
+    owner: solution-architect (платёжный контур)
+    expiry: 2026-12-31
+  - id: C-105
+    name: consent-endpoint-in-contract
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/consents'
+    severity: error
+    ad: AD-009
+    owner: solution-architect (платёжный контур)
+    expiry: 2026-12-31

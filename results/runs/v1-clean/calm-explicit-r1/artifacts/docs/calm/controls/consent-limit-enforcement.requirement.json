@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.bank.ru/controls/consent-limit-enforcement.json",
+  "title": "Consent limit enforcement",
+  "description": "Рекуррентный дебит только по активному согласию в пределах лимита и срока (AD-009).",
+  "type": "object",
+  "properties": {
+    "guard": { "type": "string" },
+    "enforcement-point": { "type": "string" },
+    "authoritative-check": { "type": "string" }
+  },
+  "additionalProperties": true
+}

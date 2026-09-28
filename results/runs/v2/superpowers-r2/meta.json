@@ -1,0 +1,59 @@
+{
+  "condition": "superpowers",
+  "rep": 2,
+  "mode": "tui",
+  "session": "b-superpowers-r2",
+  "base_sha": "bc7fc023019b236deda8c61cbc14b19f8c519771",
+  "wall_s": 847.2,
+  "turn_ok": true,
+  "records": 259,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 0,
+    "extension_skills": 15,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 151,
+  "tool_names": [
+    "edit",
+    "read_file",
+    "run_shell_command",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tchanges/sbp-subscriptions/ACCEPTANCE.md",
+    "A\tchanges/sbp-subscriptions/ADR.md",
+    "A\tchanges/sbp-subscriptions/DECISION.md",
+    "A\tchanges/sbp-subscriptions/DELTA.md",
+    "A\tchanges/sbp-subscriptions/HANDOFF.md",
+    "A\tchanges/sbp-subscriptions/RISK.md",
+    "A\tchanges/sbp-subscriptions/ROLLBACK.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp-model-avtorizacii-i-orkestraciya.md",
+    "A\tdocs/adr/ADR-009-soglasie-platelschika-na-rekurrentnye-spisaniya-zahvat-dokazatelstvo-otzyv-i-zaschita-pdn.md",
+    "A\tdocs/adr/ADR-010-idempotentnost-i-neopredelyonnyy-ishod-rekurrentnogo-spisaniya-zapret-povtornoy-otpravki-bez-proverki-statusa.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/rfp/vendor-rfp.md",
+    "A\tdocs/solutioning-sbp-subscriptions.md",
+    "M\tdocs/solutioning.md",
+    "M\tdocs/spec/state-machine.md",
+    "A\tdocs/spec/subscriptions.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

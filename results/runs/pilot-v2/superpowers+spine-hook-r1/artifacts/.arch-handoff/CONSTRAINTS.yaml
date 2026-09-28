@@ -1,0 +1,126 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+
+  # --- Изменение subscriptions-c2b (ADR-008, ADR-009): согласия плательщика и регулярные списания ---
+  # Этап — решение (до кода): ниже звенья трассировки инвариант → артефакт. Исполняемые проверки
+  # ПОВЕДЕНИЯ добавляются первым шагом реализации из шаблонов реестра (docs/spec/subscriptions.md §7):
+  #   arch-be rules template apply consent-before-auto-action --ad AD-009 --dir .
+  #   arch-be rules template apply unknown-outcome-no-resend --ad AD-011 --dir .
+  #   arch-be rules template apply append-only-journal      --ad AD-010 --dir .
+  #   arch-be rules template apply idempotency-key          --ad AD-009 --dir .
+  # После применения печатается фрагмент правила со свободным C-NNN — он вносится сюда дельтой.
+  - name: subscriptions-adr-008
+    type: file_exists
+    path: docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelshchika.md
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: subscriptions-adr-009
+    type: file_exists
+    path: docs/adr/ADR-009-soglasie-platelshchika-zhiznennyy-cikl-i-otzyv.md
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: subscriptions-spec-present
+    type: file_exists
+    path: docs/spec/subscriptions.md
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: consent-debit-invariant-declared
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'Списание по согласию плательщика — только из действующего согласия'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: unknown-outcome-invariant-declared
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'Неопределённый исход регулярного списания не приводит к повторной отправке'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: mandate-series-idempotency-declared
+    type: must_contain
+    glob: "docs/spec/subscriptions.md"
+    pattern: 'occurrenceKey'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: mandate-nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'Двойное списание за один период серии'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: mandate-api-additive-present
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/mandates'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: adapter-mandate-ops-present
+    type: must_contain
+    glob: "docs/contracts/opkc-adapter.md"
+    pattern: 'registerMandate'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: mandate-no-debit-after-revoke
+    type: must_contain
+    glob: "docs/spec/subscriptions.md"
+    pattern: 'немедленный запрет новых списаний'
+    severity: warn
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: mandate-period-normalized
+    type: must_contain
+    glob: "docs/spec/subscriptions.md"
+    pattern: 'OCCURRENCE_OUT_OF_PERIOD'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: debit-no-inner-retry-in-adapter
+    type: must_contain
+    glob: "docs/contracts/opkc-adapter.md"
+    pattern: 'внутренний повтор в адаптере запрещён'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31

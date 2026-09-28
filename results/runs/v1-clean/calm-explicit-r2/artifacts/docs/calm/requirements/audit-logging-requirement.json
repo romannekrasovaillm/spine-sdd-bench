@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Audit logging requirement",
+  "description": "Требование AD-007: каждый финансовый переход в неизменяемом аудит-логе.",
+  "type": "object",
+  "properties": {
+    "immutable": { "type": "boolean" },
+    "coverage": { "type": "string" }
+  },
+  "required": ["immutable", "coverage"],
+  "additionalProperties": true
+}

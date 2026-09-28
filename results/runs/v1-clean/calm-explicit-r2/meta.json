@@ -1,0 +1,55 @@
+{
+  "condition": "calm-explicit",
+  "rep": 2,
+  "mode": "tui",
+  "session": "b-calm-explicit-r2",
+  "base_sha": "61bbbc0b4340d5d1ebe193574840fa2954123307",
+  "wall_s": 1200.7,
+  "turn_ok": true,
+  "records": 149,
+  "solver": "deepseek-v4-pro",
+  "judge": "glm-5.2",
+  "inventory": {
+    "project_skills": 1,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 100,
+  "tool_names": [
+    "edit",
+    "glob",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\tARCHITECTURE-SPINE.md",
+    "A\tchanges/recurring-c2b-consent/DELTA.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelshchika.md",
+    "A\tdocs/calm/recurring-c2b.architecture.json",
+    "A\tdocs/calm/requirements/audit-logging-requirement.json",
+    "A\tdocs/calm/requirements/consent-limit-requirement.json",
+    "A\tdocs/calm/requirements/credit-from-paid-requirement.json",
+    "A\tdocs/calm/requirements/idempotency-requirement.json",
+    "A\tdocs/calm/requirements/pii-minimization-requirement.json",
+    "A\tdocs/calm/url-mapping.json",
+    "A\tdocs/contracts/tsp-api-recurring.md",
+    "M\tdocs/nfr.md",
+    "A\tdocs/recurring-c2b-package.md",
+    "A\tdocs/spec/recurring-consent-state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

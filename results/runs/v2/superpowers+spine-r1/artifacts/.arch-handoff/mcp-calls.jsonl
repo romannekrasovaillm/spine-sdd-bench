@@ -1,0 +1,15 @@
+{"ts":"2026-09-28T14:31:53.975241651+03:00","tool":"significance_score","verdict":"ok","duration_ms":0,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:31:53.986705126+03:00","tool":"significance_from_diff","verdict":"ok","duration_ms":11,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:31:54.029489206+03:00","tool":"architect_review","verdict":"pass","duration_ms":42,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:31:54.033893668+03:00","tool":"rules_suggest","verdict":"ok","duration_ms":4,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:35:17.222594871+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:35:46.615001173+03:00","tool":"significance_score","verdict":"ok","duration_ms":0,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:37:09.863421103+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:37:14.774543398+03:00","tool":"contract_diff","verdict":"ok","duration_ms":0,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:40:17.195081978+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:41:20.396802466+03:00","tool":"delta_guard","verdict":"pass","duration_ms":7,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:41:20.409251284+03:00","tool":"significance_from_diff","verdict":"ok","duration_ms":12,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:41:57.579222313+03:00","tool":"spine_lint","verdict":"pass","duration_ms":1,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:42:01.270854096+03:00","tool":"rubric_list","verdict":"error","duration_ms":0,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:42:11.300339718+03:00","tool":"rubric_prompt","verdict":"ok","duration_ms":1,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T14:43:05.561592807+03:00","tool":"rubric_verify","verdict":"ok","duration_ms":8,"session_id":"539da80d8e3da051","host":"qwen-cli-mcp-client-spine","judging":{"target":"<HARNESS>/runs-v2/cells/wyku3ck/ws/reports/rubric/ADR-008-model-sbp-podpisok-mandat-soglasie-kak-suschnost-spisanie-kak-platyozh.json","rubric":"adr_quality","judge_model":"qwen-code","author_model":"qwen-code","independence":"none","session_calls_before":13}}

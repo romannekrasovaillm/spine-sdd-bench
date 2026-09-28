@@ -1,0 +1,164 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Контракт API ТСП. Версия 0.2.0 — аддитивное расширение 0.1.0 (подписки СБП, ADR-008):
+    добавлены методы мандата и опциональные поля платежа. Существующие методы, обязательные
+    поля и перечисление Payment.status не изменены — обратная совместимость в рамках /v1.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      summary: Регистрация согласия (подписки) плательщика
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      summary: Отзыв согласия; новые списания прекращаются
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отозвано (или уже отозвано)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        originationType:
+          type: string
+          description: Источник платежа; отсутствие поля трактуется как QR (обратная совместимость)
+          enum: [QR, MANDATE]
+          default: QR
+        mandateId:
+          type: string
+          description: Присутствует только для платежей по мандату (originationType=MANDATE)
+    MandateRequest:
+      type: object
+      required: [tspId, amountLimit, periodKind, scheduleAnchor, purpose]
+      properties:
+        tspId: {type: string}
+        payerRef: {type: string, description: Обезличенная ссылка на плательщика (токен ОПКЦ)}
+        amountLimit: {type: integer, description: Лимит на одно списание, копейки}
+        periodLimit: {type: integer, description: Лимит накопленной суммы за период, копейки}
+        periodKind: {type: string, enum: [DAY, MONTH]}
+        maxDebitsPerPeriod: {type: integer}
+        scheduleAnchor: {type: string, description: День/дата привязки расписания}
+        purpose: {type: string}
+        validUntil: {type: string, format: date-time}
+        redirectUrl: {type: string}
+    Mandate:
+      type: object
+      required: [mandateId, tspId, status, amountLimit, periodKind]
+      properties:
+        mandateId: {type: string}
+        tspId: {type: string}
+        status:
+          type: string
+          enum: [DRAFT, PENDING_CONFIRMATION, ACTIVE, SUSPENDED, EXPIRED, REVOKED, FAILED]
+        amountLimit: {type: integer}
+        periodLimit: {type: integer}
+        periodKind: {type: string, enum: [DAY, MONTH]}
+        maxDebitsPerPeriod: {type: integer}
+        scheduleAnchor: {type: string}
+        purpose: {type: string}
+        validUntil: {type: string, format: date-time}
+        opkcMandateRef: {type: string, description: Ссылка на согласие в ОПКЦ (сквозная для сверки)}
+        createdAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time, nullable: true}
+    Problem:
+      type: object
+      required: [title, status, code]
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}

@@ -1,0 +1,103 @@
+# Fitness-правила для `arch control check` (схема control::check) — дельта CHANGE-001 (СБП-подписки).
+# Этап: решение + дельта контрактов (до реализации). Правила кодируют guard-ы дельты:
+# AD-005 без исключений, отсутствие поломки контракта, отсутствие самовольной ратификации,
+# измеримость NFR, наличие критерия отката, запрет публикации пакета до A3.
+rules:
+  - name: adr-008-present
+    type: file_exists
+    path: docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-sbp-podpiski-reestr-mandatov.md
+    severity: error
+  - name: adr-008-not-ratified
+    type: must_contain
+    glob: "docs/adr/ADR-008-*.md"
+    pattern: 'Status: Proposed'
+    severity: error
+  - name: spine-ad-009-present
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009'
+    severity: error
+  - name: spine-ad-009-not-ratified
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'не ратифицировано'
+    severity: error
+  - name: abs-credit-only-from-paid-unchanged
+    type: must_contain
+    glob: "docs/adr/ADR-005-*.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: abs-credit-not-reachable-from-created
+    type: must_contain
+    glob: "docs/spec/state-machine.md"
+    pattern: 'Зачисление в АБС невозможно'
+    severity: error
+  - name: recurring-guard-invariant-present
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'periodKey'
+    severity: error
+  - name: contract-version-bumped
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: 'version: 0.2.0'
+    severity: error
+  - name: contract-legacy-paths-intact
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/payments/{paymentId}'
+    severity: error
+  - name: contract-payment-status-enum-not-extended
+    type: must_not_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: 'PENDING_CONSENT, ACTIVE, SUSPENDED, REVOKED, EXPIRED, CREATED'
+    severity: error
+  - name: nfr-delta-present
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'СБП-подписки'
+    severity: error
+  - name: nfr-delta-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'periodKey'
+    severity: error
+  - name: nfr-existing-target-preserved
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: change-package-rollback-criterion
+    type: must_contain
+    glob: "docs/changes/change-001-sbp-subscriptions.md"
+    pattern: 'Критерий успешного отката'
+    severity: error
+  - name: change-package-acceptance-negative-scenarios
+    type: must_contain
+    glob: "docs/changes/change-001-sbp-subscriptions.md"
+    pattern: 'A-12'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: no-unresolved-markers-in-delta-approval
+    type: must_not_contain
+    glob: "docs/changes/change-001-sbp-subscriptions.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+  - name: handoff-not-published-before-a3
+    type: must_contain
+    glob: ".arch-handoff/deltas/change-001-subscriptions/MANIFEST.json"
+    pattern: 'draft-awaiting-a3'
+    severity: error
+  - name: handoff-epic-context-present
+    type: file_exists
+    path: .arch-handoff/deltas/change-001-subscriptions/ARCHITECTURE.md
+    severity: error

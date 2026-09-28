@@ -1,0 +1,31 @@
+# План отката — изменение recurring-c2b-mandates (маршрут Critical)
+change: recurring-c2b-mandates
+baseline_commit: efcf42e        # якорь отката кода (последний коммит до работы исполнителя)
+code_rollback: "git reset --hard efcf42e"
+strategy: feature-flags + единый коммит исполнителя
+owner: solution-architect (платёжный контур) + дежурная смена
+
+pre_activation:
+  action: не включать фиче-флаги подписок
+  effect: изменение полностью обратимо; контракт v0.1 и существующие платежи не затронуты
+
+post_activation:
+  flags:
+    - name: subscriptions.enroll
+      off_effect: новые мандаты не принимаются
+    - name: subscriptions.charge
+      off_effect: новые списания не инициируются
+  steps:
+    - снять приём новых мандатов (subscriptions.enroll=off)
+    - остановить инициацию новых списаний (subscriptions.charge=off)
+    - довести начатые операции штатно (PAID -> CREDITED -> COMPLETED), проконтролировать сверкой
+    - откат релиза rolling; данные мандатов обратно не мигрируются
+    - аварийный разбор: DLQ -> runbook дежурной смены; сверка компенсирует пропущенное; RTO <= 1 ч
+  signals:
+    - любое двойное списание за период (нарушение AD-010)
+    - любое списание без ACTIVE-мандата (нарушение AD-009)
+    - доля UNKNOWN выше порога NFR или backlog сверх окна догона
+    - провал fitness-гейта A4 по AD-009/AD-010/AD-011
+
+rehearsal_required: true   # для маршрута Critical — до гейта A4
+details: changes/recurring-c2b-mandates/ACCEPTANCE.md#4

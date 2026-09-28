@@ -1,0 +1,201 @@
+{
+  "files": [
+    ".arch-handoff/recurring-c2b/ARCHITECTURE.md",
+    ".arch-handoff/recurring-c2b/CONSTRAINTS.yaml",
+    ".arch-handoff/recurring-c2b/MANIFEST.json",
+    ".arch-handoff/recurring-c2b/TASK.md",
+    ".arch-handoff/recurring-c2b/adr/ADR-008-recurring-c2b-mandate.md",
+    "ARCHITECTURE-SPINE.md",
+    "README.md",
+    "_bmad-output/planning-artifacts/architecture/architecture-ws-2026-09-28/.memlog.md",
+    "changes/recurring-c2b/DELTA.md",
+    "docs/adr/ADR-008-recurring-c2b-mandate.md",
+    "docs/change/recurring-c2b-change-package.md",
+    "docs/contracts/opkc-adapter.md",
+    "docs/contracts/tsp-api.md",
+    "docs/nfr.md",
+    "docs/rfp/vendor-rfp.md",
+    "docs/solutioning.md",
+    "docs/spec/state-machine.md",
+    "openapi/tsp-api.yaml"
+  ],
+  "sensors": {
+    "chars": 142225,
+    "significance_route": true,
+    "invariant_AD005_ref": true,
+    "alternatives": true,
+    "negative_consequences": true,
+    "reversibility": true,
+    "rollback": true,
+    "acceptance": true,
+    "nfr_numeric": true,
+    "human_decision": true,
+    "placeholders": 10,
+    "adr_files": 2
+  },
+  "deterministic": {
+    "spine_gate_exit": 0,
+    "spine_gate_route": "Fast",
+    "spine_gate_fails": [],
+    "spine_gate_tail": "Гейт: .\nМаршрут: Fast (auto: score 1 (api_contract_change))\n  [PASS] fitness * — Правил: 7, нарушений: 0 (error: 0, warn: 0); реестр: 7 правил (error: 5), отпечаток 72d0bf4f — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] delta_guard — изменённых файлов: 18, защищённых среди них: 1 — покрытие: ARCHITECTURE-SPINE.md ← 'recurring-c2b'\n  [PASS] rule_weakened — реестр правил не ослаблен относительно bench-baseline — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] spine_lint * — находок: 0 (error: 0)\n  [SKIP] trace_check — нет каталога model/\n  [SKIP] model_validate — нет каталога model/\n  [SKIP] decision_quality — не включена: добавьте 'decision_quality' в [gate.required] нужного маршрута\n  [SKIP] semantic_quality — не включена: добавьте 'semantic_quality' в [gate.required] нужного маршрута\nИтог: PASS\nАттестация вердикта: sha256:1ed5b0769bf3c7079733a7730c8b58b359c824d2bd09938dea46bea716fd9c2d\n",
+    "spine_gate_base": "bench-baseline",
+    "spine_gate_skips": [
+      "decision_quality",
+      "model_validate",
+      "semantic_quality",
+      "trace_check"
+    ],
+    "invariants": {
+      "modified": [
+        "AD-008"
+      ],
+      "removed": [],
+      "added": [
+        "AD-009",
+        "AD-010"
+      ]
+    },
+    "contract_changed": true,
+    "contract_breaking": 0,
+    "contract_nonbreaking": 4,
+    "contract_tail": "contract_diff: 4 изменений (breaking: 0, non-breaking: 4)\nФормат: openapi[warn] #/paths/~1v1~1mandates CD-005 — добавлен путь «/v1/mandates»\n[warn] #/paths/~1v1~1mandates~1{mandateId} CD-005 — добавлен путь «/v1/mandates/{mandateId}»\n[warn] #/paths/~1v1~1mandates~1{mandateId}~1payments CD-005 — добавлен путь «/v1/mandates/{mandateId}/payments»\n[warn] #/paths/~1v1~1mandates~1{mandateId}~1revoke CD-005 — добавлен путь «/v1/mandates/{mandateId}/revoke»\nИтог: PASS\n",
+    "protected_touched": [
+      "ARCHITECTURE-SPINE.md"
+    ],
+    "delta_dirs": [
+      "recurring-c2b"
+    ]
+  },
+  "gate_class": "PASS_DELTA",
+  "hook_blocks": 0,
+  "contamination": [
+    "<HOME>/.arch-ml/worktrees/spine-aiml-consolidation/docs/control.md\\n<HOME>/.arch-ml/worktrees/sanitize-ad7/docs/control.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/s4-addr/docs/control.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/grounded-probe/docs/control.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/sft-v13-arm/docs/control.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/laguna-fleet-2/docs/control.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/sft-decode-diagnosis/docs/control.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/laguna-passrate-probe/docs/control.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/laguna-lr-sensitivity/docs/control.md\\n<HOME>/.arch-ml/worktrees/spine-aiml-a366f5f2a510b02d/laguna-mix-lr-calibration/docs/control.md\\n===",
+    "<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-06-onboarding-ensemble-502f9f0f3f8e036f-onb-dev-kyc\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-fleet-control-b9609f9980be3aec-streaming\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-dev-work-c0fb273928986d8c-claude-code-20260905090621\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-06-onboarding-ensemble-502f9f0f3f8e036f-onb-dev-workflow\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-handoff-demo-ed8d10551962794e-claude-code-20260904115414\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-arch-mcp-parallel-835e3d3ae5a654eb-p1-amount\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-arch-mcp-parallel-835e3d3ae5a654eb-p2-logfmt\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-llm-platform-ada7f60c87876315-claude-code-20260902160817\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-mortgage-marketplace-913a36462812d580-claude-code-20260909101105\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-spine-bank-42b7c6db0c05a788-port-failure-memory",
+    "<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-06-onboarding-ensemble-502f9f0f3f8e036f-onb-dev-kyc\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-fleet-control-b9609f9980be3aec-streaming\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-dev-work-c0fb273928986d8c-claude-code-20260905090621\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-06-onboarding-ensemble-502f9f0f3f8e036f-onb-dev-workflow\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-handoff-demo-ed8d10551962794e-claude-code-20260904115414\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-arch-mcp-parallel-835e3d3ae5a654eb-p1-amount\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-arch-mcp-parallel-835e3d3ae5a654eb-p2-logfmt\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-llm-platform-ada7f60c87876315-claude-code-20260902160817\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-mortgage-marketplace-913a36462812d580-claude-code-20260909101105\\n<HOME>/.cache/claude-cli-nodejs/-home-roman--arch-harness-worktrees-spine-bank-42b7c6db0c05a788-port-failure-memory\\nError",
+    "<HOME>/.local/bin/arch",
+    "<HOME>/.local/bin/arch\\nError",
+    "<SPINE_BANK>",
+    "<SPINE_BANK>/",
+    "<SPINE_BANK>/docs/control.md",
+    "<SPINE_BANK>/src",
+    "<SPINE_BANK>/src/",
+    "<SPINE_BANK>/target/release/arch-be\\n<SPINE_BANK>/target/release/arch-be"
+  ],
+  "decision_doc": "docs/adr/ADR-008-recurring-c2b-mandate.md",
+  "spine_visible": true,
+  "judge_token": "af1a12d6",
+  "dossier": {
+    "included": [
+      "docs/adr/ADR-008-recurring-c2b-mandate.md",
+      "changes/recurring-c2b/DELTA.md",
+      "docs/solutioning.md"
+    ],
+    "omitted": [
+      "output/planning-artifacts/architecture/architecture-ws-2026-09-28/.memlog.md",
+      "docs/nfr.md",
+      "docs/contracts/opkc-adapter.md",
+      "docs/contracts/tsp-api.md",
+      "openapi/tsp-api.yaml",
+      "docs/spec/state-machine.md",
+      "ARCHITECTURE-CORE.md",
+      ".arch-handoff/recurring-c2b/ARCHITECTURE.md",
+      ".arch-handoff/recurring-c2b/CONSTRAINTS.yaml",
+      ".arch-handoff/recurring-c2b/MANIFEST.json",
+      ".arch-handoff/recurring-c2b/TASK.md",
+      ".arch-handoff/recurring-c2b/adr/ADR-008-recurring-c2b-mandate.md",
+      "README.md",
+      "docs/change/recurring-c2b-change-package.md",
+      "docs/rfp/vendor-rfp.md"
+    ],
+    "truncated": [
+      "docs/adr/ADR-008-recurring-c2b-mandate.md",
+      "changes/recurring-c2b/DELTA.md",
+      "docs/solutioning.md"
+    ],
+    "chars": 11412
+  },
+  "judge": {
+    "solution_architecture": {
+      "total": 3.9,
+      "decision": "pass",
+      "criteria": {
+        "enterprise_scope": 4,
+        "architecture_solutioning": 4,
+        "workflow_executability": 4,
+        "validation": 4,
+        "governance_audit": 4,
+        "sdd_contract": 4,
+        "human_decision_control": 3,
+        "risk_adaptive_autonomy": 5,
+        "discovery_framing": 3,
+        "nfr_tradeoffs": 3,
+        "brownfield": 5,
+        "portability": 3,
+        "org_transformation": 4,
+        "cross_team_governance": 4,
+        "low_entry_cost": 4
+      },
+      "flags": {},
+      "independence": null,
+      "unjudged": 0,
+      "exit": 0,
+      "parts": {
+        "solution_architecture_part_a": {
+          "total": 4.0,
+          "decision": "pass",
+          "exit": 0,
+          "unjudged": 0,
+          "raw": "осчитана по именованным триггерам (5/15 для изменения, 11/15 для базового solutioning) и маршрут обоснован объёмом процесса; для значимого решения оценены обратимость («до боевого включения откат = не включать (reversible)») и blast radius («не затрагивает существующий QR-поток и уже открытые мандаты»), сигналы отката перечислены явно (списание без согласия, дубль, расхождение статусов с НСПК). |\n\n**Взвешенный итог:** 4.00/5\n**Вердикт:** Главный риск — критическая внешняя зависимость от непроверенного протокола НСПК ([ТРЕБУЕТ ПРОВЕРКИ]) и нератифицированного ADR-008, до которого инварианты AD-009/AD-010 не действуют: решение готово к архитектурному гейту, но не к старту реализации. Ядро архитектуры зрело — компоненты, версионированные контракты, негативная приёмка и риск-маршрутизация по значимости проработаны, пробелы локальны (владельцы стыков, evidence bundle, machine-readable точка решения).\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 18:27:48\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_a-20260928-182748.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-af1a12d6.json\n"
+        },
+        "solution_architecture_part_b": {
+          "total": 3.68,
+          "decision": "pass",
+          "exit": 0,
+          "unjudged": 0,
+          "raw": "ашина, единственный адаптер ОПКЦ, сага зачисления), новых компонентов и trust-зон не вводится (\"новых trust-зон и компонентов нет\"), API развивается аддитивно (v0.1→v0.2 без breaking changes), новая сущность (мандат) обоснована как новый доменный объект. Стоимость старта и владения в видимом тексте не оценена численно — 4. |\n\n**Взвешенный итог:** 3.68/5\n**Вердикт:** Главный риск — неизмеримость результата и NFR-бюджетов в самом досье: метрика успеха и цена бездействия не зафиксированы, NFR и стоимость вынесены в исключённые из досье документы, а ключевой внешний вход (регламент рекуррентных списаний НСПК) помечен [ТРЕБУЕТ ПРОВЕРКИ]. Ядро решения дисциплинированно — переиспользование ADR-001..007, guard-проверки до финансового действия, идемпотентность, сосуществование с QR-потоком и обратимость, — и готово к архитектурному гейту после закрытия пробелов по метрикам, NFR-бюджетам и протоколу НСПК.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 18:56:30\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_b-20260928-185630.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-af1a12d6.json\n"
+        }
+      },
+      "raw": "{\"solution_architecture_part_a\": {\"total\": 4.0, \"decision\": \"pass\", \"exit\": 0, \"unjudged\": 0, \"raw\": \"осчитана по именованным триггерам (5/15 для изменения, 11/15 для базового solutioning) и маршрут обоснован объёмом процесса; для значимого решения оценены обратимость («до боевого включения откат = не включать (reversible)») и blast radius («не затрагивает существующий QR-поток и уже открытые мандаты»), сигналы отката перечислены явно (списание без согласия, дубль, расхождение статусов с НСПК). |\\n\\n**Взвешенный итог:** 4.00/5\\n**Вердикт:** Главный риск — критическая внешняя зависимость от непроверенного протокола НСПК ([ТРЕБУЕТ ПРОВЕРКИ]) и нератифицированного ADR-008, до которого инварианты AD-009/AD-010 не действуют: решение готово к архитектурному гейту, но не к старту реализации. Ядро архитектуры зрело — компоненты, версионированные контракты, негативная приёмка и риск-маршрутизация по значимости проработаны, пробелы локальны (владельцы стыков, evidence bundle, machine-readable точка решения).\\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\\n**Дата:** 2026-09-28 18:27:48\\n\\nРешение рубрики: годно (pass) — код выхода 0\\n\\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_a-20260928-182748.md\\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-af1a12d6.json\\n\"}, \"solution_architecture_part_b\": {\"total\": 3.68, \"decision\": \"pass\", \"exit\": 0, \"unjudged\": 0, \"raw\": \"ашина, единственный адаптер ОПКЦ, сага зачисления), новых компонентов и trust-зон не вводится (\\\"новых trust-зон и компонентов нет\\\"), API развивается аддитивно (v0.1→v0.2 без breaking changes), новая сущность (мандат) обоснована как новый доменный объект. Стоимость старта и владения в видимом тексте не оценена численно — 4. |\\n\\n**Взвешенный итог:** 3.68/5\\n**Вердикт:** Главный риск — неизмеримость результата и NFR-бюджетов в самом досье: метрика успеха и цена бездействия не зафиксированы, NFR и стоимость вынесены в исключённые из досье документы, а ключевой внешний вход (регламент рекуррентных списаний НСПК) помечен [ТРЕБУЕТ ПРОВЕРКИ]. Ядро решения дисциплинированно — переиспользование ADR-001..007, guard-проверки до финансового действия, идемпотентность, сосуществование с QR-потоком и обратимость, — и готово к архитектурному гейту после закрытия пробелов по метрикам, NFR-бюджетам и протоколу НСПК.\\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\\n**Дата:** 2026-09-28 18:56:30\\n\\nРешение рубрики: годно (pass) — код выхода 0\\n\\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_b-20260928-185630.md\\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-af1a12d6.json\\n\"}}"
+    },
+    "architecture_gates": {
+      "total": 3.5,
+      "decision": "pass",
+      "criteria": {
+        "a0_architecture_fit": 4,
+        "a1_impact_assessment": 4,
+        "a2_solutioning_trigger": 3,
+        "a3_human_decision": 3,
+        "a4_conformance_evidence": 4,
+        "a5_drift_check": 3
+      },
+      "flags": {},
+      "independence": "launched_cross_family",
+      "unjudged": 0,
+      "exit": 0,
+      "raw": "и укладка показана попринципно: переиспользование outbox, статусной машины, идемпотентности, зачисление только из PAID (AD-005/AD-010); новый доменный объект (мандат) честно обозначен как отсутствующий в принятом решении и выведен на ратификацию через ADR-008, а не проведён молча. До 5 не дотягивает: нет признаков автоматической проверки укладки и формального architecture exception со сроком. |\n| a1_impact_assessment | 2.00 | 4 |  | Цитата: \"Владелец решения — архитектор + дежурная смена (SRE) + ИБ. RTO ≤ 1 ч.\". Затронутые системы перечислены (ОПКЦ/НСПК, Банк России, АБС, антифрод/AML, SIEM, отчётность), владельцы названы (solution-architect + бизнес + ИБ/комплаенс + SRE), последствия отказа оценены («ошибка… — финансовое и регуляторное нарушение»), reversibility с границами blast radius описана (QR-поток и открытые мандаты не затрагиваются). До 5 не хватает: полная карта влияния и оценка стоимости вынесены в файлы пакета §2/§6, исключённые из досье, а стоимость лишь качественная («costly»). |\n| a2_solutioning_trigger | 1.00 | 3 |  | Цитата: \"Route: Critical — полное Solutioning (пакет `docs/change/recurring-c2b-change-package.md`, ADR-008); Significance Score 5/15 (api_contract_change, data_contract_change, consistency_model_change, significant_nfr, financial_impact)\". Триггеры значимости посчитаны, поименованы и записаны, маршрут назначен явно. Но нигде не показан порог маршрутизации Fast/Standard/Critical, заданный человеком ДО оценки: score 5/15 → Critical выглядит назначенным сверху, а не следствием предзаданного порога; настораживает и расхождение с 11/15 в solutioning.md без объяснения правил пересчёта. |\n| a3_human_decision | 3.00 | 3 |  | Цитата: \"Status: Proposed (выносится на архитектурное решение; до ратификации инварианты AD-009/AD-010 не действуют)\". Гейт человеческого решения реален и один (ратификация ADR-008), не резиновый штамп, и фактически блокирующий — до ратификации новые инварианты не активны, что исключает решение задним числом. Но само решение ещё не принято и не записано структурно: отсутствуют machine-readable choice, rejected options и expiry; отвергнутые варианты видны лишь обрывком таблицы с kill criteria, срок актуальности не указан. |\n| a4_conformance_evidence | 2.00 | 4 |  | Цитата: \"Зачисление по мандатному платежу из `CREATED` недостижимо (fitness)\". Проверки привязаны к конкретным инвариантам (AD-003 идемпотентность, AD-005/AD-010 зачисление из PAID, AD-002/AD-007 транзакционность), названы fitness function и контрактный тест (\"Регресс QR-потока и contract-compat test v0.1→v0.2 без breaking changes\"), есть гейты G8/POC P9–P10. До 5 не хватает: нет явного условия «выпуск невозможен без собранного evidence bundle», критерии приёмки пока не выполнены (пустые чекбоксы), а NFR-доказательства вынесены в исключённые из досье файлы. |\n| a5_drift_check | 1.00 | 3 |  | Цитата: \"Сигналы: списание без действующего согласия, дубль, расхождение статусов мандатов с НСПК, провал испытаний НСПК.\". Дрейф-сигналы определены, владелец назначен (SRE), сверка с НСПК/АБС заложена как компонент (RECON) и продолжается после отключения фичи. Однако это операционная сверка состояний, а не непрерывный контроль дрейфа архитектуры: нет триггеров по расписанию/тренду, сравнения спека↔код по графу архитектуры и фиксации расхождения как дефекта. |\n\n**Взвешенный итог:** 3.50/5\n**Вердикт:** Главные риски — A2 и A3: маршрут Critical назначен при score 5/15 без предзаданного порога маршрутизации, а обязательное человеческое решение по ADR-008 ещё не зафиксировано структурно (нет choice/rejected options/expiry). Решение зрело по контенту, но к выпуску не готово: ратификация ADR-008 и сбор evidence bundle по критериям приёмки — обязательные предусловия.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 18:59:03\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-architecture_gates-20260928-185903.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-af1a12d6.json\n",
+      "attempts": 1
+    },
+    "neutral_architecture": {
+      "total": 3.89,
+      "decision": "pass",
+      "criteria": {
+        "drivers": 4,
+        "options": 2,
+        "rationale": 4,
+        "consequences": 4,
+        "impact_on_existing": 5,
+        "interface_compatibility": 4,
+        "measurable_quality": 3,
+        "verification_rollback": 5,
+        "open_questions": 4
+      },
+      "flags": {},
+      "independence": "launched_cross_family",
+      "unjudged": 0,
+      "exit": 0,
+      "raw": "без затрагивания QR-потока). Однако адресаты выгод и издержек («для кого») названы не везде, что не дотягивает до 5. |\n| impact_on_existing | 3.00 | 5 |  | Цитата: \"Что уже есть в принятом решении и переиспользуется: выделенный СБП-шлюз с транзакционным outbox (ADR-001), конечный автомат платежа с идемпотентностью (ADR-002), единственный адаптер ОПКЦ (ADR-003, ADR-004), зачисление только по подтверждённому статусу и возвраты-сага (ADR-005)\". Явный перечень поимённо: что переиспользуется (ADR-001..007, AD-007), что изменяется (API ТСП v0.2 аддитивно, адаптер ОПКЦ v0.2, путь дебета без QR_ISSUED, новые AD-009/AD-010) и что сознательно не затрагивается — «инварианты AD-001..AD-008 не ослаблены (см. пакет §2); новых trust-зон и компонентов нет». |\n| interface_compatibility | 3.00 | 4 |  | Цитата: \"Контракты: API ТСП v0.2 (аддитивно), адаптер ОПКЦ v0.2 (мандатные методы/события); RFP — gate G8, POC P9–P10\". Версионирование явное (v0.1→v0.2), аддитивность заявлена, ломающего изменения нет и это закреплено проверяемым критерием «Регресс QR-потока и contract-compat test v0.1→v0.2 без breaking changes». Однако поведение существующих потребителей ТСП при переходе на v0.2 описано лишь имплицитно (через аддитивность), а семантика новых вебхуков mandate.* для старых клиентов не разобрана — потому не 5. |\n| measurable_quality | 3.00 | 3 |  | Цитата: \"Сигналы: списание без действующего согласия, дубль, расхождение статусов мандатов с НСПК, провал испытаний НСПК. Владелец решения — архитектор + дежурная смена (SRE) + ИБ. RTO ≤ 1 ч.\". Измеримы только отдельные требования: RTO ≤ 1 ч, at-least-once доставка вебхуков, параметризованные лимиты (maxAmountPerDebit, maxTotalAmount, maxDebitsPerPeriod — без значений). Основные NFR вынесены в docs/nfr.md §7, который исключён из досье; условия измерения (нагрузка, перцентили, доступность) в видимом тексте отсутствуют. |\n| verification_rollback | 3.00 | 5 |  | Цитата: \"при необходимости — массовый отзыв мандатов по runbook. Данные обратной миграции не требуют (мандат — новый объект)\". Исполнимый план отката с условием срабатывания (сигналы: списание без согласия, дубль, расхождение статусов, провал испытаний НСПК), ответственным (архитектор + SRE + ИБ) и метрикой RTO ≤ 1 ч; фиче-флаг и поэтапность (до включения откат = не включать) делают откат реальным. Приёмка — 8 проверяемых критериев: «Повтор `POST …/payments` с тем же `Idempotency-Key` → тот же `paymentId`, второго списания и расхода лимита нет», гонки, fitness AD-005, регресс QR-потока. |\n| open_questions | 3.00 | 4 |  | Цитата: \"Внешний вход: точный протокол рекуррентных списаний НСПК (формат мандата, канал подтверждения плательщиком, лимиты, тайминги, события) — `[ТРЕБУЕТ ПРОВЕРКИ]`\". Нерешённое вынесено явно и системно (маркеры ТРЕБУЕТ ПРОВЕРКИ), указана причина нерешённости (протокол получается по договору с НСПК, публично не раскрыт) и что блокируется (формат мандата, канал подтверждения, лимиты, тайминги). Статус «Proposed (выносится на архитектурное решение; до ратификации инварианты AD-009/AD-010 не действуют)» прямо называет блокируемое решение; но адресат-роль для получения протокола НСПК по каждому вопросу не назван отдельно — поэтому 4, не 5. |\n\n**Взвешенный итог:** 3.89/5\n**Вердикт:** Главный риск — решение опирается на непроверенный внешний вход: точный протокол рекуррентных списаний НСПК помечен [ТРЕБУЕТ ПРОВЕРКИ], а сам ADR-008 ещё не ратифицирован, при этом ключевые разделы (варианты, Decision, NFR) в досье усечены или исключены, что не позволяет проверить сравнение альтернатив и измеримость требований. Пакет готов к вынесению на архитектурный гейт: влияние на существующие решения, совместимость контрактов, приёмка и откат проработаны на высоком уровне.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 19:13:09\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-neutral_architecture-20260928-191309.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-af1a12d6.json\n",
+      "attempts": 2
+    }
+  },
+  "judge_model": "glm-5.3"
+}

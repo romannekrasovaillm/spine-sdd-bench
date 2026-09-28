@@ -1,0 +1,66 @@
+# Fitness-правила для `arch control check` / `arch gate` (схема control::check).
+# Пакет дельты: рекуррентные C2B-списания СБП (Critical).
+# Этап: решение + спека (до кода). Поведенческие правила добавляются на кодовом этапе
+# (после выбора стека) — шаблоны: `arch-be rules template`.
+rules:
+  - name: adr-008-present
+    type: file_exists
+    path: docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-soglasie-platelschika-kak-preduslovie-i-model-ispolneniya-spisaniy.md
+    severity: error
+  - name: adr-009-present
+    type: file_exists
+    path: docs/adr/ADR-009-transport-podpisok-sbp-oblast-vendorskogo-adaptera-opkc.md
+    severity: error
+  - name: spec-delta-present
+    type: file_exists
+    path: openspec/changes/add-sbp-recurring-payments/specs/sbp-recurring-payments/spec.md
+    severity: error
+  - name: spine-consent-invariant
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009'
+    severity: error
+  - name: spine-revocation-invariant
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-010'
+    severity: error
+  - name: spine-charge-idempotency-invariant
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-011'
+    severity: error
+  - name: contract-consents-path
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/consents'
+    severity: error
+  - name: contract-version-bumped
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: 'version: 0.2.0'
+    severity: error
+  - name: adr-008-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/ADR-008-*.md"
+    pattern: '<!--'
+    severity: error
+  - name: adr-009-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/ADR-009-*.md"
+    pattern: '<!--'
+    severity: error
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+
+# Поведенческие правила кодового этапа (обязательные к добавлению после выбора стека):
+#   - AD-009: попытка списания при REVOKED/EXPIRED/SUSPENDED/PENDING_PAYER или сверх лимита
+#     не создаёт записи о списании и не вызывает ОПКЦ/АБС;
+#   - AD-010: отзыв до подтверждения ОПКЦ блокирует попытку; отзыв после подтверждения
+#     приводит к компенсирующему возврату;
+#   - AD-011: повтор попытки/нотификации → ровно одно списание и одно зачисление;
+#   - AD-005: зачисление недостижимо вне состояния PAID;
+#   - контракт: `arch-be contract-diff <v0.1.0> openapi/tsp-api.yaml` без ломающих изменений.

@@ -1,0 +1,55 @@
+{
+  "condition": "bmad+spine",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-bmad+spine-r1",
+  "base_sha": "3e4573e1c29fd78aee86cd97b989b72b9d4901ba",
+  "wall_s": 393.2,
+  "turn_ok": true,
+  "records": 107,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 95,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 78,
+  "tool_names": [
+    "edit",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "tool_call",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "M\t.qwen/settings.json",
+    "M\tARCHITECTURE-SPINE.md",
+    "A\tchanges/CHG-001-recurrent-c2b/ACCEPTANCE.md",
+    "A\tchanges/CHG-001-recurrent-c2b/CONTRACT-DELTA.md",
+    "A\tchanges/CHG-001-recurrent-c2b/DELTA.md",
+    "A\tchanges/CHG-001-recurrent-c2b/IMPACT.md",
+    "A\tchanges/CHG-001-recurrent-c2b/NFR-DELTA.md",
+    "A\tchanges/CHG-001-recurrent-c2b/OPEN-QUESTIONS.md",
+    "A\tchanges/CHG-001-recurrent-c2b/SIGNIFICANCE.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp-mandat-platelshchika.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "condition": "openspec",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-openspec-r1",
+  "base_sha": "50b52b3ef5267ac92f46fb7600609de325da75a8",
+  "wall_s": 524.3,
+  "turn_ok": true,
+  "records": 105,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 6,
+    "extension_skills": 0,
+    "commands": 6,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 60,
+  "tool_names": [
+    "edit",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "A\t.arch-handoff/subscriptions/ARCHITECTURE.md",
+    "A\t.arch-handoff/subscriptions/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/subscriptions/MANIFEST.json",
+    "A\t.arch-handoff/subscriptions/TASK.md",
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/rfp/vendor-rfp.md",
+    "M\tdocs/solutioning.md",
+    "M\topenapi/tsp-api.yaml",
+    "A\topenspec/changes/add-sbp-recurring-subscriptions/.openspec.yaml",
+    "A\topenspec/changes/add-sbp-recurring-subscriptions/design.md",
+    "A\topenspec/changes/add-sbp-recurring-subscriptions/proposal.md",
+    "A\topenspec/changes/add-sbp-recurring-subscriptions/specs/sbp-subscriptions/spec.md",
+    "A\topenspec/changes/add-sbp-recurring-subscriptions/tasks.md"
+  ]
+}

@@ -1,0 +1,8 @@
+$ arch-be rules template verify --dir . --lang python
+
+# Проверка зубов шаблонов
+
+Проверок: 1 (провалено: 0), пропусков: 1, находок: 0
+
+✓ consent-before-auto-action [python] violating (ожидание FAIL): код 1: FAILED skeleton/rule_templates/consent-before-auto-action/test_consent_before_auto_action.py::test_action_without_consent_is_not_created | FAILED skeleton/rule_templates/consent-before-auto-action/test_consent_before_auto_action.py::test_re…
+· пропуск — idempotency-key (AD-3): адаптирован — проверка зубов неприменима, проверьте вручную (правила 'idempotency_key_enforced' нет в реестре)

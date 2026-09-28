@@ -1,0 +1,129 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+  # --- Рекуррентные списания (подписки СБП): изменение sbp-recurring-consent ---
+  - name: recurring-spec-present
+    type: file_exists
+    path: docs/spec/consent-state-machine.md
+    severity: error
+    rationale: "спецификация согласия и попыток списания — вход реализации подписок"
+    ad: AD-009
+    adr: ADR-008
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-03-31
+    fix_hint: "создать docs/spec/consent-state-machine.md по ADR-008"
+    skill: delta-spec
+  - name: recurring-adr-present
+    type: file_exists
+    path: docs/adr/ADR-008-soglasie-platelshchika-agregat-platyozhnogo-kontura-podpiski-sbp.md
+    severity: error
+    rationale: "решение о модели согласия зафиксировано до реализации"
+    ad: AD-009
+    adr: ADR-008
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-03-31
+    fix_hint: "зафиксировать ADR-008 (запись решения до реализации)"
+    skill: adr-authoring
+  - name: recurring-consent-active-only
+    type: must_contain
+    glob: "docs/spec/consent-state-machine.md"
+    pattern: 'согласие не в состоянии `ACTIVE`'
+    severity: error
+    rationale: "списание без действующего согласия — финансовое и регуляторное нарушение"
+    ad: AD-009
+    adr: ADR-008
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-03-31
+    fix_hint: "вернуть в спецификацию критерий приёмки «нет согласия → нет списания»"
+    skill: idempotent-consumer
+  - name: recurring-attempt-id
+    type: must_contain
+    glob: "docs/spec/consent-state-machine.md"
+    pattern: 'attemptId = \(mandateId, periodStart\)'
+    severity: error
+    rationale: "детерминированный ключ попытки — защита от двойного списания при рестарте планировщика"
+    ad: AD-003
+    adr: ADR-009
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-03-31
+    fix_hint: "зафиксировать правило attemptId в спецификации согласия"
+    skill: transactional-outbox
+  - name: recurring-revocation-priority
+    type: must_contain
+    glob: "docs/spec/consent-state-machine.md"
+    pattern: 'блокирует инициацию новых списаний'
+    severity: error
+    rationale: "после отзыва согласия новые списания недопустимы"
+    ad: AD-010
+    adr: ADR-010
+    owner: solution-architect (платёжный контур) + комплаенс
+    expiry: 2027-03-31
+    fix_hint: "описать приоритет отзыва в спецификации согласия"
+    skill: idempotent-consumer
+  - name: recurring-no-fallback
+    type: must_contain
+    glob: "docs/spec/consent-state-machine.md"
+    pattern: 'не «слепой» повтор|не отменяет уже ушедшие деньги'
+    severity: warn
+    rationale: "неудавшееся списание не подменяется другим каналом и не отменяет уже ушедшие деньги"
+    ad: AD-009
+    adr: ADR-009
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-03-31
+    fix_hint: "описать запрет fallback и порядок разрешения неизвестного исхода (сверка)"
+    skill: avoiding-fallback
+  - name: recurring-nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'Двойные списания за период'
+    severity: error
+    rationale: "у нового функционала должны быть измеримые NFR, а не «работает корректно»"
+    ad: AD-009
+    adr: ADR-009
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-03-31
+    fix_hint: "добавить раздел NFR рекуррентных списаний с числами"
+    skill: nfr-design
+  - name: ears_acceptance_criteria
+    type: must_contain
+    glob: "docs/**/*.md"
+    pattern: '(?m)^\s*[-*]?\s*\**\s*(When|While|If|Where)\b'
+    severity: warn
+    rationale: "критерии приёмки без EARS-формы непроверяемы формально"
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-06-30
+    fix_hint: "переписать критерии приёмки в EARS-нотации (When/While/If/Where)"
+    skill: readiness-gate

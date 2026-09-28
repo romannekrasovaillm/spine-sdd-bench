@@ -1,0 +1,57 @@
+{
+  "condition": "openspec+spine",
+  "rep": 3,
+  "mode": "tui",
+  "session": "b-openspec+spine-r3",
+  "base_sha": "725b75ac4be9a0270dfdfccf3421cce593f988d2",
+  "wall_s": 563.8,
+  "turn_ok": true,
+  "records": 137,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 72,
+    "extension_skills": 0,
+    "commands": 6,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 84,
+  "tool_names": [
+    "edit",
+    "glob",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "tool_call",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "M\t.qwen/settings.json",
+    "M\tARCHITECTURE-SPINE.md",
+    "A\tchanges/add-sbp-subscriptions/DELTA.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-soglasie-kak-vtoroy-agregat-platyozhnogo-kontura.md",
+    "A\tdocs/adr/ADR-009-idempotentnost-i-semantika-otzyva-soglasiya-pri-rekurrentnyh-spisaniyah.md",
+    "M\topenapi/tsp-api.yaml",
+    "A\topenspec/changes/add-sbp-subscriptions/.openspec.yaml",
+    "A\topenspec/changes/add-sbp-subscriptions/design.md",
+    "A\topenspec/changes/add-sbp-subscriptions/proposal.md",
+    "A\topenspec/changes/add-sbp-subscriptions/specs/sbp-recurring-payments/spec.md",
+    "A\topenspec/changes/add-sbp-subscriptions/specs/tsp-merchant-api/spec.md",
+    "A\topenspec/changes/add-sbp-subscriptions/tasks.md"
+  ]
+}

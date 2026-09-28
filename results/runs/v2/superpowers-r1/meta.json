@@ -1,0 +1,52 @@
+{
+  "condition": "superpowers",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-superpowers-r1",
+  "base_sha": "89d779b4bf08dda416b4d9c35846f96c1b8ea324",
+  "wall_s": 878.5,
+  "turn_ok": true,
+  "records": 182,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 0,
+    "extension_skills": 15,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 100,
+  "tool_names": [
+    "edit",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "run_skill",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tchanges/sbp-subscriptions/DELTA.md",
+    "A\tchanges/sbp-subscriptions/design.md",
+    "A\tdocs/adr/ADR-008-sbp-subscriptions-mandates-scheduler.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/solutioning.md",
+    "M\tdocs/spec/state-machine.md",
+    "A\tdocs/spec/subscription-model.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

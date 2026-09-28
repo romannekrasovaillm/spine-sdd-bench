@@ -1,0 +1,163 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Мерчант-API СБП-шлюза. v0.2.0 — аддитивное расширение v0.1.0: согласия плательщика
+    (mandates) и рекуррентные C2B-списания (ADR-008, ADR-009). Существующие операции и
+    enum Payment.status не изменены; новые поля опциональны.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отозвано (списания запрещены)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/debits:
+    post:
+      operationId: createRecurringDebit
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitRequest'}
+      responses:
+        '201':
+          description: Рекуррентное списание зарегистрировано как платёж
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        mandateId: {type: string, description: 'ADR-008: согласие, по которому создано рекуррентное списание (только для подписок)'}
+        billingPeriod: {type: string, description: 'ADR-008/ADR-009: период обязательства, напр. 2026-10; часть ключа дедупликации (mandateId, billingPeriod)'}
+        paymentType:
+          type: string
+          enum: [ONE_TIME, RECURRING]
+          description: 'Тип платежа; по умолчанию ONE_TIME (обратная совместимость)'
+    MandateRequest:
+      type: object
+      required: [tspId, payerRef, period]
+      properties:
+        tspId: {type: string}
+        payerRef: {type: string, description: 'Идентификатор плательщика для подтверждения согласия (минимизирован, ПДн)'}
+        period: {type: string, enum: [WEEK, MONTH, YEAR], description: Периодичность списаний}
+        maxAmountPerDebit: {type: integer, description: 'Лимит суммы одного списания, копейки'}
+        maxAmountPerPeriod: {type: integer, description: 'Лимит суммы за период, копейки'}
+        paymentPurpose: {type: string}
+        notificationLeadHours: {type: integer, description: 'Требуемый lead time предуведомления, часы [ТРЕБУЕТ ПРОВЕРКИ: регламент НСПК]'}
+        webhookUrl: {type: string}
+    Mandate:
+      type: object
+      required: [mandateId, status]
+      properties:
+        mandateId: {type: string}
+        tspId: {type: string}
+        status:
+          type: string
+          enum: [PENDING_CONSENT, ACTIVE, SUSPENDED, REVOKED, REJECTED, EXPIRED]
+        period: {type: string, enum: [WEEK, MONTH, YEAR]}
+        maxAmountPerDebit: {type: integer}
+        maxAmountPerPeriod: {type: integer}
+        consentUrl: {type: string, description: 'Ссылка для подтверждения согласия плательщиком (до статуса ACTIVE)'}
+        consentProofRef: {type: string, description: 'Ссылка на артефакт подтверждения согласия (152-ФЗ)'}
+        createdAt: {type: string, format: date-time}
+        expiresAt: {type: string, format: date-time}
+    DebitRequest:
+      type: object
+      required: [amount, billingPeriod]
+      properties:
+        amount: {type: integer, description: 'Сумма в копейках'}
+        billingPeriod: {type: string, description: 'Период обязательства, напр. 2026-10; часть ключа дедупликации (mandateId, billingPeriod)'}
+        paymentPurpose: {type: string}
+        plannedDebitDate: {type: string, format: date, description: 'Плановая дата списания. Обязательна, если у согласия notificationLeadHours > 0: шлюз проверяет окно (plannedDebitDate − now ≥ notificationLeadHours)'}

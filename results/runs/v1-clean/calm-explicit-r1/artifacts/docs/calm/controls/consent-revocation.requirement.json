@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.bank.ru/controls/consent-revocation.json",
+  "title": "Consent revocation propagation",
+  "description": "Отзыв согласия немедленно запрещает новые дебиты (AD-009).",
+  "type": "object",
+  "properties": {
+    "target-latency": { "type": "string" },
+    "post-revoke-debits": { "type": "integer" }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,63 @@
+# Fitness-правила для CHANGE-001 «СБП-подписки» (схема control::check).
+# Этап: решение (до кода). До ратификации ADR-008 пакет не передаётся в реализацию.
+# После старта кодинга handoff перегенерируется под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-008-present
+    type: file_exists
+    path: docs/adr/ADR-008-sbp-podpiski-rekurrentnye-spisaniya-po-soglasiyu-platelshchika.md
+    severity: error
+  - name: spine-ad-009-present
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009'
+    severity: error
+  - name: spine-ad-010-present
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-010'
+    severity: error
+  - name: credit-only-from-paid-preserved
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: debit-only-active-mandate
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'Mandate в состоянии `ACTIVE`'
+    severity: error
+  - name: api-contract-additive-version
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: 'version: 0.2.0'
+    severity: error
+  - name: payment-status-enum-unchanged
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: 'CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED'
+    severity: error
+  - name: nfr-subscriptions-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'СБП-подписки'
+    severity: error
+  - name: acceptance-negative-scenarios
+    type: must_contain
+    glob: "docs/changes/change-001-sbp-podpiski/acceptance-and-rollback.md"
+    pattern: 'AC-N'
+    severity: error
+  - name: rollback-criterion-present
+    type: must_contain
+    glob: "docs/changes/change-001-sbp-podpiski/acceptance-and-rollback.md"
+    pattern: 'AC-R1'
+    severity: error
+  - name: adapter-contract-extended
+    type: must_contain
+    glob: "docs/contracts/opkc-adapter.md"
+    pattern: 'createMandate'
+    severity: error
+  - name: no-placeholders-in-adr
+    type: must_not_contain
+    glob: "docs/adr/ADR-008-*.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: error

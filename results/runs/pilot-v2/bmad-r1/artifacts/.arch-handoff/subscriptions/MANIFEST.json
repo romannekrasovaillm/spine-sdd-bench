@@ -1,0 +1,17 @@
+{
+  "created_at": "2026-09-28T00:00:00+00:00",
+  "task": "Реализовать подписки СБП (рекуррентные C2B-списания по согласию плательщика, ADR-008) поверх walking skeleton: (1) агрегат мандата (PENDING_CONSENT→ACTIVE→SUSPENDED/REVOKED/EXPIRED/REJECTED) с атомарными переходами, outbox и аудитом; параметры иммутабельны после активации; (2) аддитивный API ТСП /v1/mandates* (create/get/suspend/resume/revoke/charges) по openapi/tsp-api.yaml v0.2.0-draft; (3) списание как обычный платёж FSM (paymentOrigin=mandate, CREATED→PAID без QR), зачисление только из PAID; (4) валидация ACTIVE ∧ лимит ∧ период ∧ владелец в одной транзакции с созданием платежа; отзыв немедленно запрещает новые списания; (5) идемпотентность: Idempotency-Key + запрет повтора merchantOrderId/периода (409); (6) расширение мок-адаптера ОПКЦ операциями/событиями мандата (протокол НСПК не реализуется, [ТРЕБУЕТ ПРОВЕРКИ]); (7) нотификатор: события mandate.*; ТСП игнорирует неизвестные события; (8) сверка мандатов с мок-ОПКЦ, расхождение «отозван у ОПКЦ — активен у нас» → локальный REVOKED + алерт; (9) per-ТСП фиче-флаг подписок, не влияющий на QR-приём. Spine-инварианты AD-001…AD-011 обязательны. Критерии приёмки — RUBRIC.yaml и docs/nfr.md §7 (выполнимы на моках): списаний после отзыва = 0, двойных списаний по (мандат, период) = 0, регресс QR ≤ 5 %. Стек — по выбору команды с обоснованием в ADR; приоритет — сквозной сценарий, а не полнота продукта.",
+  "model": "deepseek",
+  "sources": [
+    "docs/adr/ADR-008-podpiski-sbp-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelschika.md",
+    "docs/spec/mandate-lifecycle.md",
+    "docs/contracts/tsp-api.md",
+    "docs/contracts/opkc-adapter.md",
+    "docs/nfr.md",
+    "docs/rfp/vendor-rfp.md",
+    "docs/solutioning.md",
+    "ARCHITECTURE-SPINE.md"
+  ],
+  "epic_context_chars": 6000,
+  "epic_context_tokens": 1500
+}

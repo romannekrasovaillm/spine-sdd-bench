@@ -1,0 +1,23 @@
+$ arch-be rules template verify --all --lang python
+
+# Проверка зубов шаблонов
+
+Проверок: 16 (провалено: 0), пропусков: 1, находок: 0
+
+✓ append-only-journal [python] reference (ожидание PASS): код 0: ....                                                                     [100%] | 4 passed in 0.04s
+✓ append-only-journal [python] violating (ожидание FAIL): код 1: FAILED skeleton/rule_templates/append-only-journal/test_append_only_journal.py::test_correction_is_a_compensating_entry_linking_the_original | FAILED skeleton/rule_templates/append-only-journal/test_append_only_journal.py::test_order_of_rec…
+✓ consent-before-auto-action [python] reference (ожидание PASS): код 0: ....                                                                     [100%] | 4 passed in 0.04s
+✓ consent-before-auto-action [python] violating (ожидание FAIL): код 1: FAILED skeleton/rule_templates/consent-before-auto-action/test_consent_before_auto_action.py::test_action_without_consent_is_not_created | FAILED skeleton/rule_templates/consent-before-auto-action/test_consent_before_auto_action.py::test_re…
+✓ idempotency-key [python] reference (ожидание PASS): код 0: ...                                                                      [100%] | 3 passed in 0.05s
+✓ idempotency-key [python] violating (ожидание FAIL): код 1: =========================== short test summary info ============================ | FAILED skeleton/rule_templates/idempotency-key/test_idempotency_key.py::test_two_deliveries_with_same_key_make_one_effect | 1 failed, 2 passed in 0.09s
+✓ no-pii-in-logs [python] reference (ожидание PASS): код 0: ....                                                                     [100%] | 4 passed in 0.04s
+✓ no-pii-in-logs [python] violating (ожидание FAIL): код 1: =========================== short test summary info ============================ | FAILED skeleton/rule_templates/no-pii-in-logs/test_no_pii_in_logs.py::test_card_number_format_not_in_telemetry | 1 failed, 3 passed in 0.08s
+✓ saga-reserve-compensation [python] reference (ожидание PASS): код 0: ....                                                                     [100%] | 4 passed in 0.05s
+✓ saga-reserve-compensation [python] violating (ожидание FAIL): код 1: FAILED skeleton/rule_templates/saga-reserve-compensation/test_saga_reserve_compensation.py::test_reject_releases_the_reserve_without_capture | FAILED skeleton/rule_templates/saga-reserve-compensation/test_saga_reserve_compensation.py::test_…
+✓ single-source-of-truth [python] reference (ожидание PASS): код 0: ....                                                                     [100%] | 4 passed in 0.04s
+✓ single-source-of-truth [python] violating (ожидание FAIL): код 1: =========================== short test summary info ============================ | FAILED skeleton/rule_templates/single-source-of-truth/test_single_source_of_truth.py::test_outdated_answer_is_not_presented_as_actual | 1 failed, 3 passed in…
+✓ unknown-outcome-no-resend [python] reference (ожидание PASS): код 0: ....                                                                     [100%] | 4 passed in 0.04s
+✓ unknown-outcome-no-resend [python] violating (ожидание FAIL): код 1: =========================== short test summary info ============================ | FAILED skeleton/rule_templates/unknown-outcome-no-resend/test_unknown_outcome_no_resend.py::test_unknown_outcome_does_not_resend | 1 failed, 3 passed in 0.09…
+✓ validate-before-side-effect [python] reference (ожидание PASS): код 0: ....                                                                     [100%] | 4 passed in 0.04s
+✓ validate-before-side-effect [python] violating (ожидание FAIL): код 1: FAILED skeleton/rule_templates/validate-before-side-effect/test_validate_before_side_effect.py::test_over_limit_transfer_makes_no_call | FAILED skeleton/rule_templates/validate-before-side-effect/test_validate_before_side_effect.py::test_bo…
+· пропуск — generic-property-test: шаблон-заготовка — исполняемой проверки нет

@@ -1,0 +1,20 @@
+{
+  "created_at": "2026-09-28T11:29:52+00:00",
+  "kind": "increment",
+  "parent_package": ".arch-handoff/",
+  "task": "Инкремент к walking skeleton платёжного шлюза СБП (C2B-приём): рекуррентные C2B-списания по согласию плательщика (мандаты, подписки СБП) по ADR-008 и контрактам v0.2. Реализовать: (1) агрегат «мандат плательщика» со статусной машиной CREATED→PENDING_CONSENT→ACTIVE→SUSPENDED/REVOKED/EXPIRED (+DECLINED), лимитами (maxAmountPerDebit, maxTotalAmount, maxDebitsPerPeriod, validUntil) и атомарными переходами «статус + outbox + аудит»; (2) аддитивный API ТСП v0.2 — пути /v1/mandates* и опциональные поля Payment.initiationType/mandateId, без изменения существующих полей и Payment.status enum; (3) рекуррентное списание как платёж в существующей статусной машине (CREATED→PAID→CREDITED→COMPLETED, без QR_ISSUED), зачисление только из PAID; (4) guard-проверки (мандат ACTIVE, лимиты, период, срок) в одной транзакции с расходом лимита до вызова ОПКЦ; (5) идемпотентность по Idempotency-Key/paymentId/mandateId/eventId; (6) расширение мок-адаптера ОПКЦ мандатными методами и событиями (реальный протокол НСПК НЕ реализуется, [ТРЕБУЕТ ПРОВЕРКИ]); (7) мандатные вебхуки ТСП; (8) негативные тесты (списание без ACTIVE, сверх лимитов, дубли, гонка «отзыв ∥ списание») и contract-compat test v0.1→v0.2. Spine-инварианты AD-001..AD-010 обязательны; AD-009/AD-010 — Proposed (ADR-008), при конфликте с принятым решением остановка и эскалация.",
+  "model": "qwen-code",
+  "sources": [
+    "docs/adr/ADR-008-recurring-c2b-mandate.md",
+    "docs/change/recurring-c2b-change-package.md",
+    "ARCHITECTURE-SPINE.md",
+    "docs/spec/state-machine.md",
+    "docs/contracts/tsp-api.md",
+    "openapi/tsp-api.yaml",
+    "docs/contracts/opkc-adapter.md",
+    "docs/nfr.md",
+    "docs/rfp/vendor-rfp.md"
+  ],
+  "epic_context_chars": 5390,
+  "epic_context_tokens": 1347
+}

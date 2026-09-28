@@ -1,0 +1,71 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+
+  # --- Дельта «подписки СБП» (changes/sbp-subscriptions) ---
+  - name: spine-subscriptions-present
+    type: file_exists
+    path: changes/sbp-subscriptions/DELTA.md
+    severity: error
+  - name: recurring-adr-set
+    type: file_exists
+    path: docs/adr/ADR-009-iniciaciya-rekurrentnyh-spisanij-tsp-porucheniya-s-idempotentnymi-slotami.md
+    severity: error
+  - name: mandate-precondition-invariant
+    type: must_contain
+    glob: "docs/spec/mandate-state-machine.md"
+    pattern: 'Действующий мандат — предусловие списания'
+    severity: error
+  - name: recurring-slot-key
+    type: must_contain
+    glob: "docs/spec/mandate-state-machine.md"
+    pattern: 'periodKey'
+    severity: error
+  - name: recurring-nfr-measurable
+    type: must_contain
+    glob: "changes/sbp-subscriptions/NFR.md"
+    pattern: 'p95'
+    severity: error
+  - name: mandate-adapter-contract
+    type: must_contain
+    glob: "docs/contracts/opkc-adapter-recurring.md"
+    pattern: 'registerMandate'
+    severity: error
+  - name: ears-acceptance-criteria
+    type: must_contain
+    glob: "changes/**/*.md"
+    pattern: '(?m)^\s*[-*]?\s*\**\s*(When|While|If|Where)\b'
+    severity: warn

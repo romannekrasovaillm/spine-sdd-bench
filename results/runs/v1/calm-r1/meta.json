@@ -1,0 +1,49 @@
+{
+  "condition": "calm",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-calm-r1",
+  "base_sha": "6eb9c1b5f6f1051975dd7119e3e2dd0526ff537d",
+  "wall_s": 1656.0,
+  "turn_ok": true,
+  "records": 95,
+  "solver": "deepseek-v4-pro",
+  "judge": "glm-5.2",
+  "inventory": {
+    "project_skills": 1,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 59,
+  "tool_names": [
+    "ask_user_question",
+    "edit",
+    "glob",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "write_file"
+  ],
+  "changed": [
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/solutioning.md",
+    "M\tdocs/spec/state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

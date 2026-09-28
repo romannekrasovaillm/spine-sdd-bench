@@ -1,0 +1,139 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие создано (ожидает подтверждения плательщиком)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/cancel:
+    post:
+      operationId: cancelConsent
+      parameters:
+        - in: path
+          name: consentId
+          required: true
+          schema: {type: string}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отозвано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        paymentType:
+          type: string
+          enum: [one_time, recurring]
+          default: one_time
+          description: one_time — разовый QR/ссылка; recurring — рекуррентное списание по согласию
+        consentId: {type: string, description: Обязателен при paymentType=recurring}
+        periodKey: {type: string, description: Ключ биллингового периода (обязателен при paymentType=recurring), для дедупликации}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentType:
+          type: string
+          enum: [one_time, recurring]
+        consentId: {type: string}
+    ConsentRequest:
+      type: object
+      required: [tspId, merchantOrderId, maxAmountPerDebit, period, endDate]
+      properties:
+        tspId: {type: string}
+        merchantOrderId: {type: string}
+        payerRef: {type: string, description: Непрозрачная ссылка на плательщика (минимально необходимые ПДн для НСПК)}
+        maxAmountPerDebit: {type: integer, description: Максимальная сумма одного списания, копейки}
+        maxTotalPerPeriod: {type: integer, description: Максимальная сумма за период, копейки}
+        period: {type: string, enum: [day, week, month], description: Периодичность лимита}
+        startDate: {type: string, format: date}
+        endDate: {type: string, format: date, description: Срок действия согласия}
+        webhookUrl: {type: string}
+    Consent:
+      type: object
+      required: [consentId, tspId, status]
+      properties:
+        consentId: {type: string}
+        tspId: {type: string}
+        merchantOrderId: {type: string}
+        maxAmountPerDebit: {type: integer}
+        maxTotalPerPeriod: {type: integer}
+        period: {type: string, enum: [day, week, month]}
+        startDate: {type: string, format: date}
+        endDate: {type: string, format: date}
+        status:
+          type: string
+          enum: [PENDING, ACTIVE, CANCELLED, EXPIRED, REVOKED, FAILED]

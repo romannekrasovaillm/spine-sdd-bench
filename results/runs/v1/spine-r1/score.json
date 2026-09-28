@@ -1,0 +1,192 @@
+{
+  "files": [
+    ".arch-handoff/CONSTRAINTS.yaml",
+    "ARCHITECTURE-SPINE.md",
+    "changes/recurrent-c2b/DELTA.md",
+    "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md",
+    "docs/contracts/opkc-adapter.md",
+    "docs/contracts/tsp-api.md",
+    "docs/nfr.md",
+    "docs/solutioning.md",
+    "docs/spec/mandate-state-machine.md",
+    "openapi/tsp-api.yaml"
+  ],
+  "sensors": {
+    "chars": 67694,
+    "significance_route": true,
+    "invariant_AD005_ref": true,
+    "alternatives": true,
+    "negative_consequences": true,
+    "reversibility": true,
+    "rollback": true,
+    "acceptance": true,
+    "nfr_numeric": true,
+    "human_decision": true,
+    "placeholders": 10,
+    "adr_files": 1
+  },
+  "deterministic": {
+    "spine_gate_exit": 0,
+    "spine_gate_route": "Fast",
+    "spine_gate_fails": [],
+    "spine_gate_tail": "Гейт: .\nМаршрут: Fast (auto: score 1 (api_contract_change); исключено по манифесту connect/.spineignore: 1 файлов)\n  [PASS] fitness * — Правил: 9, нарушений: 0 (error: 0, warn: 0); реестр: 9 правил (error: 7), отпечаток de84ae01 — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] delta_guard — изменённых файлов: 12, защищённых среди них: 1 — покрытие: ARCHITECTURE-SPINE.md ← 'recurrent-c2b'\n  [PASS] rule_weakened — реестр правил не ослаблен относительно be52c723b123cedba7139a45fa5c0000d0b98870 — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] spine_lint * — находок: 0 (error: 0)\n  [SKIP] trace_check — нет каталога model/\n  [SKIP] model_validate — нет каталога model/\n  [SKIP] decision_quality — не включена: добавьте 'decision_quality' в [gate.required] нужного маршрута\n  [SKIP] semantic_quality — не включена: добавьте 'semantic_quality' в [gate.required] нужного маршрута\nИтог: PASS\nАттестация вердикта: sha256:1bfbe3b2275fb0c760461bd21668e8ba74e99380811250167bf7a3e07c7a1f02\n",
+    "contract_changed": true,
+    "contract_breaking": 0,
+    "contract_nonbreaking": 4,
+    "contract_tail": "contract_diff: 4 изменений (breaking: 0, non-breaking: 4)\nФормат: openapi[warn] #/paths/~1v1~1mandates CD-005 — добавлен путь «/v1/mandates»\n[warn] #/paths/~1v1~1mandates~1{mandateId} CD-005 — добавлен путь «/v1/mandates/{mandateId}»\n[warn] #/paths/~1v1~1mandates~1{mandateId}~1charges CD-005 — добавлен путь «/v1/mandates/{mandateId}/charges»\n[warn] #/paths/~1v1~1mandates~1{mandateId}~1revoke CD-005 — добавлен путь «/v1/mandates/{mandateId}/revoke»\nИтог: PASS\n",
+    "protected_touched": [
+      ".arch-handoff/CONSTRAINTS.yaml",
+      "ARCHITECTURE-SPINE.md"
+    ],
+    "delta_dirs": [
+      "recurrent-c2b"
+    ]
+  },
+  "judge_token": "f7ad032f",
+  "dossier": {
+    "included": [
+      "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md",
+      "changes/recurrent-c2b/DELTA.md",
+      "docs/solutioning.md",
+      "docs/nfr.md"
+    ],
+    "omitted": [
+      "docs/contracts/opkc-adapter.md",
+      "docs/contracts/tsp-api.md",
+      "openapi/tsp-api.yaml",
+      "docs/spec/mandate-state-machine.md",
+      "ARCHITECTURE-CORE.md",
+      ".arch-handoff/CONSTRAINTS.yaml"
+    ],
+    "truncated": [
+      "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md",
+      "changes/recurrent-c2b/DELTA.md",
+      "docs/solutioning.md"
+    ],
+    "chars": 23050
+  },
+  "decision_doc": [
+    "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md"
+  ],
+  "dossier_decision": {
+    "included": [
+      "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md"
+    ],
+    "omitted": [],
+    "truncated": [
+      "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-podpiski-sbp.md"
+    ],
+    "chars": 6131
+  },
+  "judge": {
+    "solution_architecture": {
+      "total": 3.65,
+      "decision": "pass",
+      "criteria": {
+        "enterprise_scope": 4,
+        "architecture_solutioning": 4,
+        "workflow_executability": 4,
+        "validation": 4,
+        "governance_audit": 3,
+        "sdd_contract": 3,
+        "human_decision_control": 3,
+        "risk_adaptive_autonomy": 4,
+        "discovery_framing": 3,
+        "nfr_tradeoffs": 4,
+        "brownfield": 5,
+        "portability": 3,
+        "org_transformation": 3,
+        "cross_team_governance": 3,
+        "low_entry_cost": 4
+      },
+      "flags": {
+        "risk_adaptive_autonomy": [
+          "evidence_partial"
+        ]
+      },
+      "independence": null,
+      "unjudged": 0,
+      "exit": 2,
+      "parts": {
+        "solution_architecture_part_a": {
+          "total": 3.65,
+          "decision": null,
+          "exit": 2,
+          "unjudged": 0,
+          "raw": "ого Solutioning + A3 + walking skeleton + evidence-гейтов, что отличает его от более лёгких маршрутов. Blast radius не оценен отдельно для каждого решения, но financial_impact и cross_domain_integration покрывают его косвенно. |\n\n**Взвешенный итог:** 3.65/5\n**Свидетельства частично не подтвердились (evidence_partial):** risk_adaptive_autonomy (не подтвердилось 33% сэмплов)\n**Вердикт:** Зрелый архитектурный пакет с сильной NFR-спецификацией, измеримыми критериями приёмки и продуманной дельтой изменений. Главный риск — незафиксированный протокол НСПК ([ТРЕБУЕТ ПРОВЕРКИ]) и неотструктурированные A3-решения, которые могут заблокировать реализацию при отсутствии machine-readable формата человеческих контрольных точек.\n**Судья:** glm-5.2 (сэмплов на критерий: 3)\n**Дата:** 2026-09-28 08:22:42\n\nРешение рубрики: нужен человек (human) — код выхода 2\n  · критерий 'risk_adaptive_autonomy': метки [\"evidence_partial\"] — механике нечем подтвердить суждение\nПакет архитектору: <HOME>/reports/human/dossier-package-f7ad032f.md\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_a-20260928-082242.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-f7ad032f.json\n"
+        },
+        "solution_architecture_part_b": {
+          "total": 3.65,
+          "decision": "pass",
+          "exit": 0,
+          "unjudged": 0,
+          "raw": "едние команды перечислены (АБС, ИБ, НСПК). Однако механика согласования контрактов с каждой стороной не определена, владельцы cross-domain стыков с той стороны не поименованы. |\n| low_entry_cost | 2.00 | 4 |  | Цитата: \"рекуррентное списание исполняем через существующую статусную машину платежа\". Максимум переиспользования: существующая статусная машина, существующий адаптер ОПКЦ, аддитивные методы в /v1, наследуемые NFR; новые сущности (mandate, планировщик) обоснованы регуляторными требованиями. Однако явная оценка стоимости старта и владения отсутствует. |\n\n**Взвешенный итог:** 3.65/5\n**Вердикт:** Решение сильное в brownfield-привязке и измеримых NFR, но риски концентрируются в неразрешённых trade-offs NFR и отсутствии оценки операционной нагрузки на команды — пакет готов к выносу на A3, но не к старту реализации без доработки организационной модели и количественной оценки стоимости владения.\n**Судья:** glm-5.2 (сэмплов на критерий: 3)\n**Дата:** 2026-09-28 08:27:10\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_b-20260928-082710.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-f7ad032f.json\n"
+        }
+      },
+      "raw": "{\"solution_architecture_part_a\": {\"total\": 3.65, \"decision\": null, \"exit\": 2, \"unjudged\": 0, \"raw\": \"ого Solutioning + A3 + walking skeleton + evidence-гейтов, что отличает его от более лёгких маршрутов. Blast radius не оценен отдельно для каждого решения, но financial_impact и cross_domain_integration покрывают его косвенно. |\\n\\n**Взвешенный итог:** 3.65/5\\n**Свидетельства частично не подтвердились (evidence_partial):** risk_adaptive_autonomy (не подтвердилось 33% сэмплов)\\n**Вердикт:** Зрелый архитектурный пакет с сильной NFR-спецификацией, измеримыми критериями приёмки и продуманной дельтой изменений. Главный риск — незафиксированный протокол НСПК ([ТРЕБУЕТ ПРОВЕРКИ]) и неотструктурированные A3-решения, которые могут заблокировать реализацию при отсутствии machine-readable формата человеческих контрольных точек.\\n**Судья:** glm-5.2 (сэмплов на критерий: 3)\\n**Дата:** 2026-09-28 08:22:42\\n\\nРешение рубрики: нужен человек (human) — код выхода 2\\n  · критерий 'risk_adaptive_autonomy': метки [\\\"evidence_partial\\\"] — механике нечем подтвердить суждение\\nПакет архитектору: <HOME>/reports/human/dossier-package-f7ad032f.md\\n\\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_a-20260928-082242.md\\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-f7ad032f.json\\n\"}, \"solution_architecture_part_b\": {\"total\": 3.65, \"decision\": \"pass\", \"exit\": 0, \"unjudged\": 0, \"raw\": \"едние команды перечислены (АБС, ИБ, НСПК). Однако механика согласования контрактов с каждой стороной не определена, владельцы cross-domain стыков с той стороны не поименованы. |\\n| low_entry_cost | 2.00 | 4 |  | Цитата: \\\"рекуррентное списание исполняем через существующую статусную машину платежа\\\". Максимум переиспользования: существующая статусная машина, существующий адаптер ОПКЦ, аддитивные методы в /v1, наследуемые NFR; новые сущности (mandate, планировщик) обоснованы регуляторными требованиями. Однако явная оценка стоимости старта и владения отсутствует. |\\n\\n**Взвешенный итог:** 3.65/5\\n**Вердикт:** Решение сильное в brownfield-привязке и измеримых NFR, но риски концентрируются в неразрешённых trade-offs NFR и отсутствии оценки операционной нагрузки на команды — пакет готов к выносу на A3, но не к старту реализации без доработки организационной модели и количественной оценки стоимости владения.\\n**Судья:** glm-5.2 (сэмплов на критерий: 3)\\n**Дата:** 2026-09-28 08:27:10\\n\\nРешение рубрики: годно (pass) — код выхода 0\\n\\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_b-20260928-082710.md\\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-f7ad032f.json\\n\"}}"
+    },
+    "architecture_gates": {
+      "total": 3.5,
+      "decision": null,
+      "criteria": {
+        "a0_architecture_fit": 4,
+        "a1_impact_assessment": 3,
+        "a2_solutioning_trigger": 4,
+        "a3_human_decision": 3,
+        "a4_conformance_evidence": 4,
+        "a5_drift_check": 4
+      },
+      "flags": {
+        "a2_solutioning_trigger": [
+          "evidence_partial"
+        ]
+      },
+      "independence": "launched_cross_family",
+      "unjudged": 0,
+      "exit": 2,
+      "raw": "Решение:** нужен человек (`human`, код выхода 2)\n- критерий 'a2_solutioning_trigger': метки [\"evidence_partial\"] — механике нечем подтвердить суждение\n\n| Критерий | Вес | Балл | Метки | Обоснование |\n| --- | --- | --- | --- | --- |\n| a0_architecture_fit | 1.00 | 4 |  | Цитата: \"AD-001 Изоляция платёжного контура \\| Нет \\| Рекуррентные списания — внутри того же СБП-шлюза; новые сущности в платёжном контуре\". В DELTA.md приведена таблица проверки каждого инварианта AD-001..AD-009 с указанием затронут/не затронут и что меняется — укладка в утверждённые паттерны доказана явно, но автоматическая проверка не описана. |\n| a1_impact_assessment | 2.00 | 3 |  | Цитата: \"cross_domain_integration (согласие пересекает ТСП ↔ НСПК ↔ банк плательщика)\". Затронутые системы и домены перечислены через триггеры значимости, но владельцы систем, явная оценка blast radius (кто пострадает при отказе) и стоимость изменения не указаны. |\n| a2_solutioning_trigger | 1.00 | 4 | evidence_partial | Цитата: \"Сработавшие триггеры: `new_component` (реестр согласий + планировщик списаний), `new_datastore` (хранилище согласий/ПДн), `api_contract_change` (новые методы ТСП), `data_contract_change` (модель согласия, хранимое согласие), `consistency_model_change` (вторая статусная машина + детерминированный ключ периода), `cross_domain_integration` (согласие пересекает ТСП ↔ НСПК ↔ банк плательщика), `significant_nfr` (burst-нагрузка продлений), `financial_impact` (списание без явного действия плательщика)\". Все 15 триггеров посчитаны (8 сработали, 7 несработавших с объяснением), маршрут Critical следует из score. Однако порог маршрутизации не зафиксирован как заданный человеком заранее до оценки. |\n| a3_human_decision | 3.00 | 3 |  | Цитата: \"Эти пункты не фиксируются машиной: каждый меняет финансовую/юридическую модель и требует решения бизнеса, юристов и ИБ. Остальное (топология, статусные машины, идемпотентность, контракты, NFR) определено в ADR-008 и спецификации.\". Единая человеческая точка A3 выделена и не является штампом, но решения не записаны структурированно (choice, rationale, constraints, rejected options, expiry) — Status: Proposed, отвергнутые варианты не зафиксированы. |\n| a4_conformance_evidence | 2.00 | 4 |  | Цитата: \"Двойное списание \\| 0 (идемпотентность по ключу mandateId+period и Idempotency-Key) \\| Тест на повторную обработку периода\". NFR §7 содержит измеримые критерии приёмки с методами проверки для каждого связывающего решения (идемпотентность, лимиты, отзыв), и гейты A4/A5 заявлены как обязательные для Critical-маршрута, но формализация evidence-bundle как условия выпуска явно не описана. |\n| a5_drift_check | 1.00 | 4 |  | Цитата: \"Сверка согласий с ОПКЦ \\| ежечасная; расхождений \\\"у ОПКЦ отозвано — у нас ACTIVE\\\" — 0 \\| Reconciliation-отчёт\". Дрейф-чеки запланированы по расписанию (ежечасно/суточно) и есть триггеры по тренду (рост charge.failed, всплеск диспутов), но непрерывный процесс фиксации расхождения спека↔код как дефекта не описан — сверка покрывает данные, а не архитектурный дрейф. |\n\n**Взвешенный итог:** 3.50/5\n**Свидетельства частично не подтвердились (evidence_partial):** a2_solutioning_trigger (не подтвердилось 33% сэмплов)\n**Вердикт:** Пакет хорошо структурирован по триггерам, инвариантам и NFR, но ключевая слабость — A3: пять человеческих решений идентифицированы, но не приняты, ADR в статусе Proposed, rejected options и machine-readable структура отсутствуют. Без закрытия A3 и явной блокировки выпуска по evidence-bundle решение не готово к передаче в реализацию.\n**Судья:** glm-5.2 (сэмплов на критерий: 3)\n**Дата:** 2026-09-28 08:40:33\n\nРешение рубрики: нужен человек (human) — код выхода 2\n  · критерий 'a2_solutioning_trigger': метки [\"evidence_partial\"] — механике нечем подтвердить суждение\nПакет архитектору: <HOME>/reports/human/dossier-package-f7ad032f.md\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-architecture_gates-20260928-084033.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-f7ad032f.json\n",
+      "attempts": 3
+    },
+    "macedo_dimensions": {
+      "total": 4.08,
+      "decision": null,
+      "criteria": {
+        "specification": 5,
+        "context": 4,
+        "roles": 4,
+        "execution": 1,
+        "validation": 5,
+        "portability": 3
+      },
+      "flags": {
+        "roles": [
+          "evidence_partial"
+        ],
+        "portability": [
+          "evidence_partial"
+        ]
+      },
+      "independence": "launched_cross_family",
+      "unjudged": 0,
+      "exit": 2,
+      "raw": "# Оценка по рубрике «macedo_dimensions»\n\n**Решение:** нужен человек (`human`, код выхода 2)\n- критерий 'roles': метки [\"evidence_partial\"] — механике нечем подтвердить суждение\n- критерий 'portability': метки [\"evidence_partial\"] — механике нечем подтвердить суждение\n\n| Критерий | Вес | Балл | Метки | Обоснование |\n| --- | --- | --- | --- | --- |\n| specification | 2.00 | 5 |  | Цитата: \"Целевые значения — **измеримые критерии приёмки** на гейтах A4/A5\". Намерение оформлено исполнимым контрактом: ADR содержит детальную спецификацию (статусная машина согласия, API-контракты, инварианты AD-009), DELTA фиксирует WHEN-THEN требования, NFR задаёт измеримые критерии приёмки, трассируемость обеспечена ссылками на AD-001..009 и явными путями файлов. |\n| context | 2.00 | 4 |  | Цитата: \"Файлов в пакете: 10; включено в досье: 4; объём досье: 23050 символов (лимит рубрики 24000).\\nИсключены по бюджету (названы явно, не потеряны молча):\". Контекст управляется как актив с измеряемым бюджетом окна и provenance, но нет явного freshness SLA для самого контекста. |\n| roles | 3.00 | 4 | evidence_partial | Цитата: \"эти пункты не фиксируются машиной: каждый меняет финансовую/юридическую модель и требует решения бизнеса, юристов и ИБ\". Design authority (solution-architect) отделена от corporate accountability (бизнес, юристы, ИБ), A3 — обязательная человеческая точка, владелец отката определён отдельно (дежурная смена + архитектор). Однако независимость ревью с свежим контекстом явно не описана, и допуск ролей не калиброван риском явно. |\n| execution | 1.00 | 1 |  | Цитата: \"подготовить архитектурный пакет этого изменения поверх принятого решения — без написания кода\". Процесс явно производит только документы (ADR, DELTA, NFR, спецификации) и не доходит до среды: нет правки кода, выполнения команд, запуска тестов или терминала в рамках самого процесса. |\n| validation | 3.00 | 5 |  | Цитата: \"A4 (conformance): fitness-проверки spine-инвариантов, нагрузочные тесты (NFR), тесты идемпотентности, ИБ-аудит\". Многослойная валидация блокирует поставку: детерминированные сенсоры (NFR-метрики с методами проверки), независимое ревью (обязательная человеческая точка A3, ИБ-аудит), evidence-гейты A4/A5 на маршруте Critical. NFR содержит измеримые цели (RPO=0, двойное списание = 0, p95-латентности) с конкретными методами проверки. |\n| portability | 1.00 | 3 | evidence_partial | Цитата: \"Author-model: agent-code\". Артефакты в открытых форматах (markdown, YAML, OpenAPI, mermaid), структура репозитория стандартна. Однако авторство привязано к конкретному агенту (agent-code), нет упоминания интеграций с несколькими агентами, проверенной миграции между харнессами или процедур, независимых от инструмента. |\n\n**Взвешенный итог:** 4.08/5\n**Свидетельства частично не подтвердились (evidence_partial):** roles (не подтвердилось 33% сэмплов), portability (не подтвердилось 33% сэмплов)\n**Вердикт:** Архитектурный пакет демонстрирует высокую зрелость по спецификации, ролям и валидации, чётко разделяя ответственность и блокируя поставку гейтами. Главный риск — зависимость от непроверенных внешних данных НСПК, а также текущая стадия «только документы» без исполнения в изолированной среде.\n**Судья:** glm-5.2 (сэмплов на критерий: 3)\n**Дата:** 2026-09-28 07:42:57\n\nРешение рубрики: нужен человек (human) — код выхода 2\n  · критерий 'roles': метки [\"evidence_partial\"] — механике нечем подтвердить суждение\n  · критерий 'portability': метки [\"evidence_partial\"] — механике нечем подтвердить суждение\nПакет архитектору: <HOME>/reports/human/dossier-package-f7ad032f.md\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-macedo_dimensions-20260928-074257.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-f7ad032f.json\n"
+    },
+    "adr_quality": {
+      "total": 3.5,
+      "decision": "pass",
+      "criteria": {
+        "context": 5,
+        "alternatives": 2,
+        "negative_consequences": 3,
+        "reversibility": 4,
+        "status_discipline": 5
+      },
+      "flags": {},
+      "independence": "launched_cross_family",
+      "unjudged": 0,
+      "exit": 0,
+      "raw": "# Оценка по рубрике «adr_quality»\n\n**Решение:** годно (`pass`, код выхода 0)\n\n| Критерий | Вес | Балл | Метки | Обоснование |\n| --- | --- | --- | --- | --- |\n| context | 2.00 | 5 |  | Цитата: \"161-ФЗ (НПС): списание по распоряжению плательщика; согласие должно быть явным, отзываемым, с ограничением суммы и срока. «Неожиданное списание» — диспут, претензия, регуляторный риск.\" Контекст полно описывает проблему (подписочная модель для ТСП), действующие силы (регуляторика 161-ФЗ/152-ФЗ, финансовые риски, burst-нагрузка) и ограничения (протокол НСПК неизвестен, помечен [ТРЕБУЕТ ПРОВЕРКИ]); цена бездействия очевидна — ТСП не получают подписочную модель. |\n| alternatives | 3.00 | 2 |  | Цитата: \"Кто инициирует списание — только ТСП (pull), только планировщик банка (push), или оба; влияет на SLA и распределение ответственности.\" Альтернативы упоминаются только в разделе A3 как открытые подвопросы без причин отказа; для основного архитектурного решения (введение mandate-сущности) альтернативы не рассмотрены, статус-кво не оценён. |\n| negative_consequences | 2.00 | 3 |  | Цитата: \"costly после накопления массовых активных согласий: данные согласий, инициированные списания и потенциальные диспуты требуют выверки перед свёртыванием (необратимой миграции нет, но дешёвого отката не будет).\" Издержки названы, но смешаны с обсуждением обратимости; конкретика по адресатам (кого и как заденет) ограничена, митигация сводится к сознательному принятию без активных мер. |\n| reversibility | 2.00 | 4 |  | Цитата: \"trivially reversible на уровне фичи: приём новых согласий выключается фиче-флагом stop-new-mandates, разовые платежи и уже активные согласия не затрагиваются; откат релиза — rolling.\" Обратимость честно категорирована на два уровня (trivially reversible через фиче-флаг и costly после массового накопления), путь отката описан; однако путь назад явно не протестирован, а для costly-фазы митигация ограничена сознательным принятием. |\n| status_discipline | 1.00 | 5 |  | Цитата: \"Status: Proposed\" и \"Условие/срок пересмотра (expiry): после получения документации НСПК по рекуррентным платежам (протокольные детали могут изменить модель активации согласия); плановая ревизия — через 6 месяцев боевой эксплуатации.\" ADR предшествует реализации (Proposed), номер стабилен (ADR-008), связи с предыдущими ADR указаны, expiry-условие конкретно и привязано к внешнему событию и сроку. |\n\n**Взвешенный итог:** 3.50/5\n**Вердикт:** Контекст, статус-дисциплина и оценка обратимости сильны, но критический пробел — полное отсутствие альтернатив с причинами отказа — делает выбор неоправданным и не проверяемым при пересмотре. Решение не готово к Acceptance без добавления раздела альтернатив.\n**Судья:** glm-5.2 (сэмплов на критерий: 3)\n**Дата:** 2026-09-28 07:45:28\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-adr_quality-20260928-074528.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-decision-f7ad032f.json\n"
+    }
+  },
+  "judge_model": "glm-5.2"
+}

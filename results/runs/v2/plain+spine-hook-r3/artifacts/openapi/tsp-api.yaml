@@ -1,0 +1,198 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: |
+    Мерчант-API СБП-шлюза (C2B-приём).
+    Версия 0.2 — аддитивное расширение: подписки (рекуррентные списания по согласию
+    плательщика). Изменение обратно совместимо: существующие пути и поля не менялись,
+    новые поля платежа — опциональны, новые пути добавлены.
+    Предложено изменением `sbp-recurring-consent` (ADR-008, ADR-009, ADR-010;
+    вступает после человеческого решения A3).
+  x-change: sbp-recurring-consent
+  x-status: proposed
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Регистрация подписки (согласия плательщика)
+      description: |
+        Создаёт согласие плательщика (mandate). Списания по подписке возможны только
+        после подтверждения плательщиком (статус ACTIVE) и только в пределах
+        согласованных параметров (amountLimit, periodicity) — AD-009.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Подписка зарегистрирована, ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние подписки
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/cancel:
+    post:
+      operationId: cancelSubscription
+      summary: Отмена подписки ТСП
+      description: |
+        Идемпотентная отмена согласия по инициативе ТСП. Уже инициированные
+        списания разрешаются по подтверждённому статусу ОПКЦ (ADR-010).
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка отменена (или уже была отменена)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentType:
+          $ref: '#/components/schemas/PaymentType'
+        subscriptionId:
+          type: string
+          description: Согласие (подписка), по которому проведено списание; только для рекуррентных платежей
+    PaymentType:
+      type: string
+      description: Тип платежа; опционально, для обратной совместимости отсутствует у разовых платежей v0.1
+      enum: [SINGLE, RECURRING]
+    SubscriptionRequest:
+      type: object
+      required: [amountLimit, currency, periodicity, startAt]
+      properties:
+        tspId: {type: string, description: Идентификатор ТСП; при mTLS допускается опускать}
+        amountLimit: {type: integer, description: Максимальная сумма одного списания, копейки}
+        currency: {type: string, description: 'Валюта ISO 4217; v0.2 — только RUB'}
+        periodicity:
+          $ref: '#/components/schemas/Periodicity'
+        startAt: {type: string, format: date-time, description: Начало действия согласия}
+        endAt: {type: string, format: date-time, description: Срок действия согласия (опц.)}
+        maxTotalAmount: {type: integer, description: Лимит суммы всех списаний, копейки (опц.)}
+        paymentPurpose: {type: string}
+        redirectUrl: {type: string}
+        merchantOrderId: {type: string}
+    Periodicity:
+      type: string
+      description: Периодичность списаний; набор может быть ограничен регламентом НСПК
+      enum: [DAILY, WEEKLY, MONTHLY, QUARTERLY]
+    Subscription:
+      type: object
+      required: [subscriptionId, status, amountLimit, currency, periodicity]
+      properties:
+        subscriptionId: {type: string}
+        status:
+          $ref: '#/components/schemas/SubscriptionStatus'
+        amountLimit: {type: integer, description: Максимальная сумма одного списания, копейки}
+        currency: {type: string}
+        periodicity:
+          $ref: '#/components/schemas/Periodicity'
+        consentUrl:
+          type: string
+          description: Объект согласия для плательщика (ОПКЦ); формат — по документации НСПК
+        nextDebitAt: {type: string, format: date-time}
+        lastDebit:
+          type: object
+          properties:
+            paymentId: {type: string}
+            amount: {type: integer}
+            status: {type: string}
+            at: {type: string, format: date-time}
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+        reasonCode: {type: string, description: Код причины для REJECTED/REVOKED}
+    SubscriptionStatus:
+      type: string
+      enum: [CREATED, PENDING_PAYER, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+    Problem:
+      type: object
+      description: Ошибка в формате RFC 9457 (Problem Details)
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}
+        idempotencyKey: {type: string}

@@ -1,0 +1,267 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Контракт API ТСП. Версия 0.2 — обратно совместимое расширение: мандаты
+    плательщика (согласие на рекуррентные списания) и рекуррентные списания.
+    Пути и схемы версии 0.1 не изменены; существующие потребители не затронуты.
+    См. `docs/spec/mandate-state-machine.md`, ADR-008..ADR-010.
+servers:
+  - url: https://api.bank.ru/sbp
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      summary: Регистрация разового платежа (динамический QR / ссылка)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      summary: Статус платежа
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      summary: Регистрация согласия плательщика на рекуррентные списания (мандат)
+      description: >
+        Создаёт мандат и инициирует его регистрацию в ОПКЦ через адаптер.
+        Мандат становится ACTIVE только по подтверждению ОПКЦ.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Мандат создан (регистрация в ОПКЦ асинхронна)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      summary: Статус мандата
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус мандата
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      summary: Отзыв согласия (по инициативе ТСП)
+      description: >
+        Переводит мандат в REVOKED и останавливает новые списания.
+        Идемпотентно: повторный вызов не меняет уже отозванный мандат.
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Мандат отозван
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/mandates/{mandateId}/debits:
+    post:
+      operationId: createDebit
+      summary: Инициация рекуррентного списания в рамках мандата
+      description: >
+        Ключ идемпотентности слота — mandateId + periodKey: повторная инициация
+        или ретрай того же слота не создаёт второе списание (AD-011).
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitRequest'}
+      responses:
+        '201':
+          description: Поручение принято
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Debit'}
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v1/debits/{debitId}:
+    get:
+      operationId: getDebit
+      summary: Статус рекуррентного списания
+      parameters:
+        - {in: path, name: debitId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус списания
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Debit'}
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  responses:
+    Conflict:
+      description: Конфликт идемпотентности (тот же ключ, другое тело)
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    UnprocessableEntity:
+      description: Запрос отклонён бизнес-правилами (лимиты, состояние мандата)
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    ServiceUnavailable:
+      description: Транспорт ОПКЦ недоступен (ретраи/очередь)
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        flow:
+          type: string
+          description: Поток создания платежа (0.2, необязательное)
+          enum: [qr, recurring]
+        mandateId:
+          type: string
+          description: Мандат-основание для рекуррентного платежа (0.2, необязательное)
+    MandateRequest:
+      type: object
+      required: [tspId, payerId, purpose, maxAmountPerDebit]
+      properties:
+        tspId: {type: string, description: Идентификатор ТСП в шлюзе}
+        payerId: {type: string, description: Идентификатор плательщика (токен ОПКЦ)}
+        purpose: {type: string, description: Назначение подписки}
+        maxAmountPerDebit: {type: integer, description: Потолок суммы одного списания, копейки}
+        periodLimitAmount: {type: integer, description: Лимит суммы списаний за период, копейки (опц.)}
+        periodLimitCount: {type: integer, description: Лимит числа списаний за период (опц.)}
+        validUntil: {type: string, format: date-time, description: Срок действия согласия (опц.)}
+    Mandate:
+      type: object
+      required: [mandateId, status, tspId, maxAmountPerDebit]
+      properties:
+        mandateId: {type: string}
+        status:
+          type: string
+          enum: [DRAFT, PENDING_OPKC, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+        tspId: {type: string}
+        payerId: {type: string}
+        purpose: {type: string}
+        maxAmountPerDebit: {type: integer, description: Потолок суммы одного списания, копейки}
+        periodLimitAmount: {type: integer}
+        periodLimitCount: {type: integer}
+        validUntil: {type: string, format: date-time}
+        reasonCode: {type: string, nullable: true, description: Причина отклонения/отзыва (если есть)}
+    DebitRequest:
+      type: object
+      required: [periodKey, amount]
+      properties:
+        periodKey:
+          type: string
+          description: >
+            Идентификатор слота списания (например, расчётный период). Ключ
+            идемпотентности слота — mandateId + periodKey (AD-011).
+        amount: {type: integer, description: Сумма списания в копейках}
+        description: {type: string, description: Назначение списания (опц.)}
+    Debit:
+      type: object
+      required: [debitId, mandateId, periodKey, amount, status]
+      properties:
+        debitId: {type: string}
+        mandateId: {type: string}
+        periodKey: {type: string}
+        amount: {type: integer}
+        status:
+          type: string
+          enum: [CREATED, PAID, CREDITED, COMPLETED, FAILED, REJECTED]
+        paymentId: {type: string, description: Связанный платёж в автомате платежа}
+        errorCode: {type: string, nullable: true}
+    Problem:
+      type: object
+      required: [title, status]
+      properties:
+        type: {type: string, format: uri}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string, description: Канонический код ошибки шлюза}
+        traceId: {type: string}
+        idempotencyKey: {type: string}

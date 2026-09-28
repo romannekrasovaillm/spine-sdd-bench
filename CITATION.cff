@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "Если вы используете эти данные или код, пожалуйста, процитируйте работу."
+title: "Spine × SDD-стеки — живые прогоны в TUI Qwen Code"
+abstract: >-
+  Пререгистрированный эксперимент: 68 живых сессий Qwen Code в роли solution-архитектора банка
+  на brownfield-кейсе платёжного шлюза СБП. Факторная сетка «4 стека (plain, OpenSpec, BMAD,
+  superpowers) × 3 режима Spine (нет, советующий MCP+скиллы, блокирующий Stop-хук)».
+  Подключение архитектурного контура повышает долю изменений, внесённых принятым способом,
+  с 50 % до 100 % (пул, точный тест Фишера p = 0.0028) без просадки оценённого качества пакета,
+  при том что 24 из 29 «зелёных» дельт изменяли существующие инварианты.
+authors:
+  - family-names: "Nekrasov"
+    given-names: "Roman"
+    alias: "romannekrasovaillm"
+type: dataset
+version: "2.0"
+date-released: "2026-09-28"
+license: "MIT (код), CC-BY-4.0 (данные)"
+keywords:
+  - solution architecture
+  - architecture as code
+  - coding agents
+  - Qwen Code
+  - architecture governance
+  - fitness functions
+  - specification-driven development
+  - pre-registered benchmark

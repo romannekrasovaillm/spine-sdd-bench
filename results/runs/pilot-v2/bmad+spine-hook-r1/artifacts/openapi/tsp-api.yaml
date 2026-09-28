@@ -1,0 +1,392 @@
+openapi: 3.1.0
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Мерчант-API СБП-шлюза. v0.2 добавлен ТОЛЬКО аддитивно: ресурсы согласий,
+    подписок и рекуррентных списаний. Существующие пути /v1/payments* и модели
+    PaymentRequest/Payment, перечисление Payment.status не изменялись — обратная
+    совместимость с потребителями v0.1 сохранена (см. contract_diff v0.1→v0.2).
+  x-recurrence-invariants:
+    - AD-009: списание только по Consent.status=ACTIVE и в пределах согласия; зачисление только из PAID (AD-005).
+    - AD-010: истина о статусе согласия — у ОПКЦ; шлюз ведёт сверяемую копию.
+  x-authorization: >
+    ТСП видит и изменяет только свои ресурсы: шлюз обязан проверять
+    принадлежность consent/subscription/charge вызывающему ТСП (resource
+    ownership) и отвечать 403 FORBIDDEN при чужом идентификаторе. Перебор
+    идентификаторов между мерчантами — запрещён. Идентичность вызывающего
+    берётся из mTLS-сертификата ТСП; поле `tspId` в теле обязано совпадать
+    с этой идентичностью, иначе 403.
+  x-security-note: >
+    Корневой `security: mtls` распространяется на все операции. Для
+    существующих /v1/payments* это не меняет поведение: mTLS обязателен
+    по docs/contracts/tsp-api.md §1 и для v0.1; декларация лишь переносит
+    требование в машиночитаемый контракт.
+  x-openapi-version-note: >
+    Контракт заявлен как OpenAPI 3.1.0, т.к. использует securityScheme
+    типа mutualTLS (в 3.0.x такого типа нет).
+  x-webhooks: >
+    События доставляются на webhookUrl ТСП (см. docs/contracts/tsp-api.md §5):
+    payment.completed/failed/expired, refund.completed/failed, consent.activated,
+    consent.revoked, charge.completed, charge.failed, charge.skipped.
+    OpenAPI 3.0 не имеет секции webhooks — список ведётся здесь и в контракте.
+security:
+  - mtls: []
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      summary: Создать согласие плательщика на рекуррентные списания
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Текущее состояние согласия (сверяемая копия ОПКЦ, AD-010)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/consents/{consentId}/revoke:
+    post:
+      operationId: revokeConsent
+      summary: Отозвать согласие по инициативе ТСП
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: {type: string}
+      responses:
+        '200':
+          description: Отзыв принят; ожидающие списания остановлены (AD-009)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Создать подписку, привязанную к согласию
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Подписка создана
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние подписки
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+    patch:
+      operationId: updateSubscription
+      summary: Пауза/возобновление/изменение расписания подписки
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionUpdate'}
+      responses:
+        '200':
+          description: Подписка обновлена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+    delete:
+      operationId: cancelSubscription
+      summary: Отменить подписку (согласие не отзывается автоматически)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '204':
+          description: Подписка отменена; будущие списания не инициируются
+        '403': {$ref: '#/components/responses/Forbidden'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/charges:
+    post:
+      operationId: createCharge
+      summary: Инициировать рекуррентное списание по подписке
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ChargeRequest'}
+      responses:
+        '201':
+          description: >
+            Списание принято. Материализация в Payment — только при Consent.status=ACTIVE
+            и в пределах согласия (AD-009); иначе charge.skipped / 422.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/charges/{chargeId}:
+    get:
+      operationId: getCharge
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - {in: path, name: chargeId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние списания
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+components:
+  securitySchemes:
+    mtls:
+      type: mutualTLS
+      description: Взаимный TLS (сертификат ТСП, выпущенный УЦ банка) + заголовок X-API-Key
+  responses:
+    Forbidden:
+      description: Чужой ресурс — проверка принадлежности вызывающему ТСП (см. x-authorization)
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+    ConsentRequest:
+      type: object
+      required: [tspId, purpose, maxAmountPerCharge, frequency]
+      properties:
+        tspId: {type: string}
+        payerRef: {type: string, description: "Минимизированный идентификатор плательщика, если ТСП его знает (токен/маска); иначе плательщик идентифицируется банком-эмитентом при подтверждении"}
+        purpose: {type: string, description: Назначение списаний}
+        maxAmountPerCharge: {type: integer, description: Предел суммы одного списания, копейки}
+        maxAmountPerPeriod: {type: integer, description: Предел суммы за период, копейки}
+        period: {type: string, enum: [DAY, WEEK, MONTH, YEAR]}
+        frequency: {type: string, description: Ожидаемая периодичность (например, MONTHLY)}
+        validFrom: {type: string, format: date-time}
+        validUntil: {type: string, format: date-time}
+        redirectUrl: {type: string, description: Куда вернуть плательщика после подтверждения (если применимо)}
+    Consent:
+      type: object
+      required: [consentId, tspId, status]
+      properties:
+        consentId: {type: string}
+        tspId: {type: string}
+        status:
+          type: string
+          enum: [CREATED, PENDING_PAYER, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+        consentUrl: {type: string, description: "Ссылка/диплинк для подтверждения плательщиком в его банке (возвращается при PENDING_PAYER; канал и формат — по регламенту ОПКЦ [ТРЕБУЕТ ПРОВЕРКИ])"}
+        payerRef: {type: string, description: Минимизированный идентификатор плательщика (без полных ПДн)}
+        mandateTextVersion: {type: string, description: Версия текста мандата, который подтвердил плательщик (аудит/152-ФЗ)}
+        maxAmountPerCharge: {type: integer}
+        maxAmountPerPeriod: {type: integer}
+        period: {type: string}
+        validUntil: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+    SubscriptionRequest:
+      type: object
+      required: [tspId, consentId, planRef]
+      properties:
+        tspId: {type: string}
+        consentId: {type: string}
+        planRef: {type: string, description: Тариф/план ТСП}
+        schedule: {type: string, description: "Расписание списаний (формат уточняется: реестр строк или RRULE) [ТРЕБУЕТ ПРОВЕРКИ]"}
+        amount: {type: integer, description: Сумма списания по плану, копейки}
+        status: {type: string, enum: [ACTIVE, PAUSED]}
+    SubscriptionUpdate:
+      type: object
+      description: Патч подписки — все поля опциональны; неизменяемые идентификаторы (tspId/consentId/planRef) не требуются
+      properties:
+        schedule: {type: string}
+        amount: {type: integer}
+        status: {type: string, enum: [ACTIVE, PAUSED]}
+    Subscription:
+      type: object
+      required: [subscriptionId, consentId, status]
+      properties:
+        subscriptionId: {type: string}
+        tspId: {type: string}
+        consentId: {type: string}
+        planRef: {type: string}
+        schedule: {type: string}
+        amount: {type: integer}
+        status: {type: string, enum: [DRAFT, ACTIVE, PAUSED, CANCELLED]}
+        nextChargeAt: {type: string, format: date-time}
+    ChargeRequest:
+      type: object
+      required: [amount, scheduledAt]
+      properties:
+        amount: {type: integer, description: Сумма списания, копейки}
+        scheduledAt: {type: string, format: date-time, description: "Плановое время списания (обязательно). Должно быть не ранее now + срока предуведомления (baseline 24 ч; по регламенту ОПКЦ [ТРЕБУЕТ ПРОВЕРКИ]); иначе 422 CHARGE_WINDOW_NOT_MET. Немедленное списание запрещено (AD-009)"}
+        reason: {type: string}
+    Charge:
+      type: object
+      required: [chargeId, subscriptionId, consentId, amount, status]
+      properties:
+        chargeId: {type: string}
+        subscriptionId: {type: string}
+        consentId: {type: string}
+        amount: {type: integer}
+        scheduledAt: {type: string, format: date-time}
+        status:
+          type: string
+          enum: [PLANNED, NOTIFIED, INITIATED, DONE, SKIPPED, FAILED]
+        paymentId: {type: string, description: Ссылка на Payment при материализации списания}
+    Problem:
+      type: object
+      description: Problem Details (RFC 9457)
+      required: [title, status]
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}
+        idempotencyKey: {type: string}

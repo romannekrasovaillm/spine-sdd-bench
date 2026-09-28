@@ -1,0 +1,119 @@
+{
+  "schema": "arch-be/rubric-report/v1",
+  "rubric": "adr_quality",
+  "target": "docs/adr/ADR-008-model-sbp-podpisok-mandat-soglasie-kak-suschnost-spisanie-kak-platyozh.md",
+  "target_sha256": "017485754e3e95827db118fc6e218dff2f760ab548b7857cfa975c0b0f78e09e",
+  "judge_model": "qwen-code",
+  "author_model": "qwen-code",
+  "weighted_total": 4.2,
+  "verdict": "ADR готов к вынесению на A3; главный риск — цена статус-кво и путь отката.",
+  "unstable": false,
+  "evidence_not_found": 0,
+  "judge_config": {
+    "samples": 3,
+    "unstable_stdev": 1.0,
+    "evidence_min_similarity": 0.8,
+    "adaptive_samples": false
+  },
+  "independence": "none",
+  "author_source": "header",
+  "provenance": {
+    "mode": "declared",
+    "host": {
+      "name": "qwen-cli-mcp-client-spine",
+      "version": "0.0.1"
+    },
+    "session_id": "539da80d8e3da051",
+    "session_calls_before": 13,
+    "prompt_sha256": "0ec6283ce68edd76da796f73e7ff46cfb7b7511f2042a5adb1d568e9828cfcfb",
+    "prompt_issued_in_session": true,
+    "samples": [
+      {
+        "sha256": "445379dc00df80ef1bb1c7b3a916b877bf0d8701ec2395e73ff553911a7ed6b5",
+        "dropped": false
+      },
+      {
+        "sha256": "9a6b8f85055d72e2c517280b6bf57a4beb40476fde1ad4c04a296b5834489ff6",
+        "dropped": false
+      },
+      {
+        "sha256": "f79161f38a32bdd8add4a7266bcc7048c85655ddf9cb5d877fd0094d2b3767c7",
+        "dropped": false
+      }
+    ]
+  },
+  "pack_kind": null,
+  "subject": null,
+  "pack_sha256": null,
+  "inputs": [],
+  "scores": [
+    {
+      "criterion_id": "context",
+      "weight": 2.0,
+      "score": 5,
+      "rationale": "Цитата: \"уведомление плательщику до списания и лимиты регулируются правилами ОПКЦ\". Контекст называет проблему, силы (постоянное полномочие, регуляторный контур), ограничения (внешний вход НСПК) и опору на действующие инварианты.",
+      "samples": [5, 5, 5],
+      "stdev": 0.0,
+      "flags": [],
+      "evidence_unconfirmed_ratio": 0.0,
+      "invalid_samples": 0,
+      "checked": [],
+      "evidence_channel": "prose"
+    },
+    {
+      "criterion_id": "alternatives",
+      "weight": 3.0,
+      "score": 4,
+      "rationale": "Цитата: \"Дублирует финансовый путь\". Четыре реальные альтернативы с причинами отказа; статус-кво отдельной строкой не оценён.",
+      "samples": [4, 4, 4],
+      "stdev": 0.0,
+      "flags": [],
+      "evidence_unconfirmed_ratio": 0.0,
+      "invalid_samples": 0,
+      "checked": [],
+      "evidence_channel": "prose"
+    },
+    {
+      "criterion_id": "negative_consequences",
+      "weight": 2.0,
+      "score": 4,
+      "rationale": "Цитата: \"Появляется новая критичная сущность (мандат) с ПДн-чувствительными ссылками\". Издержки конкретны, есть эскалация по вендору; часть формулировок абстрактна.",
+      "samples": [4, 4, 4],
+      "stdev": 0.0,
+      "flags": [],
+      "evidence_unconfirmed_ratio": 0.0,
+      "invalid_samples": 0,
+      "checked": [],
+      "evidence_channel": "prose"
+    },
+    {
+      "criterion_id": "reversibility",
+      "weight": 2.0,
+      "score": 4,
+      "rationale": "Цитата: \"без пересмотра финансовой семантики\". Категория costly обоснована, задан expiry; пошаговый путь назад описан лишь для транспорта.",
+      "samples": [4, 4, 4],
+      "stdev": 0.0,
+      "flags": [],
+      "evidence_unconfirmed_ratio": 0.0,
+      "invalid_samples": 0,
+      "checked": [],
+      "evidence_channel": "prose"
+    },
+    {
+      "criterion_id": "status_discipline",
+      "weight": 1.0,
+      "score": 4,
+      "rationale": "Цитата: \"Status: Proposed\". Записано до реализации, есть условие пересмотра; Superseded нет (замены нет).",
+      "samples": [4, 4, 4],
+      "stdev": 0.0,
+      "flags": [],
+      "evidence_unconfirmed_ratio": 0.0,
+      "invalid_samples": 0,
+      "checked": [],
+      "evidence_channel": "prose"
+    }
+  ],
+  "invalid_samples_ratio": 0.0,
+  "decision": "pass",
+  "judged_at": "2026-09-28T14:43:05.561445373+03:00"
+}

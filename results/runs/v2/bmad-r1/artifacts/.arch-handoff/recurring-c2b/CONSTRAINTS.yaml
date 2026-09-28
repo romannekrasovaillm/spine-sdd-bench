@@ -1,0 +1,72 @@
+# Fitness-правила инкремента `recurring-c2b` (схема control::check).
+# Этап: решение (до кода). Базовый пакет walking skeleton — в родительском каталоге .arch-handoff/.
+# После начала реализации handoff перегенерирует констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-008-present
+    type: file_exists
+    path: docs/adr/ADR-008-recurring-c2b-mandate.md
+    severity: error
+  - name: change-package-present
+    type: file_exists
+    path: docs/change/recurring-c2b-change-package.md
+    severity: error
+  - name: spine-mandate-invariant
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009'
+    severity: error
+  - name: spine-debit-invariant
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-010'
+    severity: error
+  - name: openapi-version-v02
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '0.2.0'
+    severity: error
+  - name: openapi-mandates-path
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/mandates'
+    severity: error
+  - name: payment-status-enum-unchanged
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: 'CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED'
+    severity: error
+  - name: debit-credit-only-from-paid
+    type: must_contain
+    glob: "docs/spec/state-machine.md"
+    pattern: 'только из `PAID`'
+    severity: error
+  - name: mandate-active-guard
+    type: must_contain
+    glob: "docs/spec/state-machine.md"
+    pattern: 'ACTIVE'
+    severity: error
+  - name: adapter-mandate-ops
+    type: must_contain
+    glob: "docs/contracts/opkc-adapter.md"
+    pattern: 'registerMandate'
+    severity: error
+  - name: tsp-contract-mandates
+    type: must_contain
+    glob: "docs/contracts/tsp-api.md"
+    pattern: '/v1/mandates'
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn

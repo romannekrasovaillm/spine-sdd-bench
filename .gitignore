@@ -1,0 +1,9 @@
+# служебное
+*.log
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+
+# исходные рабочие каталоги прогонов в этот репозиторий не попадают:
+# публикуется только выжимка (results/, evidence/, charts/, harness/, docs/)

@@ -1,0 +1,85 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+
+  # ── Рекуррентные списания (add-recurring-payments, ADR-008/ADR-009) ──
+  - id: C-020
+    name: recurring-only-active-consent
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+  - id: C-021
+    name: recurring-no-double-period
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'periodKey'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+  - id: C-022
+    name: spine-ad-010-present
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-010'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+  - id: C-023
+    name: adr-008-present
+    type: file_exists
+    path: "docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-soglasie-platelschika-kak-edinstvennyy-istochnik-mandata.md"
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+  - id: C-024
+    name: nfr-recurring-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'Рекуррентные списания'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28
+  - id: C-025
+    name: contract-consents-path
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/consents'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-09-28

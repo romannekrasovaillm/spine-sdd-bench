@@ -1,0 +1,62 @@
+{
+  "condition": "plain+spine",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-plain+spine-r1",
+  "base_sha": "3279f3608061e6a2a83b527a64e1a8d77565e64b",
+  "wall_s": 647.7,
+  "turn_ok": true,
+  "records": 157,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 66,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 92,
+  "tool_names": [
+    "edit",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "tool_call",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "M\t.qwen/settings.json",
+    "M\tARCHITECTURE-SPINE.md",
+    "A\tchanges/sbp-subscriptions/A3-PACKAGE.md",
+    "A\tchanges/sbp-subscriptions/ACCEPTANCE.md",
+    "A\tchanges/sbp-subscriptions/DELTA.md",
+    "A\tchanges/sbp-subscriptions/HANDOFF.md",
+    "A\tchanges/sbp-subscriptions/IMPACT.md",
+    "A\tdocs/adr/ADR-008-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelshchika.md",
+    "A\tdocs/adr/ADR-009-obratno-sovmestimoe-rasshirenie-kontraktov-podpisok.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "A\tdocs/nfr-sbp-subscriptions.md",
+    "M\tdocs/rfp/vendor-rfp.md",
+    "M\tdocs/solutioning.md",
+    "A\tdocs/spec/mandate-lifecycle.md",
+    "M\tdocs/spec/state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

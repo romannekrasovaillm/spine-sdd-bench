@@ -1,0 +1,215 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0-draft
+  description: >
+    Контракт мерчант-API. v0.2.0-draft (ADR-008) аддитивно добавляет мандаты
+    (согласия на рекуррентные списания) и списания по мандату. Существующие
+    пути и схемы v0.1 не изменены; новые поля Payment — опциональны.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      summary: Регистрация мандата (согласия на рекуррентные списания)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Мандат зарегистрирован, ожидается согласие плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус мандата
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/suspend:
+    post:
+      operationId: suspendMandate
+      summary: Приостановить мандат (локальный запрет новых списаний, возобновляемо)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Мандат приостановлен
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/resume:
+    post:
+      operationId: resumeMandate
+      summary: Возобновить приостановленный мандат
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Мандат активен
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      summary: Отозвать мандат (необратимо; новые списания запрещаются немедленно)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Мандат отозван
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/charges:
+    post:
+      operationId: createMandateCharge
+      summary: Рекуррентное списание по мандату (без QR)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateChargeRequest'}
+      responses:
+        '201':
+          description: Списание зарегистрировано как платёж (paymentOrigin=mandate)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentOrigin:
+          type: string
+          enum: [qr, mandate]
+          default: qr
+          description: Источник платежа (v0.2; опционально, для v0.1-клиентов — qr)
+        mandateId:
+          type: string
+          nullable: true
+          description: Мандат для списаний по согласию (v0.2)
+        merchantOrderId: {type: string}
+    MandateRequest:
+      type: object
+      required: [tspId, maxAmountPerCharge, validFrom, validTo]
+      properties:
+        tspId: {type: string}
+        maxAmountPerCharge: {type: integer, description: Лимит разового списания, копейки}
+        maxTotalAmount: {type: integer, description: Опциональный лимит за весь срок, копейки}
+        validFrom: {type: string, format: date-time}
+        validTo: {type: string, format: date-time}
+        paymentPurpose: {type: string}
+        payerRef: {type: string, description: Идентификатор плательщика у ТСП}
+        consentRedirectUrl: {type: string, format: uri}
+    Mandate:
+      type: object
+      required: [mandateId, status]
+      properties:
+        mandateId: {type: string}
+        status:
+          type: string
+          enum: [PENDING_CONSENT, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+        consentUrl: {type: string, description: Ссылка/QR подтверждения согласия (в ответе на создание)}
+        maxAmountPerCharge: {type: integer}
+        maxTotalAmount: {type: integer}
+        validFrom: {type: string, format: date-time}
+        validTo: {type: string, format: date-time}
+        payerRef: {type: string}
+        consentEvidenceRef:
+          type: string
+          description: Ссылка-доказательство подтверждённого согласия (AD-015); появляется после активации
+        suspendedReason: {type: string, nullable: true}
+    MandateChargeRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Копейки; <= maxAmountPerCharge}
+        merchantOrderId: {type: string, description: Период/инвойс; уникален в рамках мандата}
+        paymentPurpose: {type: string}
+        noticeRef: {type: string, description: Ссылка на предварительное уведомление плательщика}
+    Problem:
+      type: object
+      description: RFC 9457 Problem Details
+      properties:
+        type: {type: string, format: uri}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}
+        idempotencyKey: {type: string}

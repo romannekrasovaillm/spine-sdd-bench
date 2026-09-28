@@ -1,0 +1,47 @@
+{
+  "condition": "openspec",
+  "rep": 2,
+  "mode": "tui",
+  "session": "b-openspec-r2",
+  "base_sha": "9aca6f97f7b3f2a99ecca1746cf7f55ec809fe91",
+  "wall_s": 428.9,
+  "turn_ok": true,
+  "records": 118,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 6,
+    "extension_skills": 0,
+    "commands": 6,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 76,
+  "tool_names": [
+    "edit",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "A\tchanges/sbp-recurring-debits/DELTA.md",
+    "A\topenspec/changes/sbp-recurring-debits/.openspec.yaml",
+    "A\topenspec/changes/sbp-recurring-debits/design.md",
+    "A\topenspec/changes/sbp-recurring-debits/proposal.md",
+    "A\topenspec/changes/sbp-recurring-debits/specs/sbp-recurring-debits/spec.md",
+    "A\topenspec/changes/sbp-recurring-debits/specs/sbp-recurring-mandates/spec.md",
+    "A\topenspec/changes/sbp-recurring-debits/specs/sbp-recurring-nfr/spec.md",
+    "A\topenspec/changes/sbp-recurring-debits/specs/tsp-api-recurring/spec.md",
+    "A\topenspec/changes/sbp-recurring-debits/tasks.md"
+  ]
+}

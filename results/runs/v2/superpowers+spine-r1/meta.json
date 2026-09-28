@@ -1,0 +1,63 @@
+{
+  "condition": "superpowers+spine",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-superpowers+spine-r1",
+  "base_sha": "efcf42e20f4dfe52d1a3b7fbec6c12b153708d53",
+  "wall_s": 914.6,
+  "turn_ok": true,
+  "records": 171,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 66,
+    "extension_skills": 15,
+    "commands": 0,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 108,
+  "tool_names": [
+    "agent",
+    "edit",
+    "read_file",
+    "run_shell_command",
+    "tool_call",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "A\tchanges/recurring-c2b-mandates/ACCEPTANCE.md",
+    "A\tchanges/recurring-c2b-mandates/DELTA.md",
+    "A\tchanges/recurring-c2b-mandates/IMPACT.md",
+    "A\tchanges/recurring-c2b-mandates/NFR.md",
+    "A\tchanges/recurring-c2b-mandates/OPEN-QUESTIONS.md",
+    "A\tchanges/recurring-c2b-mandates/SIGNIFICANCE.md",
+    "A\tchanges/recurring-c2b-mandates/handoff/ARCHITECTURE.md",
+    "A\tchanges/recurring-c2b-mandates/handoff/CONSTRAINTS.yaml",
+    "A\tchanges/recurring-c2b-mandates/handoff/MANIFEST.json",
+    "A\tchanges/recurring-c2b-mandates/handoff/ROLLBACK.yaml",
+    "A\tchanges/recurring-c2b-mandates/handoff/RUBRIC.yaml",
+    "A\tchanges/recurring-c2b-mandates/handoff/SPEC.md",
+    "A\tchanges/recurring-c2b-mandates/handoff/TASK.md",
+    "A\tchanges/recurring-c2b-mandates/handoff/adr/ADR-008-model-sbp-podpisok-mandat-soglasie-kak-suschnost-spisanie-kak-platyozh.md",
+    "A\tchanges/recurring-c2b-mandates/handoff/adr/ADR-009-iniciaciya-rekurrentnyh-spisaniy-planirovschik-i-lease-vnutri-shlyuza.md",
+    "A\tdocs/adr/ADR-008-model-sbp-podpisok-mandat-soglasie-kak-suschnost-spisanie-kak-platyozh.md",
+    "A\tdocs/adr/ADR-009-iniciaciya-rekurrentnyh-spisaniy-planirovschik-i-lease-vnutri-shlyuza.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\topenapi/tsp-api.yaml",
+    "A\treports/rubric/ADR-008-model-sbp-podpisok-mandat-soglasie-kak-suschnost-spisanie-kak-platyozh.json"
+  ]
+}

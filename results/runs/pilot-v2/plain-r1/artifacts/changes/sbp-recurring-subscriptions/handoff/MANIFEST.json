@@ -1,0 +1,27 @@
+{
+  "created_at": "2026-09-28T00:00:00+00:00",
+  "change": "sbp-recurring-subscriptions",
+  "route": "critical",
+  "status": "proposed_pending_A3",
+  "gate": "Не запускать кодовый харнесс до решения A3 (ADR-008 Accepted, AD-009..AD-011 ратифицированы)",
+  "task": "Реализовать поверх walking skeleton рекуррентные C2B-списания по согласию плательщика: мандат (жизненный цикл), подписка, периодическое списание, инициируемое ядром; идемпотентность по (mandateId, subscriptionId, billingPeriod); отзыв мандата блокирует списания; аддитивное расширение API ТСП и контракта адаптера ОПКЦ; мок-адаптеры; вебхуки с ретраями/DLQ. Инварианты AD-001..AD-011 обязательны.",
+  "sources": [
+    "ARCHITECTURE-SPINE.md",
+    "docs/adr/ADR-008-recurring-c2b-subscriptions.md",
+    "docs/spec/mandate-lifecycle.md",
+    "docs/spec/state-machine.md",
+    "docs/contracts/tsp-api.md",
+    "docs/contracts/opkc-adapter.md",
+    "openapi/tsp-api.yaml",
+    "docs/nfr.md",
+    "docs/solutioning.md",
+    "changes/sbp-recurring-subscriptions/DELTA.md",
+    "changes/sbp-recurring-subscriptions/SIGNIFICANCE.md",
+    "changes/sbp-recurring-subscriptions/IMPACT.md",
+    "changes/sbp-recurring-subscriptions/HUMAN-DECISIONS.md"
+  ],
+  "adrs_included": ["adr/ADR-008-recurring-c2b-subscriptions.md"],
+  "epic_context_tokens_estimate": 1100,
+  "rollback": "features flag recurring.enabled=false + stop-new мандатов/списаний; открытые операции доводятся; data не мигрируется назад; эндпоинты отвечают 403 RECURRING_DISABLED (см. DELTA.md)",
+  "contract_diff": "openapi: breaking 0, non-breaking 6 (spine contract-diff, CD-005)"
+}

@@ -1,0 +1,286 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Контракт между ТСП и СБП-шлюзом банка. Версия 0.2 — аддитивное расширение:
+    рекуррентные C2B-списания по согласию плательщика (мандату). Существующие
+    потребители v0.1 не затрагиваются: новые поля опциональны, новые пути
+    добавлены, значения существующих статусов не изменены.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      summary: Создание платежа (QR/ссылка) или планового списания по мандату
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      summary: Заявка на согласие плательщика (подписку)
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Заявка на мандат создана
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    get:
+      operationId: listMandates
+      parameters:
+        - {in: query, name: tspId, required: true, schema: {type: string}}
+        - {in: query, name: status, required: false, schema: {$ref: '#/components/schemas/MandateStatus'}}
+        - {in: query, name: cursor, required: false, schema: {type: string}}
+      responses:
+        '200':
+          description: Список мандатов ТСП
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/MandateList'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      parameters:
+        - $ref: '#/components/parameters/MandateId'
+      responses:
+        '200':
+          description: Статус мандата
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      summary: Отмена подписки со стороны ТСП
+      parameters:
+        - $ref: '#/components/parameters/MandateId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Мандат отозван
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /v1/mandates/{mandateId}/charges:
+    post:
+      operationId: createCharge
+      summary: Ручное (внеплановое) списание в рамках мандата
+      parameters:
+        - $ref: '#/components/parameters/MandateId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ChargeRequest'}
+      responses:
+        '201':
+          description: Списание инициировано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    get:
+      operationId: listCharges
+      parameters:
+        - $ref: '#/components/parameters/MandateId'
+        - {in: query, name: status, required: false, schema: {type: string}}
+        - {in: query, name: cursor, required: false, schema: {type: string}}
+      responses:
+        '200':
+          description: Список списаний по мандату
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ChargeList'}
+components:
+  parameters:
+    IdempotencyKey:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema: {type: string}
+    PaymentId:
+      in: path
+      name: paymentId
+      required: true
+      schema: {type: string}
+    MandateId:
+      in: path
+      name: mandateId
+      required: true
+      schema: {type: string}
+  responses:
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ProblemDetails'}
+    Conflict:
+      description: Конфликт состояния или идемпотентности
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ProblemDetails'}
+    UnprocessableEntity:
+      description: Запрос отклонён правилами (лимиты, статус мандата)
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ProblemDetails'}
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        origin:
+          type: string
+          enum: [qr, link, recurring]
+          default: qr
+          description: Источник платежа; recurring — списание по мандату
+        mandateId:
+          type: string
+          description: Обязателен при origin=recurring
+        periodKey:
+          type: string
+          description: Ключ периода (например 2026-10); задаёт идемпотентность планового списания
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        origin: {type: string, enum: [qr, link, recurring]}
+        mandateId: {type: string}
+        periodKey: {type: string}
+        chargeId: {type: string}
+    MandateStatus:
+      type: string
+      enum: [PENDING_CONSENT, PENDING_OPKC, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+    MandateRequest:
+      type: object
+      required: [tspId, payerRef, currency, maxAmountPerCharge, maxAmountPerPeriod, period]
+      properties:
+        tspId: {type: string}
+        payerRef: {type: string, description: Токен плательщика (без ПДн)}
+        currency: {type: string, enum: [RUB]}
+        maxAmountPerCharge: {type: integer, description: Лимит на одно списание, копейки}
+        maxAmountPerPeriod: {type: integer, description: Лимит на период, копейки}
+        period: {type: string, enum: [MONTH, WEEK, CUSTOM]}
+        periodLengthDays: {type: integer, description: "Окно периода в днях; обязателен при period=CUSTOM"}
+        validTo: {type: string, format: date-time}
+        description: {type: string}
+        redirectUrl: {type: string, format: uri}
+        merchantSubscriptionId: {type: string}
+    Mandate:
+      type: object
+      required: [mandateId, tspId, status, currency, maxAmountPerCharge, maxAmountPerPeriod, period]
+      properties:
+        mandateId: {type: string}
+        tspId: {type: string}
+        status: {$ref: '#/components/schemas/MandateStatus'}
+        currency: {type: string}
+        maxAmountPerCharge: {type: integer}
+        maxAmountPerPeriod: {type: integer}
+        period: {type: string, enum: [MONTH, WEEK, CUSTOM]}
+        periodLengthDays: {type: integer, nullable: true}
+        validFrom: {type: string, format: date-time, nullable: true}
+        validTo: {type: string, format: date-time, nullable: true}
+        consentRef: {type: string, nullable: true}
+        consentUrl: {type: string, format: uri, nullable: true}
+        createdAt: {type: string, format: date-time}
+        merchantSubscriptionId: {type: string}
+    MandateList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Mandate'}
+        nextCursor: {type: string, nullable: true}
+    ChargeRequest:
+      type: object
+      required: [amount, periodKey]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        periodKey: {type: string, description: "Период (MONTH: YYYY-MM, WEEK: YYYY-Www, CUSTOM: строка); обязателен"}
+        description: {type: string}
+    Charge:
+      type: object
+      required: [chargeId, mandateId, paymentId, amount, status]
+      properties:
+        chargeId: {type: string}
+        mandateId: {type: string}
+        paymentId: {type: string}
+        periodKey: {type: string}
+        amount: {type: integer}
+        status: {type: string, description: Статус платежа (см. Payment.status)}
+        createdAt: {type: string, format: date-time}
+    ChargeList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Charge'}
+        nextCursor: {type: string, nullable: true}
+    ProblemDetails:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: {type: string, format: uri}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}
+        idempotencyKey: {type: string}

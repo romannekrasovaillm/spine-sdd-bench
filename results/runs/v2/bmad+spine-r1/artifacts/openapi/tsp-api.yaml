@@ -1,0 +1,216 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Регистрация подписки (мандата) ТСП
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Подписка зарегистрирована (ожидает согласия плательщика либо активна — по протоколу ОПКЦ)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '409':
+          description: Конфликт идемпотентности или дубль подписки
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+    get:
+      operationId: listSubscriptions
+      summary: Список подписок ТСП
+      parameters:
+        - {in: query, name: status, required: false, schema: {type: string}}
+      responses:
+        '200':
+          description: Список подписок
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Подписка
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '404':
+          description: Подписка не найдена
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/cancel:
+    post:
+      operationId: cancelSubscription
+      summary: Отмена подписки со стороны ТСП (отзыв мандата выполняет плательщик в своём банке)
+      parameters:
+        - in: path
+          name: subscriptionId
+          required: true
+          schema: {type: string}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка отменена, новые списания запрещены
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '422':
+          description: Недопустимое состояние подписки
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/charges:
+    get:
+      operationId: listSubscriptionCharges
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Списания подписки по плановым периодам
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Charge'}
+  /v1/charges/{chargeId}:
+    get:
+      operationId: getCharge
+      parameters:
+        - {in: path, name: chargeId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Рекуррентное списание
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+        '404':
+          description: Списание не найдено
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+    SubscriptionRequest:
+      type: object
+      required: [tspId, amount, currency, period, merchantSubscriptionId]
+      properties:
+        tspId: {type: string}
+        amount: {type: integer, description: Сумма списания в копейках (фиксированная в v1)}
+        currency: {type: string, enum: [RUB]}
+        period: {type: string, description: "Периодичность: ISO 8601 duration (напр. P1M) или WEEKLY|MONTHLY|QUARTERLY"}
+        startDate: {type: string, format: date, description: Дата первого планового списания}
+        maxCharges: {type: integer, description: Ограничение числа списаний (опционально)}
+        description: {type: string}
+        merchantSubscriptionId: {type: string, description: Сквозной идентификатор подписки у ТСП}
+    Subscription:
+      type: object
+      required: [subscriptionId, status, amount, currency, period]
+      properties:
+        subscriptionId: {type: string}
+        tspId: {type: string}
+        status:
+          type: string
+          enum: [CREATED, PENDING_CONSENT, ACTIVE, SUSPENDED, REVOKED, EXPIRED]
+        amount: {type: integer, description: Сумма списания в копейках}
+        currency: {type: string}
+        period: {type: string}
+        startDate: {type: string, format: date}
+        nextChargeAt: {type: string, format: date-time}
+        chargesCount: {type: integer}
+        mandateId: {type: string, description: Идентификатор мандата у ОПКЦ (после активации)}
+        merchantSubscriptionId: {type: string}
+        createdAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+    Charge:
+      type: object
+      required: [chargeId, subscriptionId, billingPeriod, amount, status]
+      properties:
+        chargeId: {type: string}
+        subscriptionId: {type: string}
+        paymentId: {type: string, description: Ссылка на платёж в статусной машине (ADR-002, AD-010)}
+        billingPeriod: {type: string, description: Идентификатор планового периода; вместе с subscriptionId образует ключ идемпотентности}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [SCHEDULED, INITIATED, PAID, CREDITED, COMPLETED, FAILED, SKIPPED]
+        scheduledAt: {type: string, format: date-time}
+        paidAt: {type: string, format: date-time}
+    Problem:
+      type: object
+      description: RFC 9457 Problem Details
+      required: [title, status]
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}
+        idempotencyKey: {type: string}

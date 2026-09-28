@@ -1,0 +1,184 @@
+# Аддитивная дельта к контракту API ТСП — рекуррентные C2B-списания по согласию (v1 → v1.1).
+#
+# Назначение: зафиксировать ИЗМЕНЕНИЯ контракта ДО правки принятого файла openapi/tsp-api.yaml.
+# Изменение только аддитивное (breaking: false): ни один существующий путь, обязательное поле,
+# статус или значение перечисления не удаляется и не переименовывается. Правка принятого
+# openapi/tsp-api.yaml выполняется штатным процессом после ратификации на A1.
+#
+# Связано: ADR-002/AD-003 (идемпотентность), AD-005 (зачисление только из PAID), AD-009 (proposed),
+#          docs/contracts/tsp-api.md, docs/spec/state-machine.md, design.md (D6).
+
+openapi: 3.0.3
+info:
+  title: "СБП-шлюз — API ТСП (аддитивная дельта: согласия и рекуррентные списания)"
+  version: 1.1.0
+
+x-compatibility:
+  breaking: false
+  base: openapi/tsp-api.yaml (v0.1) → целевая v1.1
+  guarantees:
+    - Существующие пути /v1/tsp, /v1/payments, /v1/payments/{paymentId}, /v1/payments/{paymentId}/refunds не меняются
+    - Перечисление Payment.status новыми значениями не расширяется
+    - Новые поля Payment опциональны; initiationType по умолчанию "qr" (старые полезные нагрузки валидны без изменений)
+    - Новые вебхук-события — дополнительные типы; ТСП обязан игнорировать неизвестные типы, не нарушая обработку известных
+    - Версия пути остаётся /v1; переход на /v2 не требуется
+
+paths:
+  /v1/mandates:
+    post:
+      summary: Регистрация согласия плательщика (mandate)
+      operationId: createMandate
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано (ожидает подтверждения плательщика)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '409': {description: IDEMPOTENCY_CONFLICT}
+        '422': {description: INVALID_REQUEST / лимиты и параметры согласия}
+
+  /v1/mandates/{mandateId}:
+    get:
+      summary: Статус согласия
+      operationId: getMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '404': {description: MANDATE_NOT_FOUND}
+
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      summary: Отзыв согласия (ТСП); плательщик может отозвать через НСПК
+      operationId: revokeMandate
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие отозвано (идемпотентно при повторе)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '404': {description: MANDATE_NOT_FOUND}
+
+  /v1/mandates/{mandateId}/charges:
+    post:
+      summary: Инициация рекуррентного списания по согласию
+      description: Создаёт платёж в существующей статусной машине; зачисление — только из подтверждённого PAID.
+      operationId: createMandateCharge
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateChargeRequest'}
+      responses:
+        '201':
+          description: Списание инициировано; возвращается ресурс Payment
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '404': {description: MANDATE_NOT_FOUND}
+        '422': {description: MANDATE_NOT_ACTIVE / MANDATE_LIMIT_EXCEEDED}
+
+components:
+  schemas:
+    MandateStatus:
+      type: string
+      enum: [PENDING_CONSENT, ACTIVE, SUSPENDED, REVOKED, EXPIRED]
+
+    MandateRequest:
+      type: object
+      required: [tspId, maxAmountPerCharge]
+      properties:
+        tspId: {type: string}
+        maxAmountPerCharge: {type: integer, description: Максимум одного списания, копейки}
+        maxTotalAmount: {type: integer, nullable: true, description: Суммарный лимит, копейки}
+        maxCharges: {type: integer, nullable: true, description: Максимум списаний}
+        period: {type: string, enum: [ON_DEMAND, DAILY, WEEKLY, MONTHLY], default: ON_DEMAND}
+        validUntil: {type: string, format: date-time, nullable: true, description: Срок действия согласия}
+        paymentPurpose: {type: string, nullable: true}
+        merchantOrderId: {type: string, nullable: true}
+        redirectUrl: {type: string, format: uri, nullable: true}
+
+    Mandate:
+      type: object
+      required: [mandateId, tspId, status]
+      properties:
+        mandateId: {type: string}
+        tspId: {type: string}
+        status: {$ref: '#/components/schemas/MandateStatus'}
+        maxAmountPerCharge: {type: integer}
+        maxTotalAmount: {type: integer, nullable: true}
+        maxCharges: {type: integer, nullable: true}
+        period: {type: string, enum: [ON_DEMAND, DAILY, WEEKLY, MONTHLY]}
+        validUntil: {type: string, format: date-time, nullable: true}
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time, nullable: true}
+        revokedAt: {type: string, format: date-time, nullable: true}
+        expiresAt: {type: string, format: date-time, nullable: true}
+        consentUrl: {type: string, format: uri, nullable: true, description: Только пока PENDING_CONSENT}
+        consentQrImage: {type: string, nullable: true, description: data:image/png;base64, только пока PENDING_CONSENT}
+        merchantOrderId: {type: string, nullable: true}
+
+    MandateChargeRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: Сумма списания, копейки}
+        paymentPurpose: {type: string, nullable: true}
+        merchantOrderId: {type: string, nullable: true}
+
+    # НОВЫЙ ресурс-ответ для эндпоинтов согласий/списаний (обратная ссылка на базовый Payment).
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        mandateId: {type: string, nullable: true, description: Согласие, по которому создано списание}
+        initiationType: {type: string, enum: [qr, recurring], default: qr, description: Способ инициации; по умолчанию qr}
+
+# Патч существующей схемы Payment в openapi/tsp-api.yaml — только добавление опциональных полей.
+x-patches:
+  - target: components.schemas.Payment
+    op: add-optional-properties
+    properties:
+      mandateId: {type: string, nullable: true}
+      initiationType: {type: string, enum: [qr, recurring], default: qr}
+
+x-error-codes:
+  - {code: MANDATE_NOT_ACTIVE, http: 422, when: Согласие не в состоянии ACTIVE}
+  - {code: MANDATE_LIMIT_EXCEEDED, http: 422, when: Нарушен лимит суммы/числа/периода/срока согласия}
+  - {code: MANDATE_NOT_FOUND, http: 404, when: Согласие не найдено или принадлежит другому ТСП}
+
+x-webhook-events:
+  - {type: mandate.activated, when: Согласие подтверждено НСПК, payload: [eventId, type, mandateId, tspId, status, timestamp]}
+  - {type: mandate.revoked, when: Согласие отозвано (ТСП или плательщиком), payload: [eventId, type, mandateId, tspId, status, timestamp]}
+  - {type: mandate.expired, when: Истёк срок подтверждения/действия, payload: [eventId, type, mandateId, tspId, status, timestamp]}

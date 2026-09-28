@@ -1,0 +1,222 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: |
+    Контракт ТСП/мерчанта с СБП-шлюзом банка. v0.2.0 — аддитивное расширение v0.1.0
+    (подписки СБП: рекуррентные C2B-списания по согласию плательщика, ADR-008/009/010).
+    Существующие методы разового приёма не изменены.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Создание подписки (регистрация согласия плательщика)
+      description: |
+        Регистрирует согласие плательщика на периодические списания в пользу ТСП.
+        До подтверждения согласия ОПКЦ подписка в состоянии PENDING_CONSENT, списания невозможны (AD-009).
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Подписка создана, согласие ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '4XX':
+          description: Ошибка запроса (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      summary: Статус подписки и согласия
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Текущее состояние подписки
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/cancel:
+    post:
+      operationId: cancelSubscription
+      summary: Отмена подписки ТСП (прекращение будущих списаний)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Подписка отменена; будущие списания прекращены
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '4XX':
+          description: Ошибка запроса (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/debits:
+    post:
+      operationId: createDebit
+      summary: Инициация рекуррентного списания по подписке
+      description: |
+        Создаёт попытку списания за расчётный период. Идемпотентно по паре
+        (subscriptionId, billingPeriod): повторный запрос того же периода возвращает
+        ту же попытку и не создаёт второе списание (AD-010).
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitRequest'}
+      responses:
+        '201':
+          description: Попытка списания создана
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Debit'}
+        '4XX':
+          description: Ошибка запроса (RFC 9457); в т.ч. 422 при неактивном согласии/превышении лимита
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/debits/{debitId}:
+    get:
+      operationId: getDebit
+      summary: Статус попытки рекуррентного списания
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - {in: path, name: debitId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние попытки списания
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Debit'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+    SubscriptionRequest:
+      type: object
+      required: [tspId, amountLimit, billingPeriod, paymentPurpose]
+      properties:
+        tspId: {type: string}
+        amountLimit: {type: integer, description: Максимальная сумма одного списания, копейки}
+        billingPeriod:
+          type: string
+          enum: [DAY, WEEK, MONTH, QUARTER, YEAR]
+        maxDebits: {type: integer, description: Максимальное число списаний за срок подписки (опц.)}
+        startAt: {type: string, format: date-time, description: Начало действия (опц.)}
+        endAt: {type: string, format: date-time, description: Окончание срока подписки (опц.)}
+        paymentPurpose: {type: string}
+        redirectUrl: {type: string, description: Возврат плательщика после подтверждения согласия (опц.)}
+        merchantOrderId: {type: string}
+    Subscription:
+      type: object
+      required: [subscriptionId, status]
+      properties:
+        subscriptionId: {type: string}
+        consentId: {type: string, description: Идентификатор согласия в ОПКЦ (сквозной для сверки)}
+        status:
+          type: string
+          enum: [PENDING_CONSENT, ACTIVE, SUSPENDED, REVOKED, EXPIRED]
+        tspId: {type: string}
+        amountLimit: {type: integer, description: Максимальная сумма одного списания, копейки}
+        billingPeriod: {type: string, enum: [DAY, WEEK, MONTH, QUARTER, YEAR]}
+        nextDebitAt: {type: string, format: date-time, description: Плановое время следующего списания (опц.)}
+        createdAt: {type: string, format: date-time}
+        merchantOrderId: {type: string}
+    DebitRequest:
+      type: object
+      required: [amount, billingPeriod]
+      properties:
+        amount: {type: integer, description: Сумма списания в копейках, не более amountLimit согласия}
+        billingPeriod: {type: string, description: Идентификатор расчётного периода — ключ идемпотентности (AD-010)}
+        merchantOrderId: {type: string}
+    Debit:
+      type: object
+      required: [debitId, subscriptionId, amount, status]
+      properties:
+        debitId: {type: string}
+        subscriptionId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        billingPeriod: {type: string}
+        status:
+          type: string
+          enum: [SCHEDULED, CREATED, PAID, CREDITED, COMPLETED, FAILED, SKIPPED]
+        createdAt: {type: string, format: date-time}
+        paidAt: {type: string, format: date-time}
+    Problem:
+      type: object
+      description: Ошибка в формате RFC 9457 (application/problem+json)
+      required: [type, title, status, code, traceId]
+      properties:
+        type: {type: string, format: uri}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}
+        idempotencyKey: {type: string}

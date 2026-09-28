@@ -1,0 +1,215 @@
+{
+  "files": [
+    ".arch-handoff/CONSTRAINTS.yaml",
+    "ACCEPTANCE.md",
+    "ARCHITECTURE-SPINE.md",
+    "DECISION.md",
+    "EVIDENCE.yaml",
+    "PROBLEM.md",
+    "README.md",
+    "RISK.md",
+    "ROLLBACK.md",
+    "VALIDATION.md",
+    "WALKING-SKELETON.md",
+    "changes/subscriptions-c2b/DELTA.md",
+    "changes/subscriptions-c2b/IMPACT.md",
+    "docs/REVIEW.md",
+    "docs/SPEC.md",
+    "docs/adr/ADR-008-podpiski-sbp-soglasie-platelshchika-kak-istochnik-istiny.md",
+    "docs/adr/ADR-009-ispolnenie-rekurrentnyh-spisanij-planer-idempotentnost-otzyv.md",
+    "docs/adr/ADR-010-evolyuciya-kontraktov-podpiski-additivno.md",
+    "docs/contracts/opkc-adapter.md",
+    "docs/contracts/tsp-api.md",
+    "docs/nfr.md",
+    "docs/rfp/vendor-rfp.md",
+    "docs/solutioning.md",
+    "docs/spec/state-machine.md",
+    "docs/spec/subscription-state-machine.md",
+    "openapi/tsp-api.yaml",
+    "reports/fitness.md"
+  ],
+  "sensors": {
+    "chars": 142991,
+    "significance_route": true,
+    "invariant_AD005_ref": true,
+    "alternatives": true,
+    "negative_consequences": true,
+    "reversibility": true,
+    "rollback": true,
+    "acceptance": true,
+    "nfr_numeric": true,
+    "human_decision": true,
+    "placeholders": 10,
+    "adr_files": 3
+  },
+  "deterministic": {
+    "spine_gate_exit": 0,
+    "spine_gate_route": "Fast",
+    "spine_gate_fails": [],
+    "spine_gate_tail": "Гейт: .\nМаршрут: Fast (auto: score 1 (api_contract_change); исключено по манифесту connect/.spineignore: 1 файлов)\n  [PASS] fitness * — Правил: 14, нарушений: 0 (error: 0, warn: 0); реестр: 14 правил (error: 9), отпечаток a34051a6 — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] delta_guard — изменённых файлов: 29, защищённых среди них: 1 — покрытие: ARCHITECTURE-SPINE.md ← 'subscriptions-c2b'\n  [PASS] rule_weakened — реестр правил не ослаблен относительно bench-baseline — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] spine_lint * — находок: 0 (error: 0)\n  [SKIP] trace_check — нет каталога model/\n  [SKIP] model_validate — нет каталога model/\n  [SKIP] decision_quality — не включена: добавьте 'decision_quality' в [gate.required] нужного маршрута\n  [SKIP] semantic_quality — не включена: добавьте 'semantic_quality' в [gate.required] нужного маршрута\nИтог: PASS\nАттестация вердикта: sha256:ac705bd690602b79741b06b640cecabcb37e07ec6cbc7bc0fc1de224874c6650\n",
+    "spine_gate_base": "bench-baseline",
+    "spine_gate_skips": [
+      "decision_quality",
+      "model_validate",
+      "semantic_quality",
+      "trace_check"
+    ],
+    "invariants": {
+      "modified": [
+        "AD-008"
+      ],
+      "removed": [],
+      "added": [
+        "AD-009",
+        "AD-010"
+      ]
+    },
+    "contract_changed": true,
+    "contract_breaking": 0,
+    "contract_nonbreaking": 5,
+    "contract_tail": "contract_diff: 5 изменений (breaking: 0, non-breaking: 5)\nФормат: openapi[warn] #/paths/~1v1~1subscriptions CD-005 — добавлен путь «/v1/subscriptions»\n[warn] #/paths/~1v1~1subscriptions~1{subscriptionId} CD-005 — добавлен путь «/v1/subscriptions/{subscriptionId}»\n[warn] #/paths/~1v1~1subscriptions~1{subscriptionId}~1cancel CD-005 — добавлен путь «/v1/subscriptions/{subscriptionId}/cancel»\n[warn] #/paths/~1v1~1subscriptions~1{subscriptionId}~1debits CD-005 — добавлен путь «/v1/subscriptions/{subscriptionId}/debits»\n[warn] #/paths/~1v1~1subscriptions~1{subscriptionId}~1debits~1{debitId} CD-005 — добавлен путь «/v1/subscriptions/{subscriptionId}/debits/{debitId}»\nИтог: PASS\n",
+    "protected_touched": [
+      ".arch-handoff/CONSTRAINTS.yaml",
+      "ARCHITECTURE-SPINE.md"
+    ],
+    "delta_dirs": [
+      "subscriptions-c2b"
+    ]
+  },
+  "gate_class": "PASS_DELTA",
+  "hook_blocks": 0,
+  "contamination": [
+    "<HOME>/.local/bin/arch-be",
+    "<HOME>/.local/bin/arch-be\\nlrwxrwxrwx",
+    "<SPINE_BANK>/target/release/arch-be",
+    "<SPINE_BANK>/target/release/arch-be\\nError",
+    "<REPO>/live-live/runs-v2/cells/wjnrtc6/ws",
+    "<REPO>/live-live/runs-v2/cells/wjnrtc6/ws\\"
+  ],
+  "decision_doc": "docs/adr/ADR-008-podpiski-sbp-soglasie-platelshchika-kak-istochnik-istiny.md",
+  "spine_visible": true,
+  "judge_token": "0b9b2673",
+  "dossier": {
+    "included": [
+      "docs/adr/ADR-008-podpiski-sbp-soglasie-platelshchika-kak-istochnik-istiny.md",
+      "docs/adr/ADR-009-ispolnenie-rekurrentnyh-spisanij-planer-idempotentnost-otzyv.md",
+      "docs/adr/ADR-010-evolyuciya-kontraktov-podpiski-additivno.md"
+    ],
+    "omitted": [
+      "changes/subscriptions-c2b/DELTA.md",
+      "docs/solutioning.md",
+      "changes/subscriptions-c2b/IMPACT.md",
+      "docs/nfr.md",
+      "docs/contracts/opkc-adapter.md",
+      "docs/contracts/tsp-api.md",
+      "openapi/tsp-api.yaml",
+      "docs/spec/state-machine.md",
+      "docs/spec/subscription-state-machine.md",
+      "ARCHITECTURE-CORE.md",
+      ".arch-handoff/CONSTRAINTS.yaml",
+      "ACCEPTANCE.md",
+      "DECISION.md",
+      "EVIDENCE.yaml",
+      "PROBLEM.md",
+      "README.md",
+      "RISK.md",
+      "ROLLBACK.md",
+      "VALIDATION.md",
+      "WALKING-SKELETON.md",
+      "docs/REVIEW.md",
+      "docs/SPEC.md",
+      "docs/rfp/vendor-rfp.md",
+      "reports/fitness.md"
+    ],
+    "truncated": [
+      "docs/adr/ADR-008-podpiski-sbp-soglasie-platelshchika-kak-istochnik-istiny.md",
+      "docs/adr/ADR-009-ispolnenie-rekurrentnyh-spisanij-planer-idempotentnost-otzyv.md",
+      "docs/adr/ADR-010-evolyuciya-kontraktov-podpiski-additivno.md"
+    ],
+    "chars": 11634
+  },
+  "judge": {
+    "solution_architecture": {
+      "total": 3.49,
+      "decision": "pass",
+      "criteria": {
+        "enterprise_scope": 4,
+        "architecture_solutioning": 4,
+        "workflow_executability": 3,
+        "validation": 3,
+        "governance_audit": 4,
+        "sdd_contract": 2,
+        "human_decision_control": 3,
+        "risk_adaptive_autonomy": 4,
+        "discovery_framing": 3,
+        "nfr_tradeoffs": 4,
+        "brownfield": 4,
+        "portability": 4,
+        "org_transformation": 3,
+        "cross_team_governance": 4,
+        "low_entry_cost": 4
+      },
+      "flags": {},
+      "independence": null,
+      "unjudged": 0,
+      "exit": 0,
+      "parts": {
+        "solution_architecture_part_a": {
+          "total": 3.41,
+          "decision": "pass",
+          "exit": 0,
+          "unjudged": 0,
+          "raw": "ачимого решения оценены обратимость (классификация + условия пересмотра) и blast radius (аддитивность к разовому C2B, stop-new без обратной миграции, риск деградации разового приёма из-за конкуренции за ресурсы адаптера/АБС); глубина процесса адаптируется к риску — неизвестный протокол НСПК закрыт гейтами [ТРЕБУЕТ ПРОВЕРКИ] и обязательными RFP+POC. Но маршрутизация Fast/Standard/Critical и её пороги в досье не описаны. |\n\n**Взвешенный итог:** 3.41/5\n**Вердикт:** Главный риск — досье содержит лишь 3 из 27 файлов пакета с усечёнными ADR, поэтому центральные артефакты (спецификация-контракт, критерии приёмки, evidence, декомпозиция работ) не подтверждены, а семантика протокола НСПК остаётся [ТРЕБУЕТ ПРОВЕРКИ]. Архитектурное ядро (ADR-008…010: согласие как источник истины, идемпотентный планировщик, аддитивные контракты) зрелое, но готовность к реализации по предъявленному тексту подтвердить нельзя.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 20:03:15\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_a-20260928-200315.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-0b9b2673.json\n"
+        },
+        "solution_architecture_part_b": {
+          "total": 3.68,
+          "decision": "pass",
+          "exit": 0,
+          "unjudged": 0,
+          "raw": "м переиспользования существующих паттернов: список наследует готовую статусную машину и сагу возвратов, контракт расширяется аддитивно в /v1, планировщик сознательно оставлен в контуре шлюза, а не вынесен в новый сервис («решении вынести планировщик в отдельный сервис при росте нагрузки» — отложено). Новые сущности (реестр согласий) обоснованы. Однако стоимость старта и владения численно не оценена, сопровождение описано лишь качественно («дисциплина документации и тестов контракта») — не 5. |\n\n**Взвешенный итог:** 3.68/5\n**Вердикт:** Архитектурно зрелое аддитивное решение с сильной обратимостью и наследованием инвариантов, но оно стоит на непроверенном протоколе НСПК ([ТРЕБУЕТ ПРОВЕРКИ] на ключевой семантике согласий и лимитов) и без измеримой гипотезы результата, latency/стоимостных бюджетов и операционной модели on-call; к разработке готово только после верификации протокола и POC с вендором.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 20:14:53\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_b-20260928-201453.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-0b9b2673.json\n"
+        }
+      },
+      "raw": "{\"solution_architecture_part_a\": {\"total\": 3.41, \"decision\": \"pass\", \"exit\": 0, \"unjudged\": 0, \"raw\": \"ачимого решения оценены обратимость (классификация + условия пересмотра) и blast radius (аддитивность к разовому C2B, stop-new без обратной миграции, риск деградации разового приёма из-за конкуренции за ресурсы адаптера/АБС); глубина процесса адаптируется к риску — неизвестный протокол НСПК закрыт гейтами [ТРЕБУЕТ ПРОВЕРКИ] и обязательными RFP+POC. Но маршрутизация Fast/Standard/Critical и её пороги в досье не описаны. |\\n\\n**Взвешенный итог:** 3.41/5\\n**Вердикт:** Главный риск — досье содержит лишь 3 из 27 файлов пакета с усечёнными ADR, поэтому центральные артефакты (спецификация-контракт, критерии приёмки, evidence, декомпозиция работ) не подтверждены, а семантика протокола НСПК остаётся [ТРЕБУЕТ ПРОВЕРКИ]. Архитектурное ядро (ADR-008…010: согласие как источник истины, идемпотентный планировщик, аддитивные контракты) зрелое, но готовность к реализации по предъявленному тексту подтвердить нельзя.\\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\\n**Дата:** 2026-09-28 20:03:15\\n\\nРешение рубрики: годно (pass) — код выхода 0\\n\\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_a-20260928-200315.md\\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-0b9b2673.json\\n\"}, \"solution_architecture_part_b\": {\"total\": 3.68, \"decision\": \"pass\", \"exit\": 0, \"unjudged\": 0, \"raw\": \"м переиспользования существующих паттернов: список наследует готовую статусную машину и сагу возвратов, контракт расширяется аддитивно в /v1, планировщик сознательно оставлен в контуре шлюза, а не вынесен в новый сервис («решении вынести планировщик в отдельный сервис при росте нагрузки» — отложено). Новые сущности (реестр согласий) обоснованы. Однако стоимость старта и владения численно не оценена, сопровождение описано лишь качественно («дисциплина документации и тестов контракта») — не 5. |\\n\\n**Взвешенный итог:** 3.68/5\\n**Вердикт:** Архитектурно зрелое аддитивное решение с сильной обратимостью и наследованием инвариантов, но оно стоит на непроверенном протоколе НСПК ([ТРЕБУЕТ ПРОВЕРКИ] на ключевой семантике согласий и лимитов) и без измеримой гипотезы результата, latency/стоимостных бюджетов и операционной модели on-call; к разработке готово только после верификации протокола и POC с вендором.\\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\\n**Дата:** 2026-09-28 20:14:53\\n\\nРешение рубрики: годно (pass) — код выхода 0\\n\\nОтчёт: <HOME>/.arch-harness/reports/rubric-solution_architecture_part_b-20260928-201453.md\\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-0b9b2673.json\\n\"}}"
+    },
+    "architecture_gates": {
+      "total": 3.3,
+      "decision": "pass",
+      "criteria": {
+        "a0_architecture_fit": 4,
+        "a1_impact_assessment": 4,
+        "a2_solutioning_trigger": 2,
+        "a3_human_decision": 3,
+        "a4_conformance_evidence": 4,
+        "a5_drift_check": 2
+      },
+      "flags": {},
+      "independence": "launched_cross_family",
+      "unjudged": 0,
+      "exit": 0,
+      "raw": " |\n| --- | --- | --- | --- | --- |\n| a0_architecture_fit | 1.00 | 4 |  | Цитата: \"зачисление в АБС — только из подтверждённого НСПК статуса (наследует AD-005), с идемпотентностью по `debitId`\". Укладка доказана не декларативно: решения явно наследуют конкретные утверждённые AD/ADR (AD-002, AD-003, AD-005, AD-008, ADR-003/005), а для контрактов названы автоматические гейты CORE (openapi_lint, contract_diff). Однако нет ни результата автоматической проверки укладки по всей constitution, ни оформленного architecture exception (не потребовался, но процесс не показан), так что до якоря 5 не дотягивает. |\n| a1_impact_assessment | 2.00 | 4 |  | Цитата: \"Owner: solution-architect (платёжный контур) + владелец продукта «Эквайринг»\". Затронутые системы и владельцы названы (шлюз, АБС, ТСП, вендор/ОПКЦ, ИБ — ADR-010), данные оценены («создаёт новый класс финансово значимых данных (согласие/подписка, ПДн плательщика)»), blast radius частично проработан через аддитивность, фиче-флаг stop-new и риск «не деградировать разовый приём (конкуренция за ресурсы адаптера/АБС)». Но нет карты «кто пострадает при отказе» по системам и нет оценки стоимости изменения; IMPACT.md существует в пакете, но исключён из досье. |\n| a2_solutioning_trigger | 1.00 | 2 |  | Цитата: \"окно и число попыток — политика продукта, финализируется на A2/A3\". Гейты A2/A3 упомянуты как точки будущего решения, что доказывает осведомлённость о процессе, но score по триггерам значимости, заранее заданный человеком порог и маршрут Fast/Standard/Critical нигде не зафиксированы; docs/solutioning.md исключён из досье, поэтому срабатывание триггеров подтвердить нельзя. |\n| a3_human_decision | 3.00 | 3 |  | Цитата: \"Плановая ревизия — через 12 месяцев эксплуатации.\". ADR структурно дисциплинированы (Status, Owner, Decision, Reversibility, Condition/expiry): choice, rationale, constraints и срок актуальности сохранены — expiry не потерян, что выше якоря 3. Но всё записано прозой в markdown, отвергнутые альтернативы в видимой части отсутствуют, решения имеют Status: Proposed и Author-model: agent-code (agent), а сам человеческий вердикт (DECISION.md) исключён из досье — machine-readable записи решения нет. |\n| a4_conformance_evidence | 2.00 | 4 |  | Цитата: \"Инструменты подтверждения: `openapi_lint`, `contract_diff` (CORE)\". Проверки привязаны к конкретным связывающим решениям (аддитивная эволюция контрактов ADR-010 через гейт CORE), для риска вендора задано доказательство до выпуска («обязательный критерий RFP + POC»); в пакете заявлены reports/fitness.md, EVIDENCE.yaml, VALIDATION.md. Но содержимое evidence-артефактов исключено из досье, показан только один ADR с привязкой, и нет демонстрации, что выпуск невозможен без собранного evidence bundle. |\n| a5_drift_check | 1.00 | 2 |  | Цитата: \"выявлении конкуренции пиков рекуррентных и разовых операций за ресурсы\". Есть зачатки пост-выпускного внимания: трендовые триггеры пересмотра решений и плановая ревизия через 12 месяцев, операционная наблюдаемость планировщика (лаг, доля успеха). Но это ревизия ADR, а не дрейф-чек: нет непрерывного процесса сверки спека↔код/телеметрия/граф архитектуры, нет фиксации расхождений и лечения их как дефектов. |\n\n**Взвешенный итог:** 3.30/5\n**Вердикт:** Ядро пакета — дисциплинированные ADR с доказанной укладкой в CORE-решения, владельцами и expiry — сильное, но ключевые гейт-артефакты (IMPACT.md, DECISION.md, EVIDENCE.yaml, solutioning.md) исключены из досье, из-за чего A2 (порог Solutioning) и A5 (дрейф-чек) фактически не подтверждены, а A3 остаётся Proposed-прозой без machine-readable человеческого решения; к выпуску не готово, пока не показаны порог триггеров, записанное решение человека и evidence-бандл, обусловливающий релиз.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 19:38:10\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-architecture_gates-20260928-193810.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-0b9b2673.json\n",
+      "attempts": 2
+    },
+    "neutral_architecture": {
+      "total": 3.67,
+      "decision": "pass",
+      "criteria": {
+        "drivers": 4,
+        "options": 2,
+        "rationale": 4,
+        "consequences": 4,
+        "impact_on_existing": 4,
+        "interface_compatibility": 5,
+        "measurable_quality": 3,
+        "verification_rollback": 3,
+        "open_questions": 4
+      },
+      "flags": {},
+      "independence": "launched_cross_family",
+      "unjudged": 0,
+      "exit": 0,
+      "raw": " сагу возвратов (ADR-005) и её сложность; отзыв согласия не откатывает уже подтверждённые списания автоматически\". Последствия даны в обе стороны и конкретны: отрицательные (наследование сложности саги, отсроченная согласованность между планом и зачислением, конкуренция за ресурсы адаптера/АБС, риск нереализации вендором) названы с смягчениями («митигация: обязательный критерий RFP + POC»), положительные тоже есть (не деградирует разовый приём). Но адресат и цена указаны не для всех последствий, а целые разделы последствий ADR-008/009 усечены. |\n| impact_on_existing | 3.00 | 4 |  | Цитата: \"AD-003, AD-005 (CORE, в редакции AD-009/AD-010)\". Существующие решения названы поимённо и двусторонне: изменяемые (AD-003, AD-005 в редакции, наследование статусной машины ADR-002 и саги ADR-005) и сознательно не затрагиваемые («one-off C2B-приём и его контракты не затрагиваются»). Однако перечень распределён по тексту (Context, Decision, References), а не систематизирован, и причина изменения CORE-решений указана лишь косвенно через «наследование». |\n| interface_compatibility | 3.00 | 5 |  | Цитата: \"`info.version` повышается 0.1.0 → 0.2.0 (minor; контракт ещё draft, стабилизация — на A1)\". Для обоих изменяемых контрактов (API ТСП и адаптер ОПКЦ) указано всё: что сохраняется («существующие пути, поля, типы и семантика не удаляются и не переименовываются»), что ломается (ничего — расширение аддитивно), как версионируется (/v1, minor 0.2.0, сценарий /v2 при ломающих изменениях), и что делают существующие потребители («продолжат работать на прежнем подмножестве контракта»). Плюс инструменты контроля: openapi_lint, contract_diff. |\n| measurable_quality | 3.00 | 3 |  | Цитата: \"требования к восстановлению (RTO ≤ 1 ч, RPO=0)\". Измеримо заданы только RTO/RPO; остальные требования к качеству качественные — «своевременность списаний (окно оплаты по договору)», «наблюдаем (лаг, доля успеха, глубина отказов)» без порогов, единиц и условий измерения; «окно и число попыток — политика продукта» отложено. Условий измерения нет даже для RTO/RPO, а файлы с NFR (docs/nfr.md, ACCEPTANCE.md) исключены из досье. |\n| verification_rollback | 3.00 | 3 |  | Цитата: \"подписки включаются фиче-флагом и могут быть остановлены (stop-new) без миграции данных обратно\". План отката исполним и конкретен во всех трёх ADR (фиче-флаг stop-new, аддитивность, сохранение данных как аудиторского следа по 152-ФЗ, исключение новых методов из публикации). Но критерии приёмки неконкретны — только инструменты openapi_lint/contract_diff и POC без порогов; ответственный за откат и условие срабатывания отката не указаны (файлы ACCEPTANCE.md, VALIDATION.md, ROLLBACK.md исключены из досье). |\n| open_questions | 3.00 | 4 |  | Цитата: \"окно и число попыток — политика продукта, финализируется на A2/A3\". Нерешённое вынесено системно: маркер [ТРЕБУЕТ ПРОВЕРКИ] для протокола НСПК с указанием причины («получается участником по договору») и того, что он блокирует («часть семантики (лимиты, сроки, поля согласия) остаётся [ТРЕБУЕТ ПРОВЕРКИ]»); у ряда вопросов есть адресат и срок (продукт/A2/A3, стабилизация контракта на A1). Однако не каждый открытый вопрос снабжён адресатом-ролью и указанием, что именно он блокирует. |\n\n**Взвешенный итог:** 3.67/5\n**Вердикт:** Главный риск пакета — отсутствие рассмотренных альтернатив с критериями сравнения и неизмеримые требования к качеству/приёмке (частично это может быть следствием усечения ADR, но в предъявленном виде пробелы реальны); при этом совместимость контрактов, откаты и прослеживаемость драйверов проработаны образцово. Решение близко к готовности, но до утверждения требует явного сравнения вариантов, измеримых целей и конкретных критериев приёмки с ответственными за откат.\n**Судья:** glm-5.3 (сэмплов на критерий: 1)\n**Дата:** 2026-09-28 19:41:26\n\nРешение рубрики: годно (pass) — код выхода 0\n\nОтчёт: <HOME>/.arch-harness/reports/rubric-neutral_architecture-20260928-194126.md\nОтчёт для гейта: <HOME>/reports/rubric/dossier-package-0b9b2673.json\n",
+      "attempts": 1
+    }
+  },
+  "judge_model": "glm-5.3"
+}

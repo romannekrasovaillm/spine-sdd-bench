@@ -1,0 +1,69 @@
+# Фрагмент CONSTRAINTS.yaml для дельты `sbp-subscriptions` (AD-009/AD-010/AD-011).
+#
+# ВАЖНО: это НЕ рабочий реестр. Он не подключён к гейту намеренно:
+# правила command_succeeds ссылаются на тесты, которых ещё нет; если внести их
+# в .arch-handoff/CONSTRAINTS.yaml сейчас, fitness_check покраснеет и Stop-хук
+# заблокирует работу. Внесение — на этапе apply (A4), после применения шаблонов:
+#   arch-be rules template apply consent-before-auto-action --ad AD-009 --dir <кейс>
+#   arch-be rules template apply idempotency-key            --ad AD-010 --dir <кейс>
+# затем перенести эти правила в .arch-handoff/CONSTRAINTS.yaml (защищённый файл — через дельту).
+#
+# Контекст: базовая линия реестра — 0 из 7 правил проверяют поведение (control rules-report).
+# Правила 1–3 закрывают AD-009/AD-010 исполняемыми проверками.
+
+rules:
+  - name: consent_before_autodebit
+    type: command_succeeds
+    command: "python3 -m pytest -q -p no:cacheprovider skeleton/rule_templates/consent-before-auto-action/test_consent_before_auto_action.py"
+    timeout_secs: 120
+    severity: error
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-09-28
+    rationale: "AD-009: автодебет без действующей записи согласия не создаётся; отзыв останавливает следующее срабатывание"
+    fix_hint: "проверка перед созданием списания: consent.status == ACTIVE, сумма в пределах лимита, now в [validFrom, validTo]"
+    template: consent-before-auto-action
+    verified_by: AD-009
+
+  - name: recurring_debit_idempotent
+    type: command_succeeds
+    command: "python3 -m pytest -q -p no:cacheprovider skeleton/rule_templates/idempotency-key/test_idempotency_key.py"
+    timeout_secs: 120
+    severity: error
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-09-28
+    rationale: "AD-010: два тика/доставки с одним occurrenceKey дают ровно один эффект (нет двойного списания за период)"
+    fix_hint: "уникальность occurrenceKey = subscriptionId + scheduledFor в БД + идемпотентность вызова адаптера по reference=paymentId"
+    template: idempotency-key
+    verified_by: AD-010
+
+  - name: recurring_credit_only_from_paid
+    type: command_succeeds
+    command: "python3 -m pytest -q -p no:cacheprovider skeleton/rule_templates/recurring-credit-only-from-paid/test_credit_only_from_paid.py"
+    timeout_secs: 120
+    severity: error
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-09-28
+    rationale: "AD-005/AD-010: зачисление по рекуррентному списанию невозможно из CREATED; только из PAID"
+    fix_hint: "property-тест недостижимости вызова АБС из состояний, кроме PAID, для initiationType=SCHEDULED"
+    template: generic-property-test
+    verified_by: AD-010
+
+  - name: ears_acceptance_criteria
+    type: must_contain
+    glob: "changes/sbp-subscriptions/*.md"
+    pattern: '(?m)^\s*[-*]?\s*\**\s*(When|While|If|Where)\b'
+    severity: warn
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-03-28
+    rationale: "критерии приёмки в EARS-форме проверяемы формально (rules-suggest: readiness-gate)"
+    fix_hint: "переписать критерии приёмки в EARS-нотации (When/While/If/Where)"
+
+  - name: consent_lifecycle_audited
+    type: must_contain
+    glob: "docs/spec/state-machine.md"
+    pattern: '(?m)^\| C4 \| `ACTIVE` \| `REVOKED`'
+    severity: warn
+    owner: solution-architect (платёжный контур)
+    expiry: 2027-03-28
+    rationale: "AD-007/AD-011: отзыв согласия — явный переход с аудитом и блокировкой будущих списаний"
+    fix_hint: "не удалять переход C4 (отзыв → REVOKED) из таблицы автомата согласия"

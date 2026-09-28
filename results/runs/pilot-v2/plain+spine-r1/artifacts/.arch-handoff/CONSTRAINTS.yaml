@@ -1,0 +1,106 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+  # --- Дельта «подписки СБП» (рекуррентные C2B-списания, ADR-008/ADR-009, AD-009) ---
+  - name: adr-008-present
+    type: file_exists
+    path: docs/adr/ADR-008-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelshchika.md
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'решение о модели согласий обязательно для реализации подписок'
+  - name: adr-009-present
+    type: file_exists
+    path: docs/adr/ADR-009-obratno-sovmestimoe-rasshirenie-kontraktov-podpisok.md
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'решение о совместимости контрактов обязательно для расширения API'
+  - name: mandate-debit-only-active
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: '(?i)только при статусе согласия'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'AD-009: списание только при действующем согласии'
+  - name: mandate-revocation-stops-debits
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'после события отзыва согласия новые списания запрещены'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'AD-009: отзыв немедленно запрещает новые списания'
+  - name: mandate-period-idempotency
+    type: must_contain
+    glob: "docs/adr/ADR-008*.md"
+    pattern: 'billingPeriod'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'AD-009: дедупликация обязательства по (mandateId, billingPeriod)'
+  - name: subscription-nfr-measurable
+    type: must_contain
+    glob: "docs/nfr-sbp-subscriptions.md"
+    pattern: '99,95'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'NFR подписок должны сохранять базовую доступность 99,95 %'
+  - name: mandates-endpoint-present
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/mandates'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'ADR-009: согласия — отдельный ресурс контракта API ТСП'
+  - name: delta-present
+    type: file_exists
+    path: changes/sbp-subscriptions/DELTA.md
+    severity: warn
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'изменение спайна обязано иметь активную дельту'
+  - name: delta-acceptance-ears
+    type: must_contain
+    glob: "changes/sbp-subscriptions/ACCEPTANCE.md"
+    pattern: '(?m)^\s*[-*]?\s*\**\s*(When|While|If|Where)\b'
+    severity: warn
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'критерии приёмки должны быть формально проверяемыми (EARS)'

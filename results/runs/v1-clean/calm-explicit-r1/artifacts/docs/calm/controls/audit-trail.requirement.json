@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.bank.ru/controls/audit-trail.json",
+  "title": "Immutable audit trail",
+  "description": "Неизменяемый аудит-лог всех финансовых переходов и действий с согласием (AD-007).",
+  "type": "object",
+  "properties": {
+    "scope": { "type": ["string", "array"] },
+    "immutable": { "type": "boolean" },
+    "export": { "type": "string" }
+  },
+  "additionalProperties": true
+}

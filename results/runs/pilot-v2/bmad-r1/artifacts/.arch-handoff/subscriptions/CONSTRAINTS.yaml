@@ -1,0 +1,108 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Изменение: подписки СБП (ADR-008). Этап: решение → реализация.
+rules:
+  - name: spine-has-subscription-ads
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009'
+    severity: error
+  - name: spine-has-mandate-aggregate-rule
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'отдельный агрегат'
+    severity: error
+  - name: spine-has-revocation-compensation
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-012'
+    severity: error
+  - name: spine-has-credit-claim-and-observability
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-013'
+    severity: error
+  - name: spine-has-charge-key-observability
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-014'
+    severity: error
+  - name: spine-has-consent-evidence
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-015'
+    severity: error
+  - name: spine-has-antifraud-fail-closed
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-016'
+    severity: error
+  - name: openapi-consent-evidence
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: 'consentEvidenceRef'
+    severity: error
+  - name: abs-credit-only-from-paid-preserved
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'только из `PAID`'
+    severity: error
+  - name: adr-008-exists
+    type: must_contain
+    glob: "docs/adr/ADR-008-*.md"
+    pattern: 'Status: Proposed'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: mandate-spec-exists
+    type: must_contain
+    glob: "docs/spec/mandate-lifecycle.md"
+    pattern: 'Запрещённые переходы'
+    severity: error
+  - name: mandate-revocation-blocks-charges
+    type: must_contain
+    glob: "docs/spec/mandate-lifecycle.md"
+    pattern: 'немедленный'
+    severity: error
+  - name: openapi-mandates-added
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/mandates'
+    severity: error
+  - name: openapi-version-bumped
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '0.2.0-draft'
+    severity: error
+  - name: openapi-payments-preserved
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '/v1/payments'
+    severity: error
+  - name: nfr-subscriptions-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'Списаний после отзыва'
+    severity: error
+  - name: nfr-base-availability-preserved
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: vendor-rfp-mandate-gate
+    type: must_contain
+    glob: "docs/rfp/vendor-rfp.md"
+    pattern: 'G8'
+    severity: warn
+  - name: solutioning-change-recorded
+    type: must_contain
+    glob: "docs/solutioning.md"
+    pattern: 'ADR-008'
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn

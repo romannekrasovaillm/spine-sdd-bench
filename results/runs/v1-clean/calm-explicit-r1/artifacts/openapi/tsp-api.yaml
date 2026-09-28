@@ -1,0 +1,147 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Запрос согласия создан
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/revoke:
+    post:
+      operationId: revokeConsent
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие отозвано (или отзыв инициирован)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        paymentType:
+          type: string
+          enum: [ONE_TIME, RECURRING]
+          default: ONE_TIME
+          description: Тип платежа. ONE_TIME — разовый QR/ссылка (по умолчанию); RECURRING — рекуррентный дебит по согласию
+        consentId:
+          type: string
+          description: Идентификатор согласия. Обязателен при paymentType=RECURRING
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentType:
+          type: string
+          enum: [ONE_TIME, RECURRING]
+          description: Тип платежа
+        consentId:
+          type: string
+          description: Идентификатор согласия (для рекуррентного дебита)
+    ConsentRequest:
+      type: object
+      required: [tspId, amountLimit]
+      properties:
+        tspId: {type: string}
+        amountLimit:
+          type: integer
+          description: Максимальная сумма одного дебита, в копейках
+        currency: {type: string, default: RUB}
+        maxTotalAmount:
+          type: integer
+          description: Суммарный лимит по согласию, в копейках (опц.)
+        validityStart: {type: string, description: Начало действия, ISO 8601}
+        validityEnd: {type: string, description: Окончание действия, ISO 8601}
+        merchantConsentId:
+          type: string
+          description: Сквозной идентификатор согласия на стороне ТСП
+        paymentPurpose: {type: string, description: Назначение платежа/подписки}
+    Consent:
+      type: object
+      required: [consentId, status, amountLimit]
+      properties:
+        consentId: {type: string}
+        status:
+          type: string
+          enum: [REQUESTED, PENDING_SIGN, ACTIVE, REVOKED, EXPIRED, DECLINED, SUSPENDED]
+        amountLimit:
+          type: integer
+          description: Максимальная сумма одного дебита, в копейках
+        remainingLimit:
+          type: integer
+          description: Остаток суммарного лимита, в копейках
+        expiresAt: {type: string, description: Срок действия согласия, ISO 8601}
+        merchantConsentId: {type: string}
+        createdAt: {type: string, description: ISO 8601}

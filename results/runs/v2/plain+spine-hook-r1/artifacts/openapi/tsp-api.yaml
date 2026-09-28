@@ -1,0 +1,168 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Контракт ТСП (мерчант-API). Версия 0.2.0 расширяет 0.1.0 мандатами (согласие
+    плательщика на рекуррентные C2B-списания, ADR-008) обратно совместимым способом:
+    добавлены новые пути и опциональные поля; существующие пути, обязательные поля и
+    статусы платежа не изменены.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      summary: Создать платёж (разовый или рекуррентное списание по мандату)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      summary: Статус платежа
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      summary: Зарегистрировать мандат (согласие плательщика на рекуррентные списания)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Мандат зарегистрирован (ожидает подтверждения плательщика)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      summary: Статус мандата
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние мандата
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      summary: Отозвать мандат (инициатива ТСП)
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRevokeRequest'}
+      responses:
+        '200':
+          description: Мандат отозван
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+        paymentType:
+          type: string
+          description: >
+            Тип платежа: one_off — разовый (поведение v0.1, по умолчанию);
+            recurring — рекуррентное списание по мандату (требует mandateId).
+          enum: [one_off, recurring]
+          default: one_off
+        mandateId:
+          type: string
+          description: >
+            Идентификатор мандата. Обязателен при paymentType=recurring;
+            для разового платежа не указывается.
+        qrType: {type: string, enum: [dynamic, static, link]}
+        ttlSeconds: {type: integer}
+        redirectUrl: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentType:
+          type: string
+          enum: [one_off, recurring]
+          default: one_off
+        mandateId: {type: string}
+        merchantOrderId: {type: string}
+    MandateRequest:
+      type: object
+      required: [tspId, amountLimitPerCharge, amountLimitTotal]
+      properties:
+        tspId: {type: string}
+        amountLimitPerCharge: {type: integer, description: Разовый лимит списания, копейки}
+        amountLimitTotal: {type: integer, description: Суммарный лимит списаний, копейки}
+        periodicity: {type: string, description: Разрешённая периодичность списаний (формат — по НСПК)}
+        paymentPurpose: {type: string}
+        merchantOrderId: {type: string}
+        validUntil: {type: string, format: date-time, description: Срок действия согласия}
+    Mandate:
+      type: object
+      required: [mandateId, status, amountLimitPerCharge, amountLimitTotal]
+      properties:
+        mandateId: {type: string}
+        tspId: {type: string}
+        status:
+          type: string
+          enum: [PENDING_CONSENT, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+        amountLimitPerCharge: {type: integer, description: Разовый лимит списания, копейки}
+        amountLimitTotal: {type: integer, description: Суммарный лимит списаний, копейки}
+        amountChargedTotal: {type: integer, description: Списано по мандату, копейки}
+        periodicity: {type: string}
+        consentUrl: {type: string, description: Ссылка/QR для подтверждения согласия плательщиком}
+        merchantOrderId: {type: string}
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time}
+        expiresAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+        revokeReason: {type: string}
+    MandateRevokeRequest:
+      type: object
+      properties:
+        reason: {type: string}

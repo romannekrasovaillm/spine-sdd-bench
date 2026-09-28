@@ -1,0 +1,72 @@
+{
+  "total_runs": 68,
+  "by_campaign": {
+    "v2": 36,
+    "pilot-v2": 12,
+    "v1": 12,
+    "v1-clean": 8
+  },
+  "gate_no_spine": {
+    "PASS_DELTA": 6,
+    "PASS_UNTOUCHED": 1,
+    "FAIL": 5,
+    "n": 12
+  },
+  "rubric_no_spine_solution_architecture": 3.7,
+  "rubric_no_spine_architecture_gates": 3.27,
+  "rubric_no_spine_neutral_architecture": 3.58,
+  "gate_spine": {
+    "PASS_DELTA": 12,
+    "PASS_UNTOUCHED": 0,
+    "FAIL": 0,
+    "n": 12
+  },
+  "rubric_spine_solution_architecture": 3.57,
+  "rubric_spine_architecture_gates": 3.28,
+  "rubric_spine_neutral_architecture": 3.7,
+  "gate_spine_hook": {
+    "PASS_DELTA": 11,
+    "PASS_UNTOUCHED": 1,
+    "FAIL": 0,
+    "n": 12
+  },
+  "rubric_spine_hook_solution_architecture": 3.63,
+  "rubric_spine_hook_architecture_gates": 3.35,
+  "rubric_spine_hook_neutral_architecture": 3.9,
+  "f4_pass_delta": 29,
+  "f4_modified": 24,
+  "v1_gate": {
+    "FAIL": 8,
+    "PASS_UNTOUCHED": 2,
+    "PASS_DELTA": 2
+  },
+  "v1_n": 12,
+  "v1-clean_gate": {
+    "FAIL": 6,
+    "PASS_DELTA": 2
+  },
+  "v1-clean_n": 8,
+  "pilot-v2_gate": {
+    "PASS_DELTA": 9,
+    "FAIL": 2,
+    "PASS_UNTOUCHED": 1
+  },
+  "pilot-v2_n": 12,
+  "pilot_gate_by_mode": {
+    "none": {
+      "PASS_DELTA": 1,
+      "PASS_UNTOUCHED": 1,
+      "FAIL": 2
+    },
+    "spine": {
+      "PASS_DELTA": 4,
+      "PASS_UNTOUCHED": 0,
+      "FAIL": 0
+    },
+    "spine-hook": {
+      "PASS_DELTA": 4,
+      "PASS_UNTOUCHED": 0,
+      "FAIL": 0
+    }
+  }
+}

@@ -1,0 +1,177 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Аддитивное расширение v0.1: согласия плательщика и рекуррентные C2B-списания
+    (ADR-008). Существующие пути /v1/payments* не изменены.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано (ожидает подтверждения плательщиком)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/cancel:
+    post:
+      operationId: cancelConsent
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие отозвано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/debits:
+    post:
+      operationId: createRecurringDebit
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitRequest'}
+      responses:
+        '201':
+          description: Рекуррентное списание создано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Debit'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        consentId: {type: string, description: 'Опц.: идентификатор согласия для рекуррентного списания'}
+        paymentType:
+          type: string
+          enum: [ONE_SHOT, RECURRING]
+          default: ONE_SHOT
+          description: 'Опц.: тип платежа (для существующих потребителей отсутствует = ONE_SHOT)'
+    ConsentRequest:
+      type: object
+      required: [tspId, currency, maxAmount, maxFrequency]
+      properties:
+        tspId: {type: string}
+        currency: {type: string, default: RUB}
+        maxAmount: {type: integer, description: Лимит одного списания в копейках}
+        maxFrequency:
+          type: string
+          enum: [DAILY, WEEKLY, MONTHLY, UNLIMITED]
+        validFrom: {type: string, format: date-time, description: ISO 8601 UTC}
+        validTo: {type: string, format: date-time, description: ISO 8601 UTC}
+        purpose: {type: string}
+        payerReference: {type: string, description: Сквозной идентификатор плательщика у ТСП}
+        redirectUrl: {type: string}
+    Consent:
+      type: object
+      required: [consentId, tspId, status, maxAmount, maxFrequency]
+      properties:
+        consentId: {type: string}
+        tspId: {type: string}
+        status:
+          type: string
+          enum: [PENDING, ACTIVE, SUSPENDED, REVOKED, EXPIRED]
+        maxAmount: {type: integer, description: Лимит одного списания в копейках}
+        maxFrequency:
+          type: string
+          enum: [DAILY, WEEKLY, MONTHLY, UNLIMITED]
+        validFrom: {type: string, format: date-time}
+        validTo: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+    DebitRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: Сумма списания в копейках (≤ consent.maxAmount)}
+        currency: {type: string, default: RUB}
+        purpose: {type: string}
+        merchantOrderId: {type: string}
+    Debit:
+      type: object
+      required: [debitId, paymentId, consentId, amount, status]
+      properties:
+        debitId: {type: string}
+        paymentId: {type: string, description: Дебит — платёж той же статусной машины}
+        consentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, PAID, CREDITED, COMPLETED, FAILED]

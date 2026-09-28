@@ -1,0 +1,260 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: |
+    Контракт мерчант-API СБП-шлюза. v0.2.0 аддитивно расширяет v0.1.0 подписками
+    (согласие на рекуррентные списания) и списаниями. Ломающих изменений нет:
+    существующие пути и обязательные поля сохранены, новые поля опциональны.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      description: Создание заявки на согласие о рекуррентных списаниях (v0.2)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Подписка создана
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      description: Статус подписки (v0.2)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Подписка
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/cancel:
+    post:
+      operationId: cancelSubscription
+      description: Отмена подписки со стороны ТСП (v0.2); новые списания прекращаются
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка отменена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/debits:
+    get:
+      operationId: listDebits
+      description: Список списаний по подписке (v0.2)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Список списаний
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DebitList'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+    post:
+      operationId: initiateDebit
+      description: |
+        Инициация списания по согласию (v0.2). Идемпотентность: пара
+        (subscriptionId, periodKey) — повторная инициация за тот же период
+        возвращает существующее списание.
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitRequest'}
+      responses:
+        '201':
+          description: Списание инициировано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Debit'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        initiationType:
+          type: string
+          description: 'Способ инициации платежа (v0.2, опционально)'
+          enum: [qr, subscription]
+        subscriptionId:
+          type: string
+          description: 'Подписка-источник платежа (v0.2, опционально; для initiationType=subscription)'
+        debitId:
+          type: string
+          description: 'Списание-источник платежа (v0.2, опционально)'
+    SubscriptionRequest:
+      type: object
+      required: [tspId, maxAmount, period, paymentPurpose]
+      properties:
+        tspId: {type: string}
+        maxAmount: {type: integer, description: Максимальная сумма одного списания, в копейках}
+        currency: {type: string, default: RUB}
+        period:
+          type: string
+          enum: [WEEKLY, MONTHLY, CUSTOM]
+        periodDays: {type: integer, description: 'Период в днях для period=CUSTOM'}
+        paymentPurpose: {type: string}
+        startDate: {type: string, format: date}
+        endDate: {type: string, format: date, nullable: true}
+        redirectUrl: {type: string, description: Возврат плательщика после подтверждения согласия}
+    Subscription:
+      type: object
+      required: [subscriptionId, status, maxAmount, currency, period]
+      properties:
+        subscriptionId: {type: string}
+        status:
+          type: string
+          enum: [PENDING, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+        maxAmount: {type: integer}
+        currency: {type: string}
+        period:
+          type: string
+          enum: [WEEKLY, MONTHLY, CUSTOM]
+        paymentPurpose: {type: string}
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time, nullable: true}
+        expiresAt: {type: string, format: date-time, nullable: true}
+        revokedAt: {type: string, format: date-time, nullable: true}
+    DebitRequest:
+      type: object
+      required: [amount, periodKey]
+      properties:
+        amount: {type: integer, description: Сумма списания, в копейках}
+        periodKey:
+          type: string
+          description: 'Идентификатор периода списания; вместе с subscriptionId — ключ идемпотентности'
+        paymentPurpose: {type: string}
+    Debit:
+      type: object
+      required: [debitId, subscriptionId, paymentId, amount, periodKey, status]
+      properties:
+        debitId: {type: string}
+        subscriptionId: {type: string}
+        paymentId: {type: string, description: Платёж, в котором проведено списание}
+        amount: {type: integer}
+        periodKey: {type: string}
+        status:
+          type: string
+          description: Проекция статуса связанного платежа
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        createdAt: {type: string, format: date-time}
+        paidAt: {type: string, format: date-time, nullable: true}
+        errorCode: {type: string, nullable: true}
+    DebitList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Debit'}
+    Problem:
+      type: object
+      description: Ошибка RFC 9457 (application/problem+json)
+      required: [type, title, status]
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}

@@ -1,0 +1,245 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: |
+    Мерчант-API СБП-шлюза (C2B-приём). Версия 0.2.0 — аддитивное расширение:
+    добавлены рекуррентные согласия плательщика и списания по ним (ADR-008..010).
+    Существующие ресурсы одноразовых платежей не изменены и совместимы с v0.1.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      summary: Создать согласие плательщика (рекуррентное списание)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие создано, ожидает оформления плательщиком
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      summary: Статус согласия
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/consents/{consentId}/revoke:
+    post:
+      operationId: revokeConsent
+      summary: Отозвать согласие (по инициативе ТСП)
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отозвано (или уже было отозвано — идемпотентно)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/consents/{consentId}/charges:
+    post:
+      operationId: createCharge
+      summary: Инициировать рекуррентное списание по согласию
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ChargeRequest'}
+      responses:
+        '201':
+          description: Списание создано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/payments/{paymentId}/charges/{chargeId}:
+    get:
+      operationId: getCharge
+      summary: Статус рекуррентного списания
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+        - {in: path, name: chargeId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Списание
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+        default:
+          description: Ошибка (RFC 9457)
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: "Сумма в копейках"}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: "Сумма в копейках"}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        consentId: {type: string, description: "Заполнен для платежа, созданного рекуррентным списанием (ADR-008)"}
+        initiation:
+          type: string
+          enum: [QR, CONSENT]
+          description: "Источник инициации платежа (QR — одноразовый, CONSENT — по согласию)"
+    ConsentRequest:
+      type: object
+      required: [tspId, amountType, currency, periodicity]
+      properties:
+        tspId: {type: string}
+        amountType: {type: string, enum: [FIXED, VARIABLE]}
+        maxAmountPerCharge:
+          type: integer
+          description: "Максимум на одно списание в копейках; обязателен при amountType=FIXED"
+        currency: {type: string, default: RUB}
+        periodicity: {type: string, enum: [WEEKLY, MONTHLY, QUARTERLY, ANNUAL]}
+        maxTotalAmount: {type: integer, description: "Опциональный лимит суммы за весь срок в копейках"}
+        validUntil: {type: string, format: date-time, description: "Лимит срока — по НСПК [ТРЕБУЕТ ПРОВЕРКИ]"}
+        purpose: {type: string}
+        merchantOrderId: {type: string}
+        redirectUrl: {type: string}
+    Consent:
+      type: object
+      required: [consentId, tspId, status, amountType, periodicity]
+      properties:
+        consentId: {type: string}
+        tspId: {type: string}
+        status:
+          type: string
+          enum: [PENDING_PAYER, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+        amountType: {type: string, enum: [FIXED, VARIABLE]}
+        maxAmountPerCharge: {type: integer, description: "Сумма в копейках"}
+        currency: {type: string}
+        periodicity: {type: string, enum: [WEEKLY, MONTHLY, QUARTERLY, ANNUAL]}
+        validUntil: {type: string, format: date-time}
+        purpose: {type: string}
+        merchantOrderId: {type: string}
+        consentUrl: {type: string, description: "Ссылка/QR для оформления согласия плательщиком"}
+        qrId: {type: string}
+        qrImage: {type: string}
+        activatedAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+        errorCode: {type: string, description: "Код отказа при статусе REJECTED"}
+    ChargeRequest:
+      type: object
+      required: [amount, currency, billingId]
+      properties:
+        amount: {type: integer, description: "Сумма в копейках"}
+        currency: {type: string, default: RUB}
+        billingId:
+          type: string
+          description: "Стабильный идентификатор расчётного периода/начисления ТСП; уникален в паре (consentId, billingId) — ADR-009"
+        merchantOrderId: {type: string}
+        description: {type: string}
+    Charge:
+      type: object
+      required: [chargeId, paymentId, consentId, amount, billingId, status]
+      properties:
+        chargeId: {type: string}
+        paymentId: {type: string, description: "Идентификатор платежа в общей статусной машине; статус доступен через GET /v1/payments/{paymentId}"}
+        consentId: {type: string}
+        amount: {type: integer, description: "Сумма в копейках"}
+        currency: {type: string}
+        billingId: {type: string}
+        status:
+          type: string
+          enum: [CREATED, PAID, CREDITED, COMPLETED, FAILED, CANCELLED]
+        errorCode: {type: string}
+        createdAt: {type: string, format: date-time}
+    Problem:
+      type: object
+      required: [title, status]
+      properties:
+        type: {type: string, format: uri}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code:
+          type: string
+          description: "Канонический код: CONSENT_NOT_ACTIVE, CHARGE_EXCEEDS_CONSENT_LIMIT, CHARGE_CONFLICT, IDEMPOTENCY_CONFLICT"
+        traceId: {type: string}
+        idempotencyKey: {type: string}

@@ -1,0 +1,211 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      description: Регистрация мандата (согласия плательщика) на рекуррентные списания
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Мандат создан, ожидает согласия плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '409':
+          description: Конфликт идемпотентности
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние мандата и параметры списаний
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '404':
+          description: Мандат не найден
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/mandates/{mandateId}/charges:
+    get:
+      operationId: listMandateCharges
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - {in: query, name: limit, required: false, schema: {type: integer, default: 50}}
+      responses:
+        '200':
+          description: Списания по мандату
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ChargeList'}
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      description: Отзыв мандата (идемпотентно; следующее списание не создаётся)
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRevokeRequest'}
+      responses:
+        '200':
+          description: Мандат отозван
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+        '422':
+          description: Отзыв невозможен в текущем состоянии мандата
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/Problem'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        source:
+          type: string
+          description: Источник платежа; SUBSCRIPTION — списание по мандату
+          enum: [ONETIME, SUBSCRIPTION]
+          default: ONETIME
+        mandateId: {type: string, description: Мандат (при source=SUBSCRIPTION)}
+        billingPeriod: {type: string, description: 'Период списания, напр. 2026-10'}
+    MandateRequest:
+      type: object
+      required: [tspId, periodicity, purpose]
+      properties:
+        tspId: {type: string}
+        amountLimit: {type: integer, description: Максимальная сумма одного списания в копейках; опц.}
+        currency: {type: string, enum: [RUB], default: RUB}
+        periodicity: {$ref: '#/components/schemas/Periodicity'}
+        startAt: {type: string, format: date-time}
+        endAt: {type: string, format: date-time}
+        purpose: {type: string, description: Назначение списаний (видно плательщику)}
+        payerReturnUrl: {type: string, format: uri}
+    Mandate:
+      type: object
+      required: [mandateId, tspId, status, periodicity]
+      properties:
+        mandateId: {type: string}
+        tspId: {type: string}
+        status: {$ref: '#/components/schemas/MandateStatus'}
+        periodicity: {$ref: '#/components/schemas/Periodicity'}
+        amountLimit: {type: integer, description: Максимальная сумма одного списания в копейках}
+        currency: {type: string, enum: [RUB]}
+        startAt: {type: string, format: date-time}
+        endAt: {type: string, format: date-time}
+        consentRef: {type: string, description: Ссылка на согласие в ОПКЦ (сквозная для сверки)}
+        consentAt: {type: string, format: date-time}
+        lastChargeAt: {type: string, format: date-time}
+        nextChargeAt: {type: string, format: date-time}
+    MandateRevokeRequest:
+      type: object
+      properties:
+        reason: {type: string}
+    MandateStatus:
+      type: string
+      enum: [PENDING_CONSENT, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+    Periodicity:
+      type: string
+      enum: [DAILY, WEEKLY, MONTHLY, ON_DEMAND]
+    Charge:
+      type: object
+      required: [chargeId, mandateId, billingPeriod, amount, status]
+      properties:
+        chargeId: {type: string}
+        mandateId: {type: string}
+        billingPeriod: {type: string, description: 'Период списания, напр. 2026-10'}
+        paymentId: {type: string, description: Платёж, в котором исполнено списание}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [INITIATED, PAID, CREDITED, COMPLETED, FAILED, SKIPPED, UNKNOWN]
+        scheduledAt: {type: string, format: date-time}
+    ChargeList:
+      type: object
+      required: [mandateId, charges]
+      properties:
+        mandateId: {type: string}
+        charges:
+          type: array
+          items: {$ref: '#/components/schemas/Charge'}
+    ErrorCode:
+      type: string
+      description: Канонические коды ошибок (RFC 9457, поле code)
+      enum: [INVALID_REQUEST, UNAUTHORIZED, TSP_NOT_ACTIVE, NOT_FOUND, IDEMPOTENCY_CONFLICT, PAYMENT_NOT_REFUNDABLE, AMOUNT_EXCEEDS_PAID, RATE_LIMITED, INTERNAL, MANDATE_NOT_FOUND, MANDATE_NOT_ACTIVE, MANDATE_LIMIT_EXCEEDED, PERIOD_ALREADY_CHARGED, CONSENT_PENDING, CONSENT_REVOKED]
+    Problem:
+      type: object
+      description: Problem Details (RFC 9457) — используется в ошибках 4xx/5xx
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {$ref: '#/components/schemas/ErrorCode'}
+        traceId: {type: string}

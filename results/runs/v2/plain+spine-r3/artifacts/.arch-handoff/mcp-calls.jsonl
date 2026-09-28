@@ -1,0 +1,14 @@
+{"ts":"2026-09-28T15:08:12.304438808+03:00","tool":"significance_score","verdict":"ok","duration_ms":0,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:08:12.308242879+03:00","tool":"spine_lint","verdict":"pass","duration_ms":2,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:08:12.309087033+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:08:53.481228404+03:00","tool":"rules_suggest","verdict":"ok","duration_ms":5,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:09:31.997989912+03:00","tool":"adr_registry","verdict":"pass","duration_ms":3,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:09:31.998308825+03:00","tool":"rubric_list","verdict":"error","duration_ms":0,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:09:32.006516115+03:00","tool":"delta_guard","verdict":"pass","duration_ms":8,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:13:14.483025689+03:00","tool":"spine_lint","verdict":"pass","duration_ms":2,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:13:14.484176091+03:00","tool":"openapi_lint","verdict":"ok","duration_ms":0,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:13:14.506303334+03:00","tool":"fitness_check","verdict":"pass","duration_ms":21,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:13:14.516351807+03:00","tool":"delta_guard","verdict":"pass","duration_ms":9,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:13:18.992927614+03:00","tool":"contract_diff","verdict":"ok","duration_ms":1,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:13:18.999276163+03:00","tool":"adr_registry","verdict":"pass","duration_ms":6,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}
+{"ts":"2026-09-28T15:13:29.101812647+03:00","tool":"architect_review","verdict":"pass","duration_ms":61,"session_id":"a5d97a5f7f929ddc","host":"qwen-cli-mcp-client-spine"}

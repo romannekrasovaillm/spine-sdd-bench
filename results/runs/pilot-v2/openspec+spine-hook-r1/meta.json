@@ -1,0 +1,62 @@
+{
+  "condition": "openspec+spine-hook",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-openspec+spine-hook-r1",
+  "base_sha": "3c95214329fe4b0edb2f9c53b6d3924e75416ac1",
+  "wall_s": 858.4,
+  "turn_ok": true,
+  "records": 161,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 72,
+    "extension_skills": 0,
+    "commands": 6,
+    "mcp_servers": [
+      "spine"
+    ],
+    "hooks": [
+      "Stop"
+    ]
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 104,
+  "tool_names": [
+    "edit",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "tool_call",
+    "tool_search",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\t.arch-handoff/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/mcp-calls.jsonl",
+    "M\t.qwen/settings.json",
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tchanges/add-sbp-subscriptions/DELTA.md",
+    "A\tdocs/adr/ADR-008-podpiski-sbp-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelshchika.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/solutioning.md",
+    "M\tdocs/spec/state-machine.md",
+    "M\topenapi/tsp-api.yaml",
+    "A\topenspec/changes/add-sbp-subscriptions/.openspec.yaml",
+    "A\topenspec/changes/add-sbp-subscriptions/design.md",
+    "A\topenspec/changes/add-sbp-subscriptions/proposal.md",
+    "A\topenspec/changes/add-sbp-subscriptions/specs/sbp-subscriptions/spec.md",
+    "A\topenspec/changes/add-sbp-subscriptions/tasks.md"
+  ]
+}

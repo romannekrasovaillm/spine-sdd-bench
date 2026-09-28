@@ -1,0 +1,89 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение (до кода). После выбора стека и начала реализации handoff перегенерирует
+# констрейнты под кодовый харнесс (сборка, линтеры, тесты).
+rules:
+  - name: adr-set-complete
+    type: file_exists
+    path: docs/adr/ADR-001-outbox.md
+    severity: error
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: readme-exists
+    type: file_exists
+    path: README.md
+    severity: warn
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+  # --- Дельта sbp-subscriptions (Critical): трассировка решения до реализации ---
+  # Исполнительные проверки поведения (consent-before-auto-action, idempotency-key) применяются
+  # шаблонами на этапе реализации: arch-be rules template apply <id> --ad AD-N --dir .
+  - name: subscriptions-delta-present
+    type: file_exists
+    path: changes/sbp-subscriptions/DELTA.md
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: subscriptions-design-present
+    type: file_exists
+    path: changes/sbp-subscriptions/DESIGN.md
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: adr-subscriptions-present
+    type: file_exists
+    path: docs/adr/ADR-008-model-podpiski-sbp-mandat-platelschika-kak-edinstvennyy-istochnik-soglasiya.md
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+  - name: spine-consent-invariant
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009\. Согласие плательщика — обязательное условие'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'инвариант AD-009 (согласие обязательно) должен присутствовать в spine после дельты'
+  - name: spine-charge-idempotency-invariant
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'chargeId = f\(subscriptionId, periodKey\)'
+    severity: error
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'инвариант AD-010 (детерминированный ключ списания) должен присутствовать в spine'
+  - name: subscriptions-ears-acceptance
+    type: must_contain
+    glob: "changes/sbp-subscriptions/ACCEPTANCE.md"
+    pattern: '(?m)^\|\s*AC-\d+'
+    severity: warn
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'критерии приёмки нового функционала в нотации EARS'
+  - name: subscriptions-contract-additive
+    type: must_contain
+    glob: "docs/contracts/tsp-api.md"
+    pattern: '0 breaking'
+    severity: warn
+    owner: solution-architect
+    expiry: 2027-03-31
+    rationale: 'расширение контракта только аддитивно — совместимость v0.1'

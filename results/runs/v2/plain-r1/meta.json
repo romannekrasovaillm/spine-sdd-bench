@@ -1,0 +1,55 @@
+{
+  "condition": "plain",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-plain-r1",
+  "base_sha": "a6eeb33a92f0eec73d900291f5707d3e6104d639",
+  "wall_s": 519.2,
+  "turn_ok": true,
+  "records": 125,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 0,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 71,
+  "tool_names": [
+    "edit",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tdocs/adr/ADR-008-sbp-podpiski-rekurrentnye-spisaniya-po-soglasiyu-platelshchika.md",
+    "A\tdocs/changes/change-001-sbp-podpiski/README.md",
+    "A\tdocs/changes/change-001-sbp-podpiski/acceptance-and-rollback.md",
+    "A\tdocs/changes/change-001-sbp-podpiski/contracts-delta.md",
+    "A\tdocs/changes/change-001-sbp-podpiski/handoff/ARCHITECTURE.md",
+    "A\tdocs/changes/change-001-sbp-podpiski/handoff/CONSTRAINTS.yaml",
+    "A\tdocs/changes/change-001-sbp-podpiski/handoff/MANIFEST.json",
+    "A\tdocs/changes/change-001-sbp-podpiski/handoff/RUBRIC.yaml",
+    "A\tdocs/changes/change-001-sbp-podpiski/handoff/TASK.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/solutioning.md",
+    "A\tdocs/spec/mandate-debit-lifecycle.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

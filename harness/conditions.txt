@@ -1,0 +1,1 @@
+plain,plain+spine,plain+spine-hook,openspec,openspec+spine,openspec+spine-hook,bmad,bmad+spine,bmad+spine-hook,superpowers,superpowers+spine,superpowers+spine-hook

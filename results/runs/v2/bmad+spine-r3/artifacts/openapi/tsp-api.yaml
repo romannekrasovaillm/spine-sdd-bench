@@ -1,0 +1,300 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      summary: Регистрация согласия плательщика на рекуррентные списания
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+    delete:
+      operationId: revokeConsent
+      summary: Отзыв согласия (идемпотентно); блокирует будущие списания
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Согласие отозвано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Создание подписки на базе действующего согласия
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Подписка создана
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Подписка
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+    delete:
+      operationId: cancelSubscription
+      summary: Отмена подписки ТСП (идемпотентно); будущие списания не создаются
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка отменена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/pause:
+    post:
+      operationId: pauseSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка приостановлена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/resume:
+    post:
+      operationId: resumeSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Подписка возобновлена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/debits:
+    get:
+      operationId: listSubscriptionDebits
+      summary: Список списаний подписки (идентификаторы платежей)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Списания подписки
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Debit'}
+    post:
+      operationId: initiateDebit
+      summary: Внеплановое списание в рамках действующего согласия
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitInitiationRequest'}
+      responses:
+        '201':
+          description: Списание инициировано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Debit'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        subscriptionId:
+          type: string
+          nullable: true
+          description: Идентификатор подписки для рекуррентного списания; null для разового платежа
+        initiationType:
+          type: string
+          nullable: true
+          enum: [PAYER, SCHEDULED, MERCHANT]
+          description: Источник инициации платежа; null для разовых платежей без указания
+    ConsentRequest:
+      type: object
+      required: [tspId, amountLimit, validTo]
+      properties:
+        tspId: {type: string}
+        amountLimit: {type: integer, description: Лимит на одно списание, копейки}
+        totalLimit: {type: integer, description: Общий лимит списаний по согласию, копейки}
+        validTo: {type: string, description: Срок действия согласия, ISO 8601}
+        purpose: {type: string}
+        redirectUrl: {type: string}
+        merchantOrderId: {type: string}
+    Consent:
+      type: object
+      required: [consentId, tspId, status]
+      properties:
+        consentId: {type: string}
+        tspId: {type: string}
+        status:
+          type: string
+          enum: [PENDING, ACTIVE, REVOKED, EXPIRED, REJECTED]
+        amountLimit: {type: integer, description: Лимит на одно списание, копейки}
+        totalLimit: {type: integer, description: Общий лимит списаний, копейки}
+        validFrom: {type: string, nullable: true}
+        validTo: {type: string, nullable: true}
+        createdAt: {type: string}
+        revocationReason: {type: string, nullable: true}
+    SubscriptionRequest:
+      type: object
+      required: [tspId, consentId, amount, period, firstDebitAt]
+      properties:
+        tspId: {type: string}
+        consentId: {type: string}
+        amount: {type: integer, description: Сумма списания за период, копейки}
+        period:
+          type: string
+          enum: [DAY, WEEK, MONTH, YEAR]
+        firstDebitAt: {type: string, description: Момент первого списания, ISO 8601}
+        purpose: {type: string}
+        merchantOrderId: {type: string}
+    Subscription:
+      type: object
+      required: [subscriptionId, consentId, status]
+      properties:
+        subscriptionId: {type: string}
+        consentId: {type: string}
+        tspId: {type: string}
+        amount: {type: integer, description: Сумма списания за период, копейки}
+        period:
+          type: string
+          enum: [DAY, WEEK, MONTH, YEAR]
+        firstDebitAt: {type: string}
+        nextDebitAt: {type: string, nullable: true}
+        status:
+          type: string
+          enum: [ACTIVE, PAUSED, CANCELLED, EXPIRED]
+        merchantOrderId: {type: string}
+    DebitInitiationRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: Сумма списания, копейки}
+        reason: {type: string}
+        merchantOrderId: {type: string}
+    Debit:
+      type: object
+      required: [paymentId, subscriptionId, amount, status]
+      properties:
+        paymentId: {type: string}
+        subscriptionId: {type: string}
+        occurrenceKey: {type: string, description: Ключ occurrence (subscriptionId + scheduledFor)}
+        amount: {type: integer, description: Сумма в копейках}
+        scheduledFor: {type: string}
+        status: {$ref: '#/components/schemas/Payment/properties/status'}
+    Problem:
+      type: object
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}
+        idempotencyKey: {type: string}

@@ -1,0 +1,176 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: |
+    Контракт мерчант-API. v0.2.0 — аддитивное расширение v0.1.0: согласия плательщика
+    (подписки) и рекуррентные C2B-списания по согласию (ADR-008, AD-009). Ни один
+    существующий путь, поле или обязательность не изменены.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      description: Оформление согласия плательщика на рекуррентные списания (ADR-008)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано, ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/charges:
+    post:
+      operationId: createSubscriptionCharge
+      description: Инициирование рекуррентного списания по согласию (только при статусе ACTIVE)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionChargeRequest'}
+      responses:
+        '201':
+          description: Списание принято в обработку (платёж создан)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SubscriptionCharge'}
+  /v1/subscriptions/{subscriptionId}/revoke:
+    post:
+      operationId: revokeSubscription
+      description: Отзыв согласия плательщика; блокирует новые списания (AD-009)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '202':
+          description: Отзыв принят
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        subscriptionId:
+          type: string
+          description: Идентификатор согласия, по которому инициировано списание (опционально, для рекуррентных платежей)
+    SubscriptionRequest:
+      type: object
+      required: [paymentPurpose]
+      properties:
+        payerRef: {type: string, description: Идентификатор плательщика для оформления согласия (минимизированные ПДн, AD-010)}
+        amountLimitPerCharge: {type: integer, description: Максимальная сумма одного списания, копейки}
+        totalLimit: {type: integer, description: Суммарный лимит списаний по согласию, копейки}
+        currency: {type: string, description: 'ISO 4217, по умолчанию RUB (643)'}
+        period: {type: string, description: Периодичность списаний (напр. MONTHLY)}
+        paymentPurpose: {type: string, description: Назначение платежа}
+        merchantOrderId: {type: string, description: Сквозной идентификатор ТСП (опционально)}
+        webhookUrl: {type: string, description: URL вебхуков ТСП (опционально)}
+    Subscription:
+      type: object
+      required: [subscriptionId, status]
+      properties:
+        subscriptionId: {type: string}
+        status:
+          type: string
+          enum: [INITIATED, PENDING_PAYER, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+        consentRef: {type: string, description: Референс согласия в ОПКЦ/НСПК (сквозной для сверки)}
+        consentUrl: {type: string, description: Ссылка/данные для подтверждения согласия плательщиком}
+        amountLimitPerCharge: {type: integer}
+        totalLimit: {type: integer}
+        currency: {type: string}
+        period: {type: string}
+        paymentPurpose: {type: string}
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time}
+        expiresAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+    SubscriptionChargeRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: Сумма списания, копейки (в пределах параметров согласия)}
+        merchantOrderId: {type: string}
+        paymentPurpose: {type: string}
+    SubscriptionCharge:
+      type: object
+      required: [chargeId, paymentId, amount, status]
+      properties:
+        chargeId: {type: string}
+        paymentId: {type: string, description: Идентификатор платежа-списания в статусной машине}
+        amount: {type: integer}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        createdAt: {type: string, format: date-time}

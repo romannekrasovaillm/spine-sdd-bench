@@ -1,0 +1,186 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >-
+    Версия 0.2.0 аддитивна к 0.1.0: добавлены подписки (мандаты плательщика) и
+    рекуррентные списания (ADR-008). Существующие пути, обязательные поля и
+    значения enum статусов не изменены — потребители v0.1 продолжают работать
+    без изменений.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Создать подписку (мандат плательщика)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Подписка создана, мандат ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние подписки и мандата
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/revoke:
+    post:
+      operationId: revokeSubscription
+      summary: Отозвать или приостановить подписку со стороны ТСП
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRevokeRequest'}
+      responses:
+        '200':
+          description: Новое состояние подписки
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/charges:
+    get:
+      operationId: listSubscriptionCharges
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Список рекуррентных списаний по подписке
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Charge'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        mandateId: {type: string, description: 'Опционально: мандат, по которому выполнено рекуррентное списание'}
+        initiationType:
+          type: string
+          description: 'Опционально: способ инициации платежа; для v0.1-потребителей семантика по умолчанию — qr'
+          enum: [qr, recurring]
+    MandateLimits:
+      type: object
+      description: Лимиты мандата (все — в копейках); проверяются до инициации списания (AD-009)
+      properties:
+        maxPerCharge: {type: integer}
+        maxPerPeriod: {type: integer}
+        maxTotal: {type: integer}
+        maxCharges: {type: integer}
+    SubscriptionRequest:
+      type: object
+      required: [tspId, amount, currency, periodicity]
+      properties:
+        tspId: {type: string}
+        amount: {type: integer, description: Сумма регулярного списания в копейках}
+        currency: {type: string, default: RUB}
+        periodicity: {type: string, description: 'Периодичность: month | week | day'}
+        startDate: {type: string, format: date-time}
+        endDate: {type: string, format: date-time}
+        paymentPurpose: {type: string}
+        merchantSubscriptionId: {type: string, description: 'Сквозной идентификатор подписки у ТСП'}
+        limits: {$ref: '#/components/schemas/MandateLimits'}
+    SubscriptionRevokeRequest:
+      type: object
+      properties:
+        mode:
+          type: string
+          description: 'revoke — необратимый отзыв; suspend — приостановка с возможностью возобновления'
+          enum: [revoke, suspend]
+        reason: {type: string}
+    Subscription:
+      type: object
+      required: [subscriptionId, tspId, status]
+      properties:
+        subscriptionId: {type: string}
+        tspId: {type: string}
+        mandateId: {type: string}
+        status:
+          type: string
+          enum: [CREATED, PENDING_AUTH, ACTIVE, SUSPENDED, REVOKED, EXPIRED, REJECTED]
+        amount: {type: integer}
+        currency: {type: string}
+        periodicity: {type: string}
+        startDate: {type: string, format: date-time}
+        endDate: {type: string, format: date-time}
+        nextChargeAt: {type: string, format: date-time}
+        limits: {$ref: '#/components/schemas/MandateLimits'}
+        merchantSubscriptionId: {type: string}
+    Charge:
+      type: object
+      required: [chargeId, paymentId, amount, status]
+      properties:
+        chargeId: {type: string, description: Идемпотентный ключ списания, детерминированный от мандата и периода}
+        paymentId: {type: string}
+        mandateId: {type: string}
+        amount: {type: integer}
+        status: {type: string, description: Совпадает со статусом платежа-списания}
+        scheduledAt: {type: string, format: date-time}
+        completedAt: {type: string, format: date-time}
+        errorCode: {type: string, nullable: true}

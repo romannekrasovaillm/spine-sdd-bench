@@ -1,0 +1,21 @@
+{
+  "created_at": "2026-09-28T12:15:15.931331829+00:00",
+  "task": "Реализовать walking skeleton рекуррентных C2B-списаний (подписки СБП) поверх принятого решения: домен согласий/подписок в ядре шлюза, pull-списания ТСП, автомат согласия (CREATED->PENDING_PAYER->ACTIVE->REVOKED/EXPIRED), идемпотентность по (consentId,billingKey), зачисление только из PAID. Реализовать: (1) API ТСП v0.2 — /v1/consents (create/get/revoke), /v1/subscriptions (create/get/patch), /v1/subscriptions/{id}/debits; (2) автомат согласия и рекуррентного списания с транзакционным outbox и аудитом; (3) мок-адаптер ОПКЦ с registerConsent/getConsentStatus/revokeConsent/createDebit и событиями consent.* (протокол НСПК не реализуется, внешний вход); (4) мок АБС с идемпотентным зачислением; (5) вебхуки consent.*/subscription.updated. Инварианты AD-001..AD-010: списание только при согласии ACTIVE, зачисление только из PAID, идемпотентность (consentId,billingKey), ноль списаний после отзыва. Критерии — NFR docs/nfr.md §6.",
+  "model": "deepseek",
+  "sources": [
+    "ARCHITECTURE-SPINE.md",
+    "docs/adr/ADR-008-podpiski-sbp-domen-soglasiy-i-podpisok-iniciaciya-rekurrentnyh-spisaniy.md",
+    "docs/adr/ADR-009-zaschita-dannyh-soglasiya-platelschika-i-garantiya-zapreta-spisaniy-posle-otzyva.md",
+    "docs/nfr.md",
+    "docs/contracts/tsp-api.md",
+    "docs/contracts/opkc-adapter.md",
+    "docs/spec/state-machine.md",
+    "changes/sbp-recurring-subscriptions/DELTA.md"
+  ],
+  "epic_context_chars": 7063,
+  "epic_context_tokens": 1765,
+  "route": "Critical",
+  "recommended_timeout_secs": 7200,
+  "baseline_commit": "8fd7c3a",
+  "rollback_plan": "Фиче-флаг recurring_enabled: stop-new (запрет новых consents/debits), доведение открытых операций, без обратной миграции. Триггеры: двойное списание (consentId,billingKey)>0, списание после отзыва>0. Владелец: дежурная смена + архитектор (A3)."
+}

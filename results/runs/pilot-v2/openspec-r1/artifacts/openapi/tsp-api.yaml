@@ -1,0 +1,163 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.1.0
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/mandates:
+    post:
+      operationId: createMandate
+      summary: Регистрация согласия плательщика (мандата)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MandateRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}:
+    get:
+      operationId: getMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/revoke:
+    post:
+      operationId: revokeMandate
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Отзыв согласия принят
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Mandate'}
+  /v1/mandates/{mandateId}/debits:
+    post:
+      operationId: createRecurringDebit
+      summary: Инициация рекуррентного списания по действующему согласию
+      parameters:
+        - {in: path, name: mandateId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitRequest'}
+      responses:
+        '201':
+          description: Рекуррентное списание зарегистрировано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        paymentType:
+          type: string
+          enum: [ONE_OFF, RECURRING]
+          default: ONE_OFF
+          description: Тип платежа; отсутствие поля у существующих потребителей трактуется как ONE_OFF
+        mandateId:
+          type: string
+          nullable: true
+          description: Согласие плательщика (мандат) для рекуррентного платежа
+    MandateRequest:
+      type: object
+      required: [tspId, amountLimit, currency]
+      properties:
+        tspId: {type: string}
+        amountLimit: {type: integer, description: Максимальная сумма одного списания в копейках}
+        currency: {type: string, enum: [RUB]}
+        purpose: {type: string}
+        validUntil: {type: string, format: date-time}
+        payerAgreementReference:
+          type: string
+          description: "Ссылка на согласие плательщика; формат — по протоколу НСПК [ТРЕБУЕТ ПРОВЕРКИ]"
+    Mandate:
+      type: object
+      required: [mandateId, tspId, amountLimit, currency, status]
+      properties:
+        mandateId: {type: string}
+        tspId: {type: string}
+        amountLimit: {type: integer, description: Максимальная сумма одного списания в копейках}
+        currency: {type: string, enum: [RUB]}
+        status: {$ref: '#/components/schemas/MandateStatus'}
+        purpose: {type: string}
+        validUntil: {type: string, format: date-time}
+        createdAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time}
+    MandateStatus:
+      type: string
+      enum: [CREATED, PENDING_ACTIVATION, ACTIVE, SUSPENDED, REVOKED, EXPIRED]
+    DebitRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма списания в копейках}
+        merchantOrderId: {type: string}
+        purpose: {type: string}

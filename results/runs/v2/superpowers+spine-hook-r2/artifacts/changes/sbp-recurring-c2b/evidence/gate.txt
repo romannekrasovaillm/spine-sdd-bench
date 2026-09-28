@@ -1,0 +1,14 @@
+$ arch-be gate --route auto --base bench-baseline
+
+Гейт: .
+Маршрут: Fast (auto: score 0 (триггеров нет))
+  [PASS] fitness * — Правил: 13, нарушений: 0 (error: 0, warn: 0); реестр: 13 правил (error: 11), отпечаток 1860bd8f — файл: .arch-handoff/CONSTRAINTS.yaml
+  [PASS] delta_guard — изменённых файлов: 59, защищённых среди них: 1 — покрытие: ARCHITECTURE-SPINE.md ← 'sbp-recurring-c2b'
+  [PASS] rule_weakened — реестр правил не ослаблен относительно bench-baseline — файл: .arch-handoff/CONSTRAINTS.yaml
+  [PASS] spine_lint * — находок: 0 (error: 0)
+  [SKIP] trace_check — нет каталога model/
+  [SKIP] model_validate — нет каталога model/
+  [SKIP] decision_quality — не включена: добавьте 'decision_quality' в [gate.required] нужного маршрута
+  [SKIP] semantic_quality — не включена: добавьте 'semantic_quality' в [gate.required] нужного маршрута
+Итог: PASS
+Аттестация вердикта: sha256:dd34cc9f23dd9df695270704b5e3d87745c9edfe96213bec74279dfd2a23e028

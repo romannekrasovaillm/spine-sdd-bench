@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.bank.ru/controls/nps-compliance.json",
+  "title": "NPS compliance (161-FZ)",
+  "description": "Соответствие национальной платёжной системе для согласий и рекуррентных списаний.",
+  "type": "object",
+  "properties": {
+    "regulations": { "type": "array", "items": { "type": "string" } },
+    "legal-object": { "type": "string" }
+  },
+  "additionalProperties": true
+}
