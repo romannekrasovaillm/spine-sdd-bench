@@ -163,9 +163,13 @@ def main():
     ax4.text(x0, 0.16, "Гейт смотрит на файл, а не на тело AD: объявленность и характер правки "
                        "остаются работой ревью.", color=MUTED, fontsize=9.5)
 
+    fig.text(0.5, 0.012,
+             "«Через дельту» = правка принятого решения вместе с заявкой (ADDED / MODIFIED / "
+             "REMOVED), которую принимает гейт; правка защищённого файла без дельты — FAIL.",
+             color=MUTED, fontsize=9, ha="center")
     fig.suptitle("Spine × SDD-стеки: живые прогоны в TUI Qwen Code",
                  color=FG, fontsize=15, y=0.98)
-    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    fig.tight_layout(rect=[0, 0.032, 1, 0.96])
     fig.savefig(OUT / "dashboard.png", facecolor=BG)
     fig.savefig(OUT / "dashboard.svg", facecolor=BG)
     print("charts ->", OUT / "dashboard.png")

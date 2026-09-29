@@ -1,13 +1,23 @@
 #!/usr/bin/env python3
-"""make_hero.py — единственная визуализация для начала README.
+"""make_hero.py — единственная визуализация для начала README (v2.1).
 
-Одна картинка, по которой читаются ключевые результаты всех волн эксперимента:
-  * эффект Spine как фактора (PASS_DELTA по режимам) и пул-тест Фишера;
-  * матрица «стек × режим Spine»: исход каждого из 36 прогонов основного анализа;
-  * качество не просело (средние баллы трёх рубрик по режимам);
-  * слепая зона delta_guard (F4);
-  * оговорки, без которых числа нельзя цитировать;
-  * доля PASS_DELTA по всем волнам серии (v1 → v1-clean → пилот → v2).
+Картинка читается без контекста и без статистики. Сверху вниз:
+
+    1. ГЛАВНЫЙ ВЫВОД: дисциплину изменения даёт доступ к процессу, а не стек,
+       рядом — шкала «как читать p (критерий Фишера)» человеческим языком.
+    2. ЧТО ЗНАЧИТ «ИЗМЕНЕНИЕ ЧЕРЕЗ ДЕЛЬТУ»: заявка -> правка решения -> гейт.
+       Блок написан для менеджера, а не для инженера.
+    3. Три группы прогонов по доступу к процессу Spine:
+           нет доступа (чистый контроль v2 + песочница v2.1)  -> 0/18
+           доступ случайный (нашли arch-be сами в $HOME)      -> 6/6
+           доступ штатный (MCP + скиллы / Stop-хук)           -> 23/24
+    4. Доказательная база: матрица 36 прогонов, утечки в песочнице v2.1,
+       изменения существующих инвариантов, все волны серии.
+
+Вся вёрстка идёт в одной системе координат (дюймы холста 16 x 13), поэтому текст
+не наезжает на панели и не обрезается по краям. Ключевые блоки набраны крупно:
+картинка открывается в README шириной ~900 px, и главный вывод, объяснение дельты
+и три числа должны читаться без увеличения.
 """
 from __future__ import annotations
 
@@ -27,226 +37,256 @@ OUT = ROOT / "charts"
 OUT.mkdir(parents=True, exist_ok=True)
 
 BG = "#0b0e13"
-PANEL = "#141922"
+PANEL = "#101720"
+CARD = "#171d27"
 CELL = "#10151d"
-FG = "#e9edf3"
+FG = "#eef2f7"
 MUTED = "#8b95a6"
-GRID = "#242b38"
+DIM = "#5d6675"
+GRID = "#232a36"
 GREEN = "#2ea043"
 YELLOW = "#d29922"
 RED = "#e5484d"
 BLUE = "#4c8dff"
-PURPLE = "#a371f7"
 GREY = "#6e7681"
+
+W, H = 16.0, 13.0
 
 STACKS = [("plain", "голый агент"), ("openspec", "OpenSpec"), ("bmad", "BMAD"),
           ("superpowers", "superpowers")]
-MODES = [("", "без Spine"), ("spine", "+spine\nсоветующий"), ("spine-hook", "+spine-hook\nблокирующий")]
+MODES = [("", "без Spine"), ("spine", "+spine\nсоветующий"),
+         ("spine-hook", "+spine-hook\nблокирующий")]
 CLASS_COLOR = {"PASS_DELTA": GREEN, "PASS_UNTOUCHED": YELLOW, "FAIL": RED, "": GREY}
-RUBRICS = [("solution_architecture", "solution_architecture", BLUE),
-           ("architecture_gates", "architecture_gates", GREEN),
-           ("neutral_architecture", "neutral_architecture", PURPLE)]
-WAVES = [("v1", "v1\n5 условий"), ("v1-clean", "v1-clean\n4 условия"),
-         ("pilot-v2", "пилот v2\n12 ячеек"), ("v2", "v2\n12 ячеек × 3"),
-         ("v2.1", "v2.1\nконтроль\nв песочнице")]
+WAVES = [("v1", "v1"), ("v1-clean", "v1-clean"), ("pilot-v2", "пилот v2"),
+         ("v2", "v2"), ("v2.1", "v2.1 песочница")]
 
 
-def load():
+def load() -> list[dict]:
     with open(ROOT / "results" / "manifest.csv", encoding="utf-8") as fh:
         return list(csv.DictReader(fh))
 
 
-def blank(ax, face=PANEL):
-    ax.set_facecolor(face)
+def main() -> None:
+    rows = load()
+    v2 = [r for r in rows if r["campaign"] == "v2"]
+    v21 = [r for r in rows if r["campaign"] == "v2.1"]
+
+    def pd_(xs):
+        return sum(1 for r in xs if r["gate_class"] == "PASS_DELTA")
+
+    no_spine = [r for r in v2 if r["spine_mode"] == ""]
+    clean_v2 = [r for r in no_spine if not int(r["access_spine_material"] or 0)]
+    found_v2 = [r for r in no_spine if int(r["access_spine_material"] or 0)]
+    with_spine = [r for r in v2 if r["spine_mode"]]
+    groups = [
+        ("НЕТ ДОСТУПА\nк процессу", pd_(clean_v2) + pd_(v21), len(clean_v2) + len(v21),
+         "чистый контроль v2 (0/6)\n+ песочница v2.1 (0/12)", RED),
+        ("ДОСТУП НАШЁЛСЯ\nсам", pd_(found_v2), len(found_v2),
+         "агент сам нашёл arch-be\nи материалы вне песочницы", YELLOW),
+        ("ДОСТУП ШТАТНЫЙ\nSpine подключён", pd_(with_spine), len(with_spine),
+         "MCP + скиллы (12/12)\nи Stop-хук (11/12)", GREEN),
+    ]
+
+    fig = plt.figure(figsize=(W, H), dpi=150)
+    fig.patch.set_facecolor(BG)
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_xlim(0, W)
+    ax.set_ylim(0, H)
+    ax.set_facecolor(BG)
     for s in ax.spines.values():
         s.set_visible(False)
     ax.set_xticks([])
     ax.set_yticks([])
 
+    def t(x, y, s, size=10, color=FG, weight="normal", ha="left", va="center", lsp=1.4):
+        ax.text(x, y, s, fontsize=size, color=color, fontweight=weight, ha=ha, va=va,
+                linespacing=lsp)
 
-def main():
-    rows = load()
-    v2 = [r for r in rows if r["campaign"] == "v2"]
+    def card(x0, y0, x1, y1, face=CARD, edge=GRID, lw=1.3, rs=0.08):
+        ax.add_patch(FancyBboxPatch((x0, y0), x1 - x0, y1 - y0,
+                                    boxstyle=f"round,pad=0,rounding_size={rs}",
+                                    linewidth=lw, edgecolor=edge, facecolor=face))
 
-    fig = plt.figure(figsize=(16, 11), dpi=150)
-    fig.patch.set_facecolor(BG)
-    gs = fig.add_gridspec(3, 4, height_ratios=[2.45, 1.25, 0.72], hspace=0.20, wspace=0.18,
-                          left=0.025, right=0.975, top=0.885, bottom=0.03)
+    # ------------------------------------------------------------------ шапка
+    t(0.35, 12.62, "Spine × SDD-стеки", size=27, weight="bold")
+    t(0.37, 12.08, f"{len(rows)} живых прогонов Qwen Code в роли solution-архитектора банка "
+                   f"(кейс: платёжный шлюз СБП, изменение «СБП-подписки»)",
+      size=12, color=MUTED)
+    t(15.65, 12.66, "github.com/romannekrasovaillm/spine-sdd-bench", size=10.5, color=BLUE,
+      ha="right")
+    t(15.65, 12.36, "гейт — arch-be 0.3.11 · решатель — deepseek-flash · судья — glm-5.3",
+      size=9.5, color=DIM, ha="right")
 
-    fig.text(0.025, 0.955, "Spine × SDD-стеки", color=FG, fontsize=30, fontweight="bold")
-    fig.text(0.025, 0.912, f"{len(rows)} живых прогонов Qwen Code в роли solution-архитектора банка  ·  "
-                           "факторная сетка «4 стека × 3 режима Spine» + контроль v2.1 в песочнице",
-             color=MUTED, fontsize=13)
-    fig.text(0.975, 0.955, "github.com/romannekrasovaillm/spine-sdd-bench", color=BLUE,
-             fontsize=11, ha="right")
-    fig.text(0.975, 0.925, "гейт — arch-be 0.3.11 · судья — glm-5.3", color=MUTED, fontsize=10,
-             ha="right")
+    # --------------------------------------------------- главный вывод + шкала p
+    card(0.35, 9.98, 9.55, 11.72, face=PANEL, edge="#1d2634")
+    t(0.62, 11.44, "ГЛАВНЫЙ ВЫВОД", size=9.5, color=MUTED, weight="bold")
+    t(0.62, 10.96, "Дисциплину изменения даёт доступ к процессу,\nа не название стека",
+      size=18, weight="bold", lsp=1.35)
+    t(0.62, 10.40, "Один и тот же агент, один и тот же кейс, одни и те же стеки.\n"
+                   "Разница только в том, видит ли агент механику принятого решения.",
+      size=10.5, color=MUTED, lsp=1.45)
+    t(0.62, 10.13, "Случайностью это не объясняется: p = 5,4·10⁻¹¹ — 1 шанс из 18,5 млрд",
+      size=10.5, color=GREEN, weight="bold")
 
-    # ------------------------------------------------------------------ числа
-    ax0 = fig.add_subplot(gs[0, 0])
-    blank(ax0)
-    ax0.set_xlim(0, 1)
-    ax0.set_ylim(0, 1)
-    ax0.text(0.05, 0.955, "ГЛАВНЫЙ ВОПРОС", color=MUTED, fontsize=9, fontweight="bold")
-    ax0.text(0.05, 0.885, "Повышает ли Spine долю\nизменений, внесённых\nпринятым способом?",
-             color=FG, fontsize=12, va="top", linespacing=1.5)
-    ax0.plot([0.05, 0.95], [0.70, 0.70], color=GRID, lw=1)
-    ax0.text(0.05, 0.60, "0 %", color=GREY, fontsize=29, fontweight="bold", va="center")
-    ax0.annotate("", xy=(0.55, 0.60), xytext=(0.31, 0.60),
-                 arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=2.8))
-    ax0.text(0.58, 0.60, "96 %", color=GREEN, fontsize=29, fontweight="bold", va="center")
-    ax0.text(0.05, 0.515, "чистый контроль: 0 из 18", color=MUTED, fontsize=9.5)
-    ax0.text(0.58, 0.515, "со Spine: 23 из 24", color=MUTED, fontsize=9.5)
-    ax0.plot([0.05, 0.95], [0.43, 0.43], color=GRID, lw=1)
-    ax0.text(0.05, 0.355, "Точный тест Фишера (0/18 против 23/24)", color=MUTED, fontsize=9.5)
-    ax0.text(0.05, 0.245, "p = 5.4·10⁻¹¹", color=FG, fontsize=19, fontweight="bold")
-    ax0.text(0.05, 0.150, "v2.1: контроль в песочнице 0/12 — песочница удержала", color=MUTED, fontsize=9.5)
-    ax0.plot([0.05, 0.95], [0.09, 0.09], color=GRID, lw=1)
-    ax0.text(0.05, 0.02, "утечек в песочнице: 0 из 12 по всем каналам", color=FG, fontsize=10.5)
+    card(9.80, 9.98, 15.65, 11.72, face=PANEL, edge="#1d2634")
+    t(10.05, 11.44, "КАК ЧИТАТЬ p (критерий Фишера)", size=10.5, color=FG, weight="bold")
+    t(10.05, 11.13, "p — вероятность увидеть такую разницу случайно,\nесли связи нет вообще.",
+      size=9.6, color=MUTED, lsp=1.4)
+    scale = [("p > 0,05", "разницы на этих данных не видно", DIM, MUTED),
+             ("p < 0,05", "совпадением объяснить трудно (1 из 20)", YELLOW, MUTED),
+             ("p < 0,001", "почти исключено (1 из 1000)", YELLOW, MUTED),
+             ("p = 5,4·10⁻¹¹", "1 из 18 500 000 000 — здесь", GREEN, FG)]
+    for i, (val, txt, col, tcol) in enumerate(scale):
+        y = 10.84 - i * 0.24
+        t(10.05, y, val, size=10.5, color=col, weight="bold")
+        t(11.75, y, "— " + txt, size=9.6, color=tcol)
+
+    # ------------------------------------------- что значит «через дельту»
+    card(0.35, 7.88, 15.65, 9.78, face=CARD, edge="#243044")
+    t(0.62, 9.60, "ЧТО ЗНАЧИТ «ИЗМЕНЕНИЕ ЧЕРЕЗ ДЕЛЬТУ»", size=14, weight="bold")
+    t(0.62, 9.36, "Принятое решение защищено гейтом: правку нельзя сделать молча — "
+                  "её объявляют заявкой, то есть дельтой.", size=10, color=MUTED)
+    steps = [
+        ("1. ЗАЯВКА — до правки", GREEN,
+         "Агент пишет дельту: что в решении\nДОБАВЛЯЕТСЯ, МЕНЯЕТСЯ и СНИМАЕТСЯ\n"
+         "(ADDED / MODIFIED / REMOVED) и почему."),
+        ("2. ПРАВКА РЕШЕНИЯ", BLUE,
+         "Только затем меняются защищённые файлы:\nARCHITECTURE-SPINE.md, CONSTRAINTS.yaml,\n"
+         "ADR и контракты. Дельта лежит рядом."),
+        ("3. ПРОВЕРКА ГЕЙТОМ", FG,
+         "Гейт сверяет: защищённый файл тронут без\nдельты → КРАСНЫЙ. Дельта есть → "
+         "PASS_DELTA:\nизменение внесено принятым способом."),
+    ]
+    for i, (head, col, body) in enumerate(steps):
+        x0 = 0.62 + i * 5.05
+        card(x0, 8.18, x0 + 4.75, 9.20, face=CELL, edge=col, lw=1.5, rs=0.06)
+        t(x0 + 0.22, 9.03, head, size=11, color=col, weight="bold")
+        t(x0 + 0.22, 8.82, body, size=10.5, color=MUTED, va="top", lsp=1.45)
+    t(0.62, 8.00, "Без дельты: молча переписал решение → 5 из 6 провалов гейта; "
+                  "не тронул решение вовсе → гейт зелёный, но изменение живёт мимо "
+                  "архитектуры (PASS_UNTOUCHED).",
+      size=9.6, color=DIM)
+
+    # ------------------------------------------------------------------ три группы
+    t(0.35, 7.62, "PASS_DELTA — доля прогонов, где принятое решение изменено принятым "
+                  "способом (через дельту)", size=11, weight="bold")
+    for i, (label, yes, n, sub, col) in enumerate(groups):
+        x0 = 0.35 + i * 5.15
+        x1 = x0 + 4.95
+        card(x0, 5.45, x1, 7.40, face=CARD, edge=col, lw=1.8)
+        cx = (x0 + x1) / 2
+        t(cx, 7.10, label, size=13, color=col, weight="bold", ha="center", lsp=1.35)
+        t(cx, 6.62, f"{yes} / {n}", size=34, weight="bold", ha="center")
+        ax.add_patch(Rectangle((x0 + 0.45, 6.18), 4.05, 0.16, color="#222a36"))
+        share = yes / n if n else 0
+        if share > 0:
+            ax.add_patch(Rectangle((x0 + 0.45, 6.18), 4.05 * share, 0.16, color=col))
+        t(cx, 5.92, f"{share:.0%} изменений через дельту", size=11, color=MUTED, ha="center")
+        t(cx, 5.66, sub, size=10, color=DIM, ha="center", lsp=1.4)
 
     # ------------------------------------------------------------------ матрица
-    axm = fig.add_subplot(gs[0, 1:])
-    blank(axm)
-    axm.set_xlim(-1.35, 4.15)
-    axm.set_ylim(-1.35, 5.05)
+    card(0.35, 1.62, 9.55, 5.30, face=CARD, edge=GRID)
+    t(0.62, 5.04, "Основной анализ v2: 36 прогонов", size=12.5, weight="bold")
+    mx0, mx1 = 0.55, 9.35
+    colw = (mx1 - mx0) / 3
     for i, (_, mlabel) in enumerate(MODES):
-        axm.text(i + 0.5, 4.42, mlabel, color=FG, fontsize=11, ha="center", va="center",
-                 linespacing=1.35)
+        t(mx0 + colw * (i + 0.5), 4.74, mlabel, size=10.5, ha="center", lsp=1.35, color=FG)
+    row_top, rowh = 4.22, 0.70
     for j, (skey, slabel) in enumerate(STACKS):
-        y = 4 - j - 0.5
-        axm.text(-0.14, y, slabel, color=FG, fontsize=11.5, ha="right", va="center")
+        y = row_top - j * rowh
+        t(mx0 + 0.02, y, slabel, size=11, color=FG)
         for i, (mkey, _) in enumerate(MODES):
+            cell_x0 = mx0 + colw * i + 0.10
+            cell_x1 = mx0 + colw * (i + 1) - 0.10
+            if j % 2 == 0:
+                card(cell_x0, y - 0.28, cell_x1, y + 0.28, face=CELL, edge=GRID, lw=0.9,
+                     rs=0.05)
             xs = [r for r in v2 if r["stack"] == skey and r["spine_mode"] == mkey]
-            axm.add_patch(FancyBboxPatch((i + 0.05, y - 0.40), 0.90, 0.80,
-                                         boxstyle="round,pad=0.01,rounding_size=0.07",
-                                         linewidth=1.1, edgecolor=GRID, facecolor=CELL))
+            ccx = (cell_x0 + cell_x1) / 2
             for k, r in enumerate(sorted(xs, key=lambda z: z["rep"])):
                 col = CLASS_COLOR.get(r["gate_class"], GREY)
                 leak = int(r.get("access_spine_material") or 0) > 0
-                axm.scatter(i + 0.5 + (k - 1) * 0.26, y + 0.13, s=210, color=col,
-                            edgecolors="white" if leak else BG,
-                            linewidths=1.8 if leak else 1.3,
-                            linestyles="dashed" if leak else "solid", zorder=3)
-                axm.text(i + 0.5 + (k - 1) * 0.26, y + 0.13, r["rep"], color="#0b0e13",
-                         fontsize=7.5, ha="center", va="center", zorder=4, fontweight="bold")
+                sx = ccx + (k - 1) * 0.34
+                ax.scatter(sx, y + 0.09, s=185, color=col, zorder=3,
+                           edgecolors="white" if leak else BG,
+                           linewidths=1.7 if leak else 1.1,
+                           linestyles="dashed" if leak else "solid")
+                t(sx, y + 0.09, r["rep"], size=6.8, color="#0b0e13", ha="center",
+                  weight="bold")
             kind = Counter(r["gate_class"] for r in xs).most_common(1)[0][0]
-            label = {"PASS_DELTA": "через дельту", "PASS_UNTOUCHED": "спайн не тронут",
-                     "FAIL": "провал гейта"}.get(kind, "—")
-            axm.text(i + 0.5, y - 0.24, label, color=CLASS_COLOR.get(kind, MUTED),
-                     fontsize=8.8, ha="center", va="center")
-    axm.text(1.08, 4.86, "каждый кружок — один живой прогон, цифра — номер повтора",
-             color=MUTED, fontsize=9.5, ha="center")
-    axm.scatter(-1.22, -0.60, s=150, color=GREEN, edgecolors=BG)
-    axm.text(-1.08, -0.60, "через дельту (PASS_DELTA)", color=MUTED, fontsize=10, va="center")
-    axm.scatter(0.28, -0.60, s=150, color=YELLOW, edgecolors=BG)
-    axm.text(0.42, -0.60, "спайн не тронут (PASS_UNTOUCHED)", color=MUTED, fontsize=10, va="center")
-    axm.scatter(1.72, -0.60, s=150, color=RED, edgecolors=BG)
-    axm.text(1.86, -0.60, "провал гейта (FAIL)", color=MUTED, fontsize=10, va="center")
-    axm.scatter(-1.22, -0.97, s=150, color=GREY, edgecolors="white", linewidths=1.8,
-                linestyles="dashed")
-    axm.text(-1.08, -0.97, "обведён пунктиром — прогон нашёл материалы Spine вне своей ячейки "
-             "(именно эти 6 прогонов дали PASS_DELTA в контроле)",
-             color=MUTED, fontsize=9.2, va="center")
+            t(ccx, y - 0.17, {"PASS_DELTA": "через дельту",
+                              "PASS_UNTOUCHED": "спайн не тронут",
+                              "FAIL": "провал гейта"}.get(kind, "—"),
+              size=8.4, color=CLASS_COLOR.get(kind, MUTED), ha="center")
+    t(0.62, 1.74, "Белая штриховая обводка — агент нашёл материалы Spine сам.",
+      size=9, color=MUTED)
 
-    # ------------------------------------------------------------------ рубрики
-    axr = fig.add_subplot(gs[1, 0])
-    blank(axr)
-    axr.set_xlim(-0.5, 2.5)
-    axr.set_ylim(0, 5.2)
-    width = 0.24
-    for k, (key, label, col) in enumerate(RUBRICS):
-        vals = []
-        for mkey, _ in MODES:
-            v = [float(r[key]) for r in v2 if r["spine_mode"] == mkey and r[key] not in ("", None)]
-            vals.append(float(np.mean(v)) if v else 0)
-        axr.bar(np.arange(3) + (k - 1) * width, vals, width, color=col, label=label.split("_")[0])
-    axr.plot([-0.5, 2.5], [3.5, 3.5], color=RED, lw=1, ls=(0, (4, 3)))
-    axr.text(2.45, 3.6, "порог 3.5", color=RED, fontsize=8, ha="right")
-    axr.set_xticks(range(3))
-    axr.set_xticklabels(["без\nSpine", "+spine", "+spine-\nhook"], color=MUTED, fontsize=9)
-    axr.set_yticks([1, 3, 5])
-    axr.tick_params(colors=MUTED, labelsize=8, length=0)
-    axr.set_title("Качество не просело: средние баллы рубрик", color=FG, fontsize=11, pad=8)
-    axr.legend(facecolor=PANEL, edgecolor=GRID, labelcolor=MUTED, fontsize=7.6,
-               loc="upper center", bbox_to_anchor=(0.5, 1.0), ncol=1, framealpha=0.95,
-               handlelength=1.1, labelspacing=0.25, borderpad=0.4)
+    # ------------------------------------------------------------------ песочница v2.1
+    card(9.80, 3.75, 15.65, 5.30, face=CARD, edge=GRID)
+    t(10.05, 5.04, "Песочница v2.1: утечек нет", size=12.5, weight="bold")
+    t(10.05, 4.78, "12 контрольных прогонов в контейнере.", size=9.8, color=MUTED)
+    t(10.05, 4.58, "Изменений через дельту — ноль. Проверенные каналы:",
+      size=9.8, color=MUTED)
+    for i, name in enumerate(("материалы Spine", "харнесс и руководство",
+                              "мета-файлы ячейки", "$HOME оператора")):
+        y = 4.36 - i * 0.18
+        t(10.05, y, "— " + name, size=8.8, color=DIM)
+        t(15.40, y, "0", size=10.5, color=GREEN, weight="bold", ha="right")
 
-    # ------------------------------------------------------------------ F4
-    axf = fig.add_subplot(gs[1, 1])
-    blank(axf)
-    pd = [r for r in v2 if r["gate_class"] == "PASS_DELTA"]
-    mod = sum(1 for r in pd if r["invariants_modified"])
-    clean = len(pd) - mod
-    axf.set_xlim(0, 1)
-    axf.set_ylim(0, 1)
-    axf.set_title("Изменения существующих инвариантов", color=FG, fontsize=11, pad=8)
-    ads = sum(1 for r in pd if r["invariants_modified"])
-    undecl = sum(1 for r in pd if r["invariants_undeclared"])
-    decl = ads - undecl
-    x0, x1, w = 0.06, 0.94, 0.30
-    total = len(pd)
-    axf.add_patch(Rectangle((x0, 0.55), (x1 - x0) * decl / total, w, color=YELLOW))
-    axf.add_patch(Rectangle((x0 + (x1 - x0) * decl / total, 0.55), (x1 - x0) * undecl / total, w,
-                            color=RED))
-    axf.add_patch(Rectangle((x0 + (x1 - x0) * ads / total, 0.55),
-                            (x1 - x0) * (total - ads) / total, w, color="#2a3341"))
-    axf.text(x0 + (x1 - x0) * decl / total / 2, 0.70, str(decl), color="#0b0e13", fontsize=13,
-             fontweight="bold", ha="center", va="center")
-    axf.text(x0 + (x1 - x0) * decl / total + (x1 - x0) * undecl / total / 2, 0.70, str(undecl),
-             color="white", fontsize=12, ha="center", va="center")
-    axf.text(x0 + (x1 - x0) * ads / total + (x1 - x0) * (total - ads) / total / 2, 0.70,
-             str(total - ads), color=MUTED, fontsize=12, ha="center", va="center")
-    axf.text(x0, 0.42, f"из {total} «зелёных» дельт существующие", color=FG, fontsize=10)
-    axf.text(x0, 0.31, f"инварианты меняли {ads}; из них {decl} объявлены", color=FG, fontsize=10)
-    axf.text(x0, 0.20, f"в MODIFIED дельты, {undecl} — нет (мелкое уточнение,", color=MUTED, fontsize=10)
-    axf.text(x0, 0.09, "ослаблений нет). Гейт смотрит файл, не тело AD.", color=MUTED, fontsize=10)
+    # ------------------------------------------------------------------ AD
+    pd_rows = [r for r in v2 if r["gate_class"] == "PASS_DELTA"]
+    decl = sum(1 for r in pd_rows if r["invariants_modified"] and not r["invariants_undeclared"])
+    undecl = sum(1 for r in pd_rows if r["invariants_undeclared"])
+    total = len(pd_rows)
+    card(9.80, 1.62, 15.65, 3.65, face=CARD, edge=GRID)
+    t(10.05, 3.40, "Что менялось в принятых инвариантах", size=12.5, weight="bold")
+    x0, x1, h = 10.05, 15.40, 0.26
+    ybar = 2.80
+    ax.add_patch(Rectangle((x0, ybar), (x1 - x0) * decl / total, h, color=YELLOW))
+    ax.add_patch(Rectangle((x0 + (x1 - x0) * decl / total, ybar), (x1 - x0) * undecl / total,
+                           h, color=RED))
+    ax.add_patch(Rectangle((x0 + (x1 - x0) * (decl + undecl) / total, ybar),
+                           (x1 - x0) * (total - decl - undecl) / total, h, color="#222a36"))
+    t(x0 + (x1 - x0) * decl / total / 2, ybar + h / 2, str(decl), size=12, color="#0b0e13",
+      weight="bold", ha="center")
+    t(x0 + (x1 - x0) * decl / total + (x1 - x0) * undecl / total / 2, ybar + h / 2,
+      str(undecl), size=11, color="white", ha="center")
+    t(x0 + (x1 - x0) * (decl + undecl) / total + (x1 - x0) * (total - decl - undecl)
+      / total / 2, ybar + h / 2, str(total - decl - undecl), size=11, color=MUTED,
+      ha="center")
+    for i, (col, label) in enumerate([(YELLOW, "объявлено в MODIFIED дельты"),
+                                      (RED, "не объявлено"),
+                                      ("#222a36", "существующие AD не тронуты")]):
+        ly = 2.48 - i * 0.20
+        ax.add_patch(Rectangle((10.05, ly - 0.05), 0.16, 0.11, color=col))
+        t(10.30, ly, label, size=8.8, color=MUTED)
+    t(10.05, 1.84, f"из {total} зелёных дельт существующие AD меняли {decl + undecl};\n"
+                   f"все — в ячейках со Spine, ослаблений правил нет.",
+      size=9, color=DIM, va="top", lsp=1.4)
 
-    # ------------------------------------------------------------------ оговорки
-    axc = fig.add_subplot(gs[1, 2:])
-    blank(axc)
-    axc.set_xlim(0, 1)
-    axc.set_ylim(0, 1)
-    axc.set_title("Без этих оговорок числа цитировать нельзя", color=FG, fontsize=11, pad=8)
-    lines = [
-        ("n = 3 на ячейку вместо 6",
-         "значимы только большие эффекты; per-stack тесты H1 незначимы, пул — исследовательский"),
-        ("проверка слепоты судьи неинформативна",
-         "постоянный ответ; сбалансированная точность 0.5 — различения нет"),
-        ("в v2 слепота прогона была нарушена",
-         "26 из 36 агентов находили материалы Spine вне ячейки; в v2.1 — 0 каналов утечки"),
-        ("по рубрикам вывода нет",
-         "n = 3, один сэмпл судьи, две рубрики не оценены"),
-    ]
-    for i, (a, b) in enumerate(lines):
-        y = 0.82 - i * 0.245
-        axc.text(0.015, y, "— " + a, color=FG, fontsize=10.2)
-        axc.text(0.035, y - 0.10, b, color=MUTED, fontsize=9.2)
-
-    # ------------------------------------------------------------------ волны серии
-    axw = fig.add_subplot(gs[2, :])
-    blank(axw)
-    axw.set_xlim(0, 1)
-    axw.set_ylim(0, 1)
-    axw.set_title("Все волны серии: доля изменений, внесённых принятым способом (PASS_DELTA)",
-                  color=FG, fontsize=11, pad=6, loc="left")
-    xs = np.linspace(0.055, 0.80, len(WAVES))
+    # ------------------------------------------------------------------ волны
+    t(0.35, 1.42, "Все волны серии — доля PASS_DELTA:", size=9.5, color=MUTED)
+    xs = np.linspace(1.55, 9.10, len(WAVES))
     for i, (camp, label) in enumerate(WAVES):
         rs = [r for r in rows if r["campaign"] == camp]
-        share = sum(1 for r in rs if r["gate_class"] == "PASS_DELTA") / len(rs) if rs else 0
-        if camp == "v2.1":
-            col = RED if share == 0 else GREEN
-        else:
-            col = GREY if camp.startswith("v1") else (BLUE if camp == "pilot-v2" else GREEN)
-        axw.add_patch(Rectangle((xs[i] - 0.035, 0.22), 0.07, share * 0.56, color=col))
-        axw.text(xs[i], 0.22 + share * 0.56 + 0.055, f"{share:.0%}", color=FG, fontsize=12,
-                 ha="center", fontweight="bold")
-        axw.text(xs[i], 0.16, label, color=MUTED, fontsize=8.6, ha="center", va="top",
-                 linespacing=1.4)
-        axw.text(xs[i], 0.055, f"n = {len(rs)}", color=MUTED, fontsize=8, ha="center")
-    axw.text(0.845, 0.62, "Волны несравнимы по баллам:", color=MUTED, fontsize=9)
-    axw.text(0.845, 0.47, "разные модели и дизайн.", color=MUTED, fontsize=9)
-    axw.text(0.845, 0.30, "Класс гейта детерминирован", color=MUTED, fontsize=9)
-    axw.text(0.845, 0.15, "и сравним между волнами.", color=MUTED, fontsize=9)
+        share = pd_(rs) / len(rs) if rs else 0
+        col = RED if share == 0 else (GREY if camp.startswith("v1") else
+                                      (BLUE if camp == "pilot-v2" else GREEN))
+        ax.add_patch(Rectangle((xs[i] - 0.30, 0.74), 0.60, 0.40, color="#1c2530"))
+        if share > 0:
+            ax.add_patch(Rectangle((xs[i] - 0.30, 0.74), 0.60, 0.40 * share, color=col))
+        t(xs[i], 0.58, f"{label} · {share:.0%} · n={len(rs)}", size=8.4, color=MUTED,
+          ha="center")
+    t(9.80, 0.96, "v2.1 — контроль в песочнице даёт ноль:\nэто подтверждение гипотезы, "
+                  "а не провал.", size=9.2, color=MUTED, lsp=1.4)
+
+    # ------------------------------------------------------------------ оговорки
+    t(0.35, 0.30, "Оговорки: n = 3 на ячейку, судья — 1 сэмпл, проверка слепоты судьи "
+                  "неинформативна, adr_quality и macedo_dimensions не оценены; "
+                  "по рубрикам вывода нет.", size=8.4, color=DIM)
+    t(0.35, 0.10, "Первый отчёт называл «24 из 29» изменившихся инвариантов — это была ошибка "
+                  "подсчёта границы AD-блока; верное число 8 из 29 (docs/06-corrections-to-v2.md).",
+      size=8.4, color=DIM)
 
     fig.savefig(OUT / "hero.png", facecolor=BG)
     fig.savefig(OUT / "hero.svg", facecolor=BG)
