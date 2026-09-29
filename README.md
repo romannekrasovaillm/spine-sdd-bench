@@ -11,8 +11,12 @@
 каждого прогона — в этом репозитории.
 
 <p align="center">
-  <img src="charts/dashboard.png" alt="Сводка результатов" width="100%">
+  <img src="charts/hero.png" alt="Ключевые результаты: PASS_DELTA 50 % → 100 %, матрица 36 прогонов, качество рубрик, слепая зона delta_guard, все волны серии" width="100%">
 </p>
+
+<sub>Одна картинка — весь эксперимент: эффект контура на матрице 12 ячеек, пул-тест,
+баллы рубрик, слепая зона `delta_guard` и все четыре волны серии. Подробная разбивка —
+[`charts/dashboard.png`](charts/dashboard.png), сырые данные — [`results/manifest.csv`](results/manifest.csv).</sub>
 
 > **English abstract.** A live, pre-registered benchmark of architectural control in coding
 > agents. 68 sessions of Qwen Code acting as a bank solution architect on a brownfield case
@@ -84,6 +88,7 @@
 | [`results/runs/`](results/runs) | по каждому прогону: метрики, оценка судьи, транскрипт и **артефакты агента** |
 | [`evidence/`](evidence) | кадры живого TUI из каждого прогона (сняты из панели tmux, не из X) |
 | [`harness/`](harness) | весь код прогона: драйвер TUI, установка стеков, скоринг, статистика |
+| [`charts/`](charts) | одна витрина (`hero.png`) и детальный дашборд (`dashboard.png`) |
 | [**Релиз v2.0**](https://github.com/romannekrasovaillm/spine-sdd-bench/releases/tag/v2.0) | отчёт Word и PDF одним файлом — если хочется читать не с экрана |
 
 ---
@@ -109,7 +114,7 @@
 
 ## Как читать репозиторий за 10 минут
 
-1. **`charts/dashboard.png`** — вся картина на одном экране.
+1. **`charts/hero.png`** (выше) — весь эксперимент на одном экране; детальная разбивка — `charts/dashboard.png`.
 2. **`results/manifest.csv`** — откройте в таблице, отсортируйте по `gate_class`: видно,
    что `FAIL` и `PASS_UNTOUCHED` встречаются ровно в ячейках без Spine.
 3. **`results/runs/v2/bmad-r1/`** против **`results/runs/v2/bmad+spine+r1/`** — один и тот же
