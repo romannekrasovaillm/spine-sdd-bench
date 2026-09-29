@@ -90,25 +90,24 @@ def main():
     ax0.text(0.05, 0.885, "Повышает ли Spine долю\nизменений, внесённых\nпринятым способом?",
              color=FG, fontsize=12, va="top", linespacing=1.5)
     ax0.plot([0.05, 0.95], [0.70, 0.70], color=GRID, lw=1)
-    ax0.text(0.05, 0.60, "50 %", color=GREY, fontsize=29, fontweight="bold", va="center")
-    ax0.annotate("", xy=(0.60, 0.60), xytext=(0.36, 0.60),
+    ax0.text(0.05, 0.60, "0 %", color=GREY, fontsize=29, fontweight="bold", va="center")
+    ax0.annotate("", xy=(0.55, 0.60), xytext=(0.31, 0.60),
                  arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=2.8))
-    ax0.text(0.63, 0.60, "100 %", color=GREEN, fontsize=29, fontweight="bold", va="center")
-    ax0.text(0.05, 0.515, "без Spine: 6 из 12", color=MUTED, fontsize=9.5)
-    ax0.text(0.63, 0.515, "+spine: 12 из 12", color=MUTED, fontsize=9.5)
+    ax0.text(0.58, 0.60, "96 %", color=GREEN, fontsize=29, fontweight="bold", va="center")
+    ax0.text(0.05, 0.515, "чистый контроль: 0 из 6", color=MUTED, fontsize=9.5)
+    ax0.text(0.58, 0.515, "со Spine: 23 из 24", color=MUTED, fontsize=9.5)
     ax0.plot([0.05, 0.95], [0.43, 0.43], color=GRID, lw=1)
-    ax0.text(0.05, 0.355, "Пул по четырём стекам", color=MUTED, fontsize=9.5)
-    ax0.text(0.05, 0.245, "23 / 24", color=FG, fontsize=21, fontweight="bold")
-    ax0.text(0.50, 0.255, "против 6 / 12", color=MUTED, fontsize=12)
-    ax0.text(0.05, 0.155, "точный тест Фишера  p = 0.0028", color=GREEN, fontsize=11)
+    ax0.text(0.05, 0.355, "Точный тест Фишера", color=MUTED, fontsize=9.5)
+    ax0.text(0.05, 0.245, "p = 1.2·10⁻⁵", color=FG, fontsize=19, fontweight="bold")
+    ax0.text(0.05, 0.150, "против грязного контроля: p = 0.0028", color=MUTED, fontsize=10)
     ax0.plot([0.05, 0.95], [0.09, 0.09], color=GRID, lw=1)
-    ax0.text(0.05, 0.02, "Провалов гейта  5 → 0", color=FG, fontsize=11.5)
+    ax0.text(0.05, 0.02, "Провалов гейта у чистого контроля: 5 из 6", color=FG, fontsize=10.5)
 
     # ------------------------------------------------------------------ матрица
     axm = fig.add_subplot(gs[0, 1:])
     blank(axm)
-    axm.set_xlim(-1.35, 3.5)
-    axm.set_ylim(-1.15, 5.05)
+    axm.set_xlim(-1.35, 4.15)
+    axm.set_ylim(-1.35, 5.05)
     for i, (_, mlabel) in enumerate(MODES):
         axm.text(i + 0.5, 4.42, mlabel, color=FG, fontsize=11, ha="center", va="center",
                  linespacing=1.35)
@@ -122,8 +121,11 @@ def main():
                                          linewidth=1.1, edgecolor=GRID, facecolor=CELL))
             for k, r in enumerate(sorted(xs, key=lambda z: z["rep"])):
                 col = CLASS_COLOR.get(r["gate_class"], GREY)
+                leak = int(r.get("access_spine_material") or 0) > 0
                 axm.scatter(i + 0.5 + (k - 1) * 0.26, y + 0.13, s=210, color=col,
-                            edgecolors=BG, linewidths=1.3, zorder=3)
+                            edgecolors="white" if leak else BG,
+                            linewidths=1.8 if leak else 1.3,
+                            linestyles="dashed" if leak else "solid", zorder=3)
                 axm.text(i + 0.5 + (k - 1) * 0.26, y + 0.13, r["rep"], color="#0b0e13",
                          fontsize=7.5, ha="center", va="center", zorder=4, fontweight="bold")
             kind = Counter(r["gate_class"] for r in xs).most_common(1)[0][0]
@@ -139,6 +141,11 @@ def main():
     axm.text(0.42, -0.60, "спайн не тронут (PASS_UNTOUCHED)", color=MUTED, fontsize=10, va="center")
     axm.scatter(1.72, -0.60, s=150, color=RED, edgecolors=BG)
     axm.text(1.86, -0.60, "провал гейта (FAIL)", color=MUTED, fontsize=10, va="center")
+    axm.scatter(-1.22, -0.97, s=150, color=GREY, edgecolors="white", linewidths=1.8,
+                linestyles="dashed")
+    axm.text(-1.08, -0.97, "обведён пунктиром — прогон нашёл материалы Spine вне своей ячейки "
+             "(именно эти 6 прогонов дали PASS_DELTA в контроле)",
+             color=MUTED, fontsize=9.2, va="center")
 
     # ------------------------------------------------------------------ рубрики
     axr = fig.add_subplot(gs[1, 0])
@@ -171,19 +178,27 @@ def main():
     clean = len(pd) - mod
     axf.set_xlim(0, 1)
     axf.set_ylim(0, 1)
-    axf.set_title("Слепая зона delta_guard", color=FG, fontsize=11, pad=8)
+    axf.set_title("Изменения существующих инвариантов", color=FG, fontsize=11, pad=8)
+    ads = sum(1 for r in pd if r["invariants_modified"])
+    undecl = sum(1 for r in pd if r["invariants_undeclared"])
+    decl = ads - undecl
     x0, x1, w = 0.06, 0.94, 0.30
-    axf.add_patch(Rectangle((x0, 0.55), (x1 - x0) * mod / len(pd), w, color=RED))
-    axf.add_patch(Rectangle((x0 + (x1 - x0) * mod / len(pd), 0.55),
-                            (x1 - x0) * clean / len(pd), w, color=GREEN))
-    axf.text(x0 + (x1 - x0) * mod / len(pd) / 2, 0.70, str(mod), color="white", fontsize=19,
+    total = len(pd)
+    axf.add_patch(Rectangle((x0, 0.55), (x1 - x0) * decl / total, w, color=YELLOW))
+    axf.add_patch(Rectangle((x0 + (x1 - x0) * decl / total, 0.55), (x1 - x0) * undecl / total, w,
+                            color=RED))
+    axf.add_patch(Rectangle((x0 + (x1 - x0) * ads / total, 0.55),
+                            (x1 - x0) * (total - ads) / total, w, color="#2a3341"))
+    axf.text(x0 + (x1 - x0) * decl / total / 2, 0.70, str(decl), color="#0b0e13", fontsize=13,
              fontweight="bold", ha="center", va="center")
-    axf.text(x0 + (x1 - x0) * mod / len(pd) + (x1 - x0) * clean / len(pd) / 2, 0.70, str(clean),
-             color="white", fontsize=14, ha="center", va="center")
-    axf.text(x0, 0.42, "«зелёных» дельт", color=FG, fontsize=10)
-    axf.text(x0, 0.31, "изменили существующие", color=FG, fontsize=10)
-    axf.text(x0, 0.20, "инварианты AD-001…AD-008,", color=FG, fontsize=10)
-    axf.text(x0, 0.09, "и гейт этого не увидел", color=MUTED, fontsize=10)
+    axf.text(x0 + (x1 - x0) * decl / total + (x1 - x0) * undecl / total / 2, 0.70, str(undecl),
+             color="white", fontsize=12, ha="center", va="center")
+    axf.text(x0 + (x1 - x0) * ads / total + (x1 - x0) * (total - ads) / total / 2, 0.70,
+             str(total - ads), color=MUTED, fontsize=12, ha="center", va="center")
+    axf.text(x0, 0.42, f"из {total} «зелёных» дельт существующие", color=FG, fontsize=10)
+    axf.text(x0, 0.31, f"инварианты меняли {ads}; из них {decl} объявлены", color=FG, fontsize=10)
+    axf.text(x0, 0.20, f"в MODIFIED дельты, {undecl} — нет (мелкое уточнение,", color=MUTED, fontsize=10)
+    axf.text(x0, 0.09, "ослаблений нет). Гейт смотрит файл, не тело AD.", color=MUTED, fontsize=10)
 
     # ------------------------------------------------------------------ оговорки
     axc = fig.add_subplot(gs[1, 2:])
@@ -194,15 +209,17 @@ def main():
     lines = [
         ("n = 3 на ячейку вместо 6",
          "значимы только большие эффекты; per-stack тесты H1 незначимы, пул — исследовательский"),
-        ("слепота судьи по фактору Spine нарушена",
-         "он угадал инструмент 4/6 при случайном уровне 20 %"),
-        ("adr_quality и macedo_dimensions не оценены",
-         "бюджет судейского времени; судья — 1 сэмпл на критерий"),
+        ("проверка слепоты судьи неинформативна",
+         "постоянный ответ; сбалансированная точность 0.5 — различения нет"),
+        ("слепота прогона нарушена",
+         "26 из 36 агентов находили материалы Spine вне ячейки; это и даёт контроль 6/6"),
+        ("по рубрикам вывода нет",
+         "n = 3, один сэмпл судьи, две рубрики не оценены"),
     ]
     for i, (a, b) in enumerate(lines):
-        y = 0.80 - i * 0.29
+        y = 0.82 - i * 0.245
         axc.text(0.015, y, "— " + a, color=FG, fontsize=10.2)
-        axc.text(0.035, y - 0.115, b, color=MUTED, fontsize=9.4)
+        axc.text(0.035, y - 0.10, b, color=MUTED, fontsize=9.2)
 
     # ------------------------------------------------------------------ волны серии
     axw = fig.add_subplot(gs[2, :])

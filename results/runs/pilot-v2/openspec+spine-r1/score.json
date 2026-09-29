@@ -49,7 +49,9 @@
     "protected_touched": [],
     "delta_dirs": [
       "add-sbp-subscriptions"
-    ]
+    ],
+    "invariants_declared": [],
+    "invariants_undeclared": []
   },
   "gate_class": "PASS_DELTA",
   "hook_blocks": 0,

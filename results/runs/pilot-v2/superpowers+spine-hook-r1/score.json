@@ -41,9 +41,7 @@
       "trace_check"
     ],
     "invariants": {
-      "modified": [
-        "AD-008"
-      ],
+      "modified": [],
       "removed": [],
       "added": [
         "AD-009",
@@ -61,7 +59,9 @@
     ],
     "delta_dirs": [
       "subscriptions-c2b"
-    ]
+    ],
+    "invariants_declared": [],
+    "invariants_undeclared": []
   },
   "gate_class": "PASS_DELTA",
   "hook_blocks": 1,

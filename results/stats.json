@@ -33,40 +33,21 @@
   "rubric_spine_hook_solution_architecture": 3.63,
   "rubric_spine_hook_architecture_gates": 3.35,
   "rubric_spine_hook_neutral_architecture": 3.9,
-  "f4_pass_delta": 29,
-  "f4_modified": 24,
-  "v1_gate": {
-    "FAIL": 8,
-    "PASS_UNTOUCHED": 2,
-    "PASS_DELTA": 2
+  "pass_delta_n": 29,
+  "pass_delta_modified": 8,
+  "pass_delta_declared": 7,
+  "control_clean": {
+    "n": 6,
+    "PASS_DELTA": 0
   },
-  "v1_n": 12,
-  "v1-clean_gate": {
-    "FAIL": 6,
-    "PASS_DELTA": 2
+  "control_dirty": {
+    "n": 6,
+    "PASS_DELTA": 6
   },
-  "v1-clean_n": 8,
-  "pilot-v2_gate": {
-    "PASS_DELTA": 9,
-    "FAIL": 2,
-    "PASS_UNTOUCHED": 1
-  },
-  "pilot-v2_n": 12,
-  "pilot_gate_by_mode": {
-    "none": {
-      "PASS_DELTA": 1,
-      "PASS_UNTOUCHED": 1,
-      "FAIL": 2
-    },
-    "spine": {
-      "PASS_DELTA": 4,
-      "PASS_UNTOUCHED": 0,
-      "FAIL": 0
-    },
-    "spine-hook": {
-      "PASS_DELTA": 4,
-      "PASS_UNTOUCHED": 0,
-      "FAIL": 0
-    }
+  "leak_channels": {
+    "saw_condition_commit": 15,
+    "spine_material": 26,
+    "harness_text": 3,
+    "cell_meta": 2
   }
 }

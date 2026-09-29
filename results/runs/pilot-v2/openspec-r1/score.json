@@ -45,7 +45,9 @@
     "contract_tail": "contract_diff: 4 изменений (breaking: 0, non-breaking: 4)\nФормат: openapi[warn] #/paths/~1v1~1mandates CD-005 — добавлен путь «/v1/mandates»\n[warn] #/paths/~1v1~1mandates~1{mandateId} CD-005 — добавлен путь «/v1/mandates/{mandateId}»\n[warn] #/paths/~1v1~1mandates~1{mandateId}~1debits CD-005 — добавлен путь «/v1/mandates/{mandateId}/debits»\n[warn] #/paths/~1v1~1mandates~1{mandateId}~1revoke CD-005 — добавлен путь «/v1/mandates/{mandateId}/revoke»\nИтог: PASS\n",
     "openspec_validate_exit": 0,
     "protected_touched": [],
-    "delta_dirs": []
+    "delta_dirs": [],
+    "invariants_declared": [],
+    "invariants_undeclared": []
   },
   "gate_class": "PASS_UNTOUCHED",
   "hook_blocks": 0,

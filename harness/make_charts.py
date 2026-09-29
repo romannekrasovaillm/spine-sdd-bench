@@ -15,16 +15,23 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import Rectangle
 
 OUT = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve() / "charts"
 OUT.mkdir(parents=True, exist_ok=True)
 
 BG = "#0f1115"
+PANEL = "#141922"
 FG = "#e8ecf1"
 GRID = "#2a2f3a"
 C_PASS = "#2ea043"
 C_UNTOUCHED = "#bf8700"
 C_FAIL = "#d1242f"
+YELLOW = "#d29922"
+RED = "#e5484d"
+MUTED = "#8b95a6"
+FG = "#e8ecf1"
+GRID = "#2a2f3a"
 C_SPINE = "#1f6feb"
 C_NOSPINE = "#8b949e"
 
@@ -39,6 +46,12 @@ def style(ax, title, ylabel=None):
         ax.set_ylabel(ylabel, color=FG, fontsize=10)
     ax.grid(axis="y", color=GRID, alpha=0.5, linewidth=0.7)
     ax.set_axisbelow(True)
+
+
+def panel(ax, color=PANEL):
+    ax.set_facecolor(color)
+    for s in ax.spines.values():
+        s.set_visible(False)
 
 
 def load():
@@ -94,35 +107,61 @@ def main():
     ax2.set_xticklabels(SHORT, fontsize=8)
     ax2.set_ylim(0, 5)
     style(ax2, "v2: баллы рубрик (судья glm-5.3, 1 сэмпл)", "балл 1–5")
-    ax2.legend(facecolor=BG, edgecolor=GRID, labelcolor=FG, fontsize=7)
+    ax2.legend(facecolor=BG, edgecolor=GRID, labelcolor=FG, fontsize=7,
+               loc="upper center", bbox_to_anchor=(0.5, 1.0), ncol=1,
+               labelspacing=0.25, borderpad=0.35)
 
-    # 3. эффект Spine как фактора
+    # 3. эффект Spine как фактора (контроль разделён по загрязнению)
     ax3 = fig.add_subplot(2, 2, 3)
-    modes = ["", "spine", "spine-hook"]
-    share, tot = [], []
-    for m in modes:
-        xs = [r for r in v2 if r["spine_mode"] == m]
-        share.append(sum(1 for r in xs if r["gate_class"] == "PASS_DELTA") / len(xs) * 100 if xs else 0)
-        tot.append(len(xs))
-    bars = ax3.bar(["без Spine", "+spine (советующий)", "+spine-hook (блокирующий)"], share,
-                   color=[C_NOSPINE, C_SPINE, "#a371f7"], width=0.55)
-    for b, v, n in zip(bars, share, tot):
-        ax3.text(b.get_x() + b.get_width() / 2, v + 2, f"{v:.0f}%\n(n={n})", ha="center",
-                 color=FG, fontsize=9)
-    ax3.set_ylim(0, 115)
-    style(ax3, "Доля изменений, внесённых принятым способом", "% прогонов с PASS_DELTA")
+    panel(ax3)
+    no = [r for r in v2 if r["spine_mode"] == ""]
+    clean = [r for r in no if not int(r["access_spine_material"] or 0)]
+    dirty = [r for r in no if int(r["access_spine_material"] or 0)]
+    groups = [("чистый\nконтроль", clean, C_NOSPINE),
+              ("нашёл Spine\nсам", dirty, "#b07d3a"),
+              ("+spine", [r for r in v2 if r["spine_mode"] == "spine"], C_SPINE),
+              ("+spine-hook", [r for r in v2 if r["spine_mode"] == "spine-hook"], "#a371f7")]
+    share = [sum(1 for r in xs if r["gate_class"] == "PASS_DELTA") / len(xs) * 100 if xs else 0
+             for _, xs, _ in groups]
+    bars = ax3.bar([g[0] for g in groups], share, color=[g[2] for g in groups], width=0.6)
+    for b, v, (_, xs, _) in zip(bars, share, groups):
+        ax3.text(b.get_x() + b.get_width() / 2, v + 3, f"{v:.0f}%\n(n={len(xs)})", ha="center",
+                 color=FG, fontsize=8.5)
+    ax3.set_ylim(0, 118)
+    ax3.tick_params(axis="x", labelsize=8)
+    style(ax3, "Доля изменений через дельту", "% прогонов с PASS_DELTA")
 
-    # 4. слепая зона delta_guard
+    # 4. изменения существующих инвариантов
     ax4 = fig.add_subplot(2, 2, 4)
-    pd_rows = [r for r in v2 if r["gate_class"] == "PASS_DELTA"]
-    mod = sum(1 for r in pd_rows if r["invariants_modified"])
-    clean = len(pd_rows) - mod
-    bars = ax4.barh(["зелёные дельты"], [mod], color=C_FAIL, label="меняли существующие AD")
-    ax4.barh(["зелёные дельты"], [clean], left=[mod], color=C_PASS, label="существующие AD не тронуты")
-    ax4.text(mod / 2, 0, str(mod), ha="center", va="center", color="white", fontsize=12)
-    ax4.text(mod + clean / 2, 0, str(clean), ha="center", va="center", color="white", fontsize=12)
-    style(ax4, "F4: что скрывают «зелёные» дельты", "")
-    ax4.legend(facecolor=BG, edgecolor=GRID, labelcolor=FG, fontsize=8, loc="lower right")
+    panel(ax4)
+    pd = [r for r in v2 if r["gate_class"] == "PASS_DELTA"]
+    ads = sum(1 for r in pd if r["invariants_modified"])
+    undecl = sum(1 for r in pd if r["invariants_undeclared"])
+    decl = ads - undecl
+    total = len(pd)
+    ax4.set_xlim(0, 1)
+    ax4.set_ylim(0, 1)
+    ax4.set_xticks([])
+    ax4.set_yticks([])
+    ax4.set_title("Изменения существующих инвариантов AD-001…AD-008 в «зелёных» дельтах",
+                  color=FG, fontsize=11, pad=8)
+    x0, x1, h = 0.03, 0.97, 0.34
+    ax4.add_patch(Rectangle((x0, 0.44), (x1 - x0) * decl / total, h, color=YELLOW))
+    ax4.add_patch(Rectangle((x0 + (x1 - x0) * decl / total, 0.44), (x1 - x0) * undecl / total, h,
+                            color=RED))
+    ax4.add_patch(Rectangle((x0 + (x1 - x0) * ads / total, 0.44),
+                            (x1 - x0) * (total - ads) / total, h, color="#2a3341"))
+    ax4.text(x0 + (x1 - x0) * decl / total / 2, 0.61, str(decl), color="#0b0e13", fontsize=13,
+             fontweight="bold", ha="center", va="center")
+    ax4.text(x0 + (x1 - x0) * decl / total + (x1 - x0) * undecl / total / 2, 0.61, str(undecl),
+             color="white", fontsize=12, ha="center", va="center")
+    ax4.text(x0 + (x1 - x0) * ads / total + (x1 - x0) * (total - ads) / total / 2, 0.61,
+             str(total - ads), color=MUTED, fontsize=13, ha="center", va="center")
+    ax4.text(x0, 0.30, f"жёлтый — объявлены в MODIFIED дельты ({decl}); красный — нет ({undecl}); "
+                       f"серый — существующие AD не менялись ({total - ads})",
+             color=MUTED, fontsize=9.5)
+    ax4.text(x0, 0.16, "Гейт смотрит на файл, а не на тело AD: объявленность и характер правки "
+                       "остаются работой ревью.", color=MUTED, fontsize=9.5)
 
     fig.suptitle("Spine × SDD-стеки: живые прогоны в TUI Qwen Code",
                  color=FG, fontsize=15, y=0.98)

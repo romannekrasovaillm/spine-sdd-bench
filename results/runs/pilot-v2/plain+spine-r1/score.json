@@ -64,7 +64,12 @@
     ],
     "delta_dirs": [
       "sbp-subscriptions"
-    ]
+    ],
+    "invariants_declared": [
+      "AD-004",
+      "AD-008"
+    ],
+    "invariants_undeclared": []
   },
   "gate_class": "PASS_DELTA",
   "hook_blocks": 0,

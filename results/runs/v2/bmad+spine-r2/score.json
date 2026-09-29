@@ -55,9 +55,7 @@
       "trace_check"
     ],
     "invariants": {
-      "modified": [
-        "AD-008"
-      ],
+      "modified": [],
       "removed": [],
       "added": [
         "AD-009",
@@ -74,7 +72,9 @@
     ],
     "delta_dirs": [
       "subscriptions-c2b"
-    ]
+    ],
+    "invariants_declared": [],
+    "invariants_undeclared": []
   },
   "gate_class": "PASS_DELTA",
   "hook_blocks": 0,
@@ -211,5 +211,11 @@
       "attempts": 1
     }
   },
-  "judge_model": "glm-5.3"
+  "judge_model": "glm-5.3",
+  "access_spine_material": 6,
+  "saw_condition_commit": 1,
+  "read_harness": 0,
+  "cell_meta_reads": 0,
+  "arch_be_runs": 12,
+  "runtime_spine_ok": true
 }

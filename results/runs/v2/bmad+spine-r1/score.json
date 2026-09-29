@@ -42,8 +42,7 @@
       "modified": [
         "AD-001",
         "AD-003",
-        "AD-004",
-        "AD-008"
+        "AD-004"
       ],
       "removed": [],
       "added": [
@@ -63,7 +62,13 @@
     ],
     "delta_dirs": [
       "CHG-001-recurrent-c2b"
-    ]
+    ],
+    "invariants_declared": [
+      "AD-001",
+      "AD-003",
+      "AD-004"
+    ],
+    "invariants_undeclared": []
   },
   "gate_class": "PASS_DELTA",
   "hook_blocks": 0,
@@ -183,5 +188,11 @@
       "attempts": 1
     }
   },
-  "judge_model": "glm-5.3"
+  "judge_model": "glm-5.3",
+  "access_spine_material": 1,
+  "saw_condition_commit": 0,
+  "read_harness": 0,
+  "cell_meta_reads": 0,
+  "arch_be_runs": 0,
+  "runtime_spine_ok": true
 }

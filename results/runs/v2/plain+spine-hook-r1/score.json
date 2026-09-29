@@ -41,8 +41,7 @@
     ],
     "invariants": {
       "modified": [
-        "AD-002",
-        "AD-008"
+        "AD-002"
       ],
       "removed": [],
       "added": [
@@ -60,7 +59,11 @@
     ],
     "delta_dirs": [
       "sbp-subscriptions"
-    ]
+    ],
+    "invariants_declared": [
+      "AD-002"
+    ],
+    "invariants_undeclared": []
   },
   "gate_class": "PASS_DELTA",
   "hook_blocks": 1,
@@ -185,5 +188,11 @@
       "attempts": 3
     }
   },
-  "judge_model": "glm-5.3"
+  "judge_model": "glm-5.3",
+  "access_spine_material": 8,
+  "saw_condition_commit": 0,
+  "read_harness": 0,
+  "cell_meta_reads": 0,
+  "arch_be_runs": 33,
+  "runtime_spine_ok": true
 }
