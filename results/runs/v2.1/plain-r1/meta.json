@@ -1,0 +1,54 @@
+{
+  "condition": "plain",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-plain-r1",
+  "base_sha": "a64d3f59abe6468265b65c55f835e5009b5fd37c",
+  "wall_s": 323.7,
+  "turn_ok": true,
+  "records": 98,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 0,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 58,
+  "tool_names": [
+    "edit",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tdocs/adr/ADR-008-podpiski-sbp-rekurrentnye-c2b-spisaniya.md",
+    "A\tdocs/changes/sbp-subscriptions/01-significance-and-route.md",
+    "A\tdocs/changes/sbp-subscriptions/02-impact-on-accepted-architecture.md",
+    "A\tdocs/changes/sbp-subscriptions/04-contract-changes.md",
+    "A\tdocs/changes/sbp-subscriptions/05-nfr.md",
+    "A\tdocs/changes/sbp-subscriptions/06-acceptance-criteria-and-rollback.md",
+    "A\tdocs/changes/sbp-subscriptions/07-human-decisions.md",
+    "A\tdocs/changes/sbp-subscriptions/README.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/solutioning.md",
+    "M\tdocs/spec/state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

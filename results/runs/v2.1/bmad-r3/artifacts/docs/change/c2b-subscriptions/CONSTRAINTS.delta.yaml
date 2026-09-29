@@ -1,0 +1,69 @@
+# Предлагаемое расширение fitness-правил для изменения CS-001 (подписки СБП).
+# Схема — как в .arch-handoff/CONSTRAINTS.yaml (control::check). Это ЧЕРНОВИК: применяется
+# после ратификации ADR-008 (решение A6) и объединяется с действующим пакетом харнесса.
+#
+# Механически проверяемые инварианты (ниже) — прокси на уровне документов решения.
+# Поведенческие инварианты проверяются тестами приёмки из docs/change/c2b-subscriptions/CHANGE-PACKAGE.md §6.1:
+#   AD-009  "только ACTIVE, отзыв блокирует допуск"        -> AC-03, AC-06, AC-17
+#   AD-010  "зачисление только из PAID для CONSENT"        -> AC-02, AC-07
+#   AD-011  "одна незавершённая попытка на период"         -> AC-04, AC-05
+#   AD-012  "единый адаптер; поддержка подписок в RFP"      -> AC-12
+#   AD-013  "поверхность согласия вне шлюза"               -> AC-16 (в части ссылок)
+#   AD-014  "артефакт согласия/отзыва + аудит"             -> AC-13, AC-14
+#   AD-015  "AML-передача согласий и списаний"             -> AC-15
+#   AD-016  "объектная авторизация подписок"               -> AC-16
+rules:
+  - name: adr-008-present
+    type: file_exists
+    path: docs/adr/ADR-008-podpiski-sbp-rekurrentnye-c2b-spisaniya-po-soglasiyu-platelshchika.md
+    severity: error
+  - name: consent-only-active-debit
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'только при согласии в `ACTIVE`'
+    severity: error
+  - name: consent-charge-attempt-uniqueness
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'не более одной незавершённой'
+    severity: error
+  - name: consent-credit-only-from-paid
+    type: must_contain
+    glob: "docs/spec/consent-state-machine.md"
+    pattern: 'зачисление **только** из `PAID`'
+    severity: error
+  - name: consent-single-okpc-adapter
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'только через единый адаптер ОПКЦ'
+    severity: error
+  - name: consent-evidence-and-audit
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'неизменяемый артефакт'
+    severity: error
+  - name: consent-aml-control
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'антифрод/AML'
+    severity: error
+  - name: subscription-object-authz
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: '`tspId` согласия = `tspId` запроса'
+    severity: error
+  - name: contract-v0-2-additive
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: 'version: 0.2.0'
+    severity: warn
+  - name: nfr-subscriptions-present
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: 'Подписки СБП'
+    severity: error
+  - name: spine-cs001-no-placeholders
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn

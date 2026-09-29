@@ -1,0 +1,258 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Мерчант-API СБП-шлюза. v0.2 — обратно совместимое расширение к v0.1 (изменение CS-001,
+    ADR-008): добавлены подписки СБП (согласие плательщика и рекуррентные списания).
+    Существующие пути, поля и значения `Payment.status` не изменены; новые поля — опциональные.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Оформление согласия плательщика на регулярные списания
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Согласие создано, ожидает подтверждения плательщика
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '409':
+          description: IDEMPOTENCY_CONFLICT
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие и история списаний
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/subscriptions/{subscriptionId}/charges:
+    post:
+      operationId: createCharge
+      summary: Рекуррентное списание по действующему согласию
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ChargeRequest'}
+      responses:
+        '201':
+          description: Списание создано (статус CREATED)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+        '200':
+          description: Идемпотентный повтор — возвращается существующее списание
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Charge'}
+        '409':
+          description: "IDEMPOTENCY_CONFLICT | CHARGE_ALREADY_EXISTS | CHARGE_CONFLICT"
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+        '422':
+          description: "SUBSCRIPTION_NOT_ACTIVE | SUBSCRIPTION_LIMIT_EXCEEDED | SUBSCRIPTION_EXPIRED"
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/suspend:
+    post:
+      operationId: suspendSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие приостановлено
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/subscriptions/{subscriptionId}/resume:
+    post:
+      operationId: resumeSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие возобновлено
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409':
+          description: SUBSCRIPTION_ALREADY_TERMINAL
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+  /v1/subscriptions/{subscriptionId}/close:
+    post:
+      operationId: closeSubscription
+      summary: Закрытие согласия со стороны ТСП (необратимо)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие отозвано (REVOKED)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409':
+          description: SUBSCRIPTION_ALREADY_TERMINAL
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Problem'}
+components:
+  responses:
+    NotFound:
+      description: Объект не найден или недоступен вызывающему ТСП (объектная авторизация, AD-016)
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Problem'}
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        operationType:
+          type: string
+          description: Тип операции (v0.2); отсутствие поля трактуется как QR
+          enum: [QR, CONSENT]
+        subscriptionId:
+          type: string
+          description: Согласие-источник (v0.2); присутствует только при operationType=CONSENT
+    SubscriptionRequest:
+      type: object
+      required: [tspId, amountType, maxAmountPerCharge, periodLimit, period, startDate, paymentPurpose]
+      properties:
+        tspId: {type: string}
+        amountType: {type: string, enum: [FIXED, VARIABLE]}
+        maxAmountPerCharge: {type: integer, description: "Потолок одного списания, копейки"}
+        periodLimit: {type: integer, description: "Потолок списаний за период, копейки"}
+        period: {type: string, enum: [DAY, WEEK, MONTH]}
+        startDate: {type: string, format: date}
+        endDate: {type: string, format: date, nullable: true}
+        paymentPurpose: {type: string}
+        payerRef: {type: string, description: Идентификатор плательщика на стороне ТСП (не ПДн)}
+        returnUrl: {type: string, format: uri}
+        merchantSubscriptionId: {type: string}
+    Subscription:
+      type: object
+      required: [subscriptionId, subscriptionStatus]
+      properties:
+        subscriptionId: {type: string}
+        subscriptionStatus:
+          type: string
+          enum: [CREATED, PENDING_PAYER, ACTIVE, SUSPENDED, REVOKED, EXPIRED, DECLINED]
+        amountType: {type: string, enum: [FIXED, VARIABLE]}
+        maxAmountPerCharge: {type: integer}
+        periodLimit: {type: integer}
+        period: {type: string, enum: [DAY, WEEK, MONTH]}
+        startDate: {type: string, format: date}
+        endDate: {type: string, format: date, nullable: true}
+        merchantSubscriptionId: {type: string}
+        consentUrl: {type: string, description: Ссылка/deeplink на подтверждение в приложении банка плательщика}
+        createdAt: {type: string, format: date-time}
+        errorCode: {type: string, nullable: true, description: Причина отказа (DECLINED) или иного терминального состояния}
+        charges:
+          type: array
+          items: {$ref: '#/components/schemas/Charge'}
+    ChargeRequest:
+      type: object
+      required: [chargeId, billingPeriod, amount]
+      properties:
+        chargeId: {type: string, description: Идемпотентный идентификатор попытки}
+        billingPeriod: {type: string, description: "Ключ периода, уникален в паре с subscriptionId"}
+        amount: {type: integer, description: "Копейки; не больше maxAmountPerCharge"}
+        description: {type: string}
+    Charge:
+      type: object
+      required: [chargeId, subscriptionId, billingPeriod, amount, status]
+      properties:
+        chargeId: {type: string}
+        paymentId: {type: string, description: "Идентификатор платежа (для GET /v1/payments/{paymentId})"}
+        subscriptionId: {type: string}
+        billingPeriod: {type: string}
+        amount: {type: integer}
+        status:
+          type: string
+          description: Канонические значения Payment.status; QR_ISSUED/EXPIRED для списаний недостижимы
+          enum: [CREATED, PAID, CREDITED, COMPLETED, FAILED, REFUNDED]
+        errorCode: {type: string, nullable: true, description: Нормализованный код отказа банка/ОПКЦ}
+    Problem:
+      type: object
+      description: RFC 9457 Problem Details
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        code: {type: string}
+        traceId: {type: string}
+        idempotencyKey: {type: string}

@@ -1,0 +1,52 @@
+{
+  "condition": "plain",
+  "rep": 2,
+  "mode": "tui",
+  "session": "b-plain-r2",
+  "base_sha": "a64d3f59abe6468265b65c55f835e5009b5fd37c",
+  "wall_s": 393.3,
+  "turn_ok": true,
+  "records": 112,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 0,
+    "extension_skills": 0,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 66,
+  "tool_names": [
+    "edit",
+    "glob",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "A\t.arch-handoff/increments/2026-09-29-sbp-subscriptions/ARCHITECTURE.md",
+    "A\t.arch-handoff/increments/2026-09-29-sbp-subscriptions/CONSTRAINTS.yaml",
+    "A\t.arch-handoff/increments/2026-09-29-sbp-subscriptions/TASK.md",
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tdocs/adr/ADR-008-podpiski-sbp-rekurrentnye-c2b-spisaniya.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "A\tdocs/contracts/tsp-api-subscriptions.md",
+    "A\tdocs/nfr-subscriptions.md",
+    "M\tdocs/rfp/vendor-rfp.md",
+    "A\tdocs/solutioning-subscriptions.md",
+    "A\tdocs/spec/subscription-lifecycle.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

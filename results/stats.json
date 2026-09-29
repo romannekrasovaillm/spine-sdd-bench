@@ -1,10 +1,11 @@
 {
-  "total_runs": 68,
+  "total_runs": 80,
   "by_campaign": {
     "v2": 36,
     "pilot-v2": 12,
     "v1": 12,
-    "v1-clean": 8
+    "v1-clean": 8,
+    "v2.1": 12
   },
   "gate_no_spine": {
     "PASS_DELTA": 6,
@@ -49,5 +50,18 @@
     "spine_material": 26,
     "harness_text": 3,
     "cell_meta": 2
+  },
+  "v2.1_gate": {
+    "FAIL": 10,
+    "PASS_UNTOUCHED": 2
+  },
+  "v2.1_n": 12,
+  "v2.1_wall_median": 389,
+  "h8_fisher_p_vs_spine": 1.04e-08,
+  "h8_leak_channels": {
+    "spine_material": 0,
+    "harness": 0,
+    "cell_meta": 0,
+    "operator_home": 0
   }
 }

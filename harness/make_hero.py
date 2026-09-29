@@ -47,7 +47,8 @@ RUBRICS = [("solution_architecture", "solution_architecture", BLUE),
            ("architecture_gates", "architecture_gates", GREEN),
            ("neutral_architecture", "neutral_architecture", PURPLE)]
 WAVES = [("v1", "v1\n5 условий"), ("v1-clean", "v1-clean\n4 условия"),
-         ("pilot-v2", "пилот v2\n12 ячеек"), ("v2", "v2\n12 ячеек × 3")]
+         ("pilot-v2", "пилот v2\n12 ячеек"), ("v2", "v2\n12 ячеек × 3"),
+         ("v2.1", "v2.1\nконтроль\nв песочнице")]
 
 
 def load():
@@ -73,8 +74,8 @@ def main():
                           left=0.025, right=0.975, top=0.885, bottom=0.03)
 
     fig.text(0.025, 0.955, "Spine × SDD-стеки", color=FG, fontsize=30, fontweight="bold")
-    fig.text(0.025, 0.912, "68 живых прогонов Qwen Code в роли solution-архитектора банка  ·  "
-                           "факторная сетка «4 стека × 3 режима Spine»",
+    fig.text(0.025, 0.912, f"{len(rows)} живых прогонов Qwen Code в роли solution-архитектора банка  ·  "
+                           "факторная сетка «4 стека × 3 режима Spine» + контроль v2.1 в песочнице",
              color=MUTED, fontsize=13)
     fig.text(0.975, 0.955, "github.com/romannekrasovaillm/spine-sdd-bench", color=BLUE,
              fontsize=11, ha="right")
@@ -94,14 +95,14 @@ def main():
     ax0.annotate("", xy=(0.55, 0.60), xytext=(0.31, 0.60),
                  arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=2.8))
     ax0.text(0.58, 0.60, "96 %", color=GREEN, fontsize=29, fontweight="bold", va="center")
-    ax0.text(0.05, 0.515, "чистый контроль: 0 из 6", color=MUTED, fontsize=9.5)
+    ax0.text(0.05, 0.515, "чистый контроль: 0 из 18", color=MUTED, fontsize=9.5)
     ax0.text(0.58, 0.515, "со Spine: 23 из 24", color=MUTED, fontsize=9.5)
     ax0.plot([0.05, 0.95], [0.43, 0.43], color=GRID, lw=1)
-    ax0.text(0.05, 0.355, "Точный тест Фишера", color=MUTED, fontsize=9.5)
-    ax0.text(0.05, 0.245, "p = 1.2·10⁻⁵", color=FG, fontsize=19, fontweight="bold")
-    ax0.text(0.05, 0.150, "против грязного контроля: p = 0.0028", color=MUTED, fontsize=10)
+    ax0.text(0.05, 0.355, "Точный тест Фишера (0/18 против 23/24)", color=MUTED, fontsize=9.5)
+    ax0.text(0.05, 0.245, "p = 5.4·10⁻¹¹", color=FG, fontsize=19, fontweight="bold")
+    ax0.text(0.05, 0.150, "v2.1: контроль в песочнице 0/12 — песочница удержала", color=MUTED, fontsize=9.5)
     ax0.plot([0.05, 0.95], [0.09, 0.09], color=GRID, lw=1)
-    ax0.text(0.05, 0.02, "Провалов гейта у чистого контроля: 5 из 6", color=FG, fontsize=10.5)
+    ax0.text(0.05, 0.02, "утечек в песочнице: 0 из 12 по всем каналам", color=FG, fontsize=10.5)
 
     # ------------------------------------------------------------------ матрица
     axm = fig.add_subplot(gs[0, 1:])
@@ -211,8 +212,8 @@ def main():
          "значимы только большие эффекты; per-stack тесты H1 незначимы, пул — исследовательский"),
         ("проверка слепоты судьи неинформативна",
          "постоянный ответ; сбалансированная точность 0.5 — различения нет"),
-        ("слепота прогона нарушена",
-         "26 из 36 агентов находили материалы Spine вне ячейки; это и даёт контроль 6/6"),
+        ("в v2 слепота прогона была нарушена",
+         "26 из 36 агентов находили материалы Spine вне ячейки; в v2.1 — 0 каналов утечки"),
         ("по рубрикам вывода нет",
          "n = 3, один сэмпл судьи, две рубрики не оценены"),
     ]
@@ -232,7 +233,10 @@ def main():
     for i, (camp, label) in enumerate(WAVES):
         rs = [r for r in rows if r["campaign"] == camp]
         share = sum(1 for r in rs if r["gate_class"] == "PASS_DELTA") / len(rs) if rs else 0
-        col = GREY if camp.startswith("v1") else (BLUE if camp == "pilot-v2" else GREEN)
+        if camp == "v2.1":
+            col = RED if share == 0 else GREEN
+        else:
+            col = GREY if camp.startswith("v1") else (BLUE if camp == "pilot-v2" else GREEN)
         axw.add_patch(Rectangle((xs[i] - 0.035, 0.22), 0.07, share * 0.56, color=col))
         axw.text(xs[i], 0.22 + share * 0.56 + 0.055, f"{share:.0%}", color=FG, fontsize=12,
                  ha="center", fontweight="bold")

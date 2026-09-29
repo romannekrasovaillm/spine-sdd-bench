@@ -1,0 +1,53 @@
+{
+  "condition": "superpowers",
+  "rep": 2,
+  "mode": "tui",
+  "session": "b-superpowers-r2",
+  "base_sha": "0239452c5a9ef67827bb82aa651d44f75e194b1e",
+  "wall_s": 358.1,
+  "turn_ok": true,
+  "records": 107,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 0,
+    "extension_skills": 15,
+    "commands": 0,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 62,
+  "tool_names": [
+    "edit",
+    "grep_search",
+    "read_file",
+    "run_shell_command",
+    "skill",
+    "write_file"
+  ],
+  "dialogs_answered": 0,
+  "changed": [
+    "M\tARCHITECTURE-SPINE.md",
+    "M\tREADME.md",
+    "A\tdocs/adr/ADR-008-sbp-podpiski-mandat-platelshchika-i-rekurrentnoe-spisanie.md",
+    "A\tdocs/adr/ADR-009-iniciaciya-rekurrentnyh-spisanij-tsp-sheduker-shlyuza-ili-gibrid-proposed-a3.md",
+    "A\tdocs/changes/2026-09-29-sbp-subscriptions/README.md",
+    "A\tdocs/changes/2026-09-29-sbp-subscriptions/acceptance-and-rollback.md",
+    "A\tdocs/changes/2026-09-29-sbp-subscriptions/handoff/TASK.md",
+    "A\tdocs/changes/2026-09-29-sbp-subscriptions/solutioning.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "M\tdocs/rfp/vendor-rfp.md",
+    "A\tdocs/spec/subscription-state-machine.md",
+    "M\topenapi/tsp-api.yaml"
+  ]
+}

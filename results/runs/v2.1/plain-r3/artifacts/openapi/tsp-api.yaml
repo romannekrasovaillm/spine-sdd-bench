@@ -1,0 +1,154 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: |
+    Версия 0.2.0 — аддитивное расширение подписками СБП (согласие плательщика; ADR-008/ADR-009).
+    Существующие потребители 0.1.0 не ломаются: добавляются новые пути, схемы и опциональные поля;
+    поведение /v1/payments, /v1/payments/{paymentId} и значения enum Payment.status не меняются.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/consents:
+    post:
+      operationId: createConsent
+      summary: Создание согласия плательщика (подписка, мандат)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}:
+    get:
+      operationId: getConsent
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+    delete:
+      operationId: revokeConsent
+      summary: Отзыв согласия (запрет новых списаний; отзыв необратим)
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Согласие отозвано
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Consent'}
+  /v1/consents/{consentId}/payments:
+    post:
+      operationId: createConsentPayment
+      summary: Списание по согласию (создаёт обычный платёж; зачисление — только из PAID)
+      parameters:
+        - {in: path, name: consentId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConsentPaymentRequest'}
+      responses:
+        '201':
+          description: Платёж по согласию зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        consentId:
+          type: string
+          description: Идентификатор согласия (заполнен для списаний по подписке, ADR-008)
+    ConsentRequest:
+      type: object
+      required: [tspId, maxAmount, period, validUntil]
+      properties:
+        tspId: {type: string}
+        maxAmount: {type: integer, description: Максимальная сумма одного списания, копейки}
+        period: {type: string, enum: [DAY, WEEK, MONTH], description: Период списаний}
+        maxChargesPerPeriod: {type: integer, description: Лимит числа списаний за период}
+        validUntil: {type: string, format: date-time, description: Срок действия согласия}
+        paymentPurpose: {type: string}
+        merchantOrderId: {type: string}
+    Consent:
+      type: object
+      required: [consentId, status, maxAmount, period]
+      properties:
+        consentId: {type: string}
+        status:
+          type: string
+          enum: [CREATED, PENDING_ACTIVATION, ACTIVE, SUSPENDED, REJECTED, REVOKED, EXPIRED]
+        maxAmount: {type: integer, description: Максимальная сумма одного списания, копейки}
+        period: {type: string, enum: [DAY, WEEK, MONTH]}
+        validUntil: {type: string, format: date-time}
+        confirmUrl: {type: string, description: Ссылка/QR для подтверждения согласия плательщиком}
+        activatedAt: {type: string, format: date-time}
+        revokedAt: {type: string, format: date-time}
+    ConsentPaymentRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: Сумма списания, копейки}
+        merchantOrderId: {type: string}
+        description: {type: string}

@@ -1,32 +1,34 @@
 # Spine × SDD-стеки — живые прогоны в TUI Qwen Code
 
-[![Прогонов](https://img.shields.io/badge/живых%20прогонов-68-1f6feb)](#три-числа-которые-стоит-унести)
+[![Прогонов](https://img.shields.io/badge/живых%20прогонов-80-1f6feb)](#три-числа-которые-стоит-унести)
 [![Дизайн](https://img.shields.io/badge/дизайн-пререгистрирован%20(n%3D3)-2ea043)](docs/02-preregistration-v2.md)
-[![Гейт](https://img.shields.io/badge/PASS__DELTA-50%25%20%E2%86%92%20100%25-a371f7)](#три-числа-которые-стоит-унести)
+[![Гейт](https://img.shields.io/badge/PASS__DELTA%20со%20Spine-23%2F24-2ea043)](#три-числа-которые-стоит-унести)
+[![Песочница](https://img.shields.io/badge/v2.1%20контроль%20в%20песочнице-0%2F12%2C%20утечек%200-d1242f)](#три-числа-которые-стоит-унести)
 [![Лицензия](https://img.shields.io/badge/код-MIT%20%C2%B7%20данные-CC%20BY%204.0-bf8700)](DATA-LICENSE)
 
 **Что даёт контур архитектурного контроля, подключённый к уже выбранному SDD-стеку?**
-Ответ получен экспериментом: 68 живых прогонов Qwen Code в роли solution-архитектора банка,
-факторная сетка «4 стека × 3 режима Spine», единый гейт, слепой судья и полные артефакты
-каждого прогона — в этом репозитории.
+Ответ получен экспериментом: **80 живых прогонов** Qwen Code в роли solution-архитектора банка,
+факторная сетка «4 стека × 3 режима Spine» плюс контроль, перезапущенный в файловой песочнице,
+единый гейт, слепой судья и полные артефакты каждого прогона — в этом репозитории.
 
 <p align="center">
-  <img src="charts/hero.png" alt="Ключевые результаты: PASS_DELTA 0/6 в чистом контроле против 23/24 со Spine, матрица 36 прогонов, баллы рубрик, изменения существующих AD (8 из 29), все волны серии" width="100%">
+  <img src="charts/hero.png" alt="Ключевые результаты: PASS_DELTA 0/18 в изолированном контроле против 23/24 со Spine, матрица 36 прогонов, баллы рубрик, изменения существующих AD (8 из 29), все волны серии включая контроль v2.1 в песочнице" width="100%">
 </p>
 
 <sub>Одна картинка — весь эксперимент: эффект контура на матрице 12 ячеек, чистый контроль
 против загрязнённого, баллы рубрик, изменения существующих AD (8 из 29, из них 7 объявлены)
-и все четыре волны серии. Подробная разбивка —
+и все пять волн серии. Подробная разбивка —
 [`charts/dashboard.png`](charts/dashboard.png), сырые данные — [`results/manifest.csv`](results/manifest.csv).</sub>
 
 > **English abstract.** A live, pre-registered benchmark of architectural control in coding
-> agents. 68 sessions of Qwen Code acting as a bank solution architect on a brownfield case
+> agents. 80 sessions of Qwen Code acting as a bank solution architect on a brownfield case
 > (`sbp-gateway`, SBP subscriptions). Factor: *stack* {plain, OpenSpec, BMAD, superpowers} ×
 > *Spine mode* {none, advisory MCP+skills, blocking Stop-hook}. Headline: access to the
 > architecture-control process makes an agent change the accepted architecture the accepted way
-> — **23 of 24** runs with Spine, versus **0 of 6** clean control runs (Fisher p = 1.2e-5,
-> exploratory). The six passing control runs had all found Spine material outside their sandbox,
-> so the run was not blind; wave v2.1 re-runs the control inside a filesystem sandbox.
+> — **23 of 24** runs with Spine, versus **0 of 18** isolated control runs (Fisher p = 5.4e-11).
+> The six passing v2 control runs had all found Spine material outside their sandbox, so wave v2.1
+> re-ran the control inside a Docker sandbox: 0/12 with **zero leak channels**, confirming that
+> the effect is driven by access to the process, not by the stack label.
 > **8 of 29** passing deltas modified existing invariants — all in Spine cells, 7 of 8 declared
 > in the delta's `MODIFIED` section, none weakening. Judged content quality: **no conclusion**
 > (n = 3, one judge sample, blindness test uninformative). Every raw artifact, transcript and
@@ -44,7 +46,12 @@
 
 ¹ `openspec+spine-hook` r1 — сбой среды: MCP-сервер Spine в сессии не поднялся, агент записал в память `spine-cli-unavailable` и спайн не трогал. Без этой ячейки хук даёт 11/11 (анализ чувствительности).
 
-Пул по ITT: **23/24 против 6/12, p = 0.0028**. Против **чистого** контроля: **23/24 против 0/6, p = 1.2·10⁻⁵**. Оба теста исследовательские, вне пререгистрации.
+Пул по ITT: **23/24 против 6/12, p = 0.0028**. Против **чистого** контроля: **23/24 против 0/6, p = 1.2·10⁻⁵**.
+
+**Волна v2.1 это подтвердила:** контроль, перезапущенный в файловой песочнице, где агент
+не видит ни `arch-be`, ни харнесса, ни `$HOME` оператора, дал **0/12 PASS_DELTA**
+(0 из 18 чистых против 23/24, **p = 5.4·10⁻¹¹**), при **нуле срабатываний по всем каналам утечки**.
+Подробности — [`docs/10-wave-v2.1.md`](docs/10-wave-v2.1.md).
 
 И рядом — то, что делает результат честным, а не рекламным:
 
@@ -107,6 +114,8 @@
 | [`docs/07-findings.md`](docs/07-findings.md) | находки об инструментах: F1–F14 и что они значат на практике |
 | [`docs/08-limitations.md`](docs/08-limitations.md) | ограничения: где числам нельзя верить |
 | [`docs/09-series-map.md`](docs/09-series-map.md) | карта серии: v1 → CALM → v2 → v2.1 |
+| [`docs/10-wave-v2.1.md`](docs/10-wave-v2.1.md) | **волна v2.1**: контроль в песочнице, 0/12, проверка утечек |
+| [`results/v2.1/`](results/v2.1) | данные волны v2.1: пререгистрация, преднастройка, сводка |
 | [`harness/recheck_v2.py`](harness/recheck_v2.py) | одна команда, воспроизводящая все числа ревью на опубликованных данных |
 | [`results/manifest.csv`](results/manifest.csv) | **все 68 прогонов** одной таблицей: класс гейта, рубрики, стена, файлы |
 | [`results/runs/`](results/runs) | по каждому прогону: метрики, оценка судьи, транскрипт и **артефакты агента** |
@@ -120,10 +129,10 @@
 ## Пять выводов, которые можно применять завтра
 
 1. **Дело в доступе к процессу, а не в конкретном стеке.** Со Spine изменение принятым
-   способом внесли BMAD 3/3, superpowers 3/3, OpenSpec 3/3 и голый агент 3/3; **чистый
-   контроль — 0/6, против 0/6 (p = 1.2·10⁻⁵)**. Доступ может быть штатным (MCP и скиллы)
-   или случайным: 6 из 6 прошедших контрольных прогонов сами нашли материалы Spine вне
-   своей песочницы.
+   способом внесли BMAD 3/3, superpowers 3/3, OpenSpec 3/3 и голый агент 3/3; изолированный
+   контроль — **0/18 (v2: 0/6, v2.1: 0/12), p = 5.4·10⁻¹¹**. Доступ может быть штатным
+   (MCP и скиллы) или случайным: 6 из 6 прошедших контрольных прогонов v2 сами нашли материалы
+   Spine вне песочницы. Волна v2.1 закрыла этот канал — и ноль подтвердился.
 2. **Блокирующий хук не обязателен.** Советующий режим (MCP + скиллы, без хука) дал 12/12;
    хук — 11/12 и заметно дороже по времени. Дисциплину даёт доступ к процессу, а не наказание.
 3. **По рубрикам вывода нет.** `neutral_architecture` растёт (3.58 → 3.70 → 3.90),
@@ -165,11 +174,11 @@
   данными не подтверждается (журналов MCP в досье — 0 из 110).
 - **`adr_quality` и `macedo_dimensions` не оценены** в основном прогоне (бюджет судейского
   времени) и в таблицах стоят как «—».
-- **Слепота прогона нарушена.** 26 из 36 агентов обращались к материалам Spine вне своей
-  ячейки (реальный `$HOME` оператора: `arch-be`, `~/.arch-harness`, `~/.arch-ml`), 15 видели
-  имя условия в сообщении baseline-коммита, 3 читали файлы харнесса, 2 открывали мета-файлы
-  своей ячейки. Все 6 прошедших гейт прогонов без Spine — из числа нашедших Spine сами.
-  Поэтому волна v2.1 перезапускает контроль в файловой песочнице.
+- **Слепота прогона была нарушена в v2** (и устранена в v2.1). 26 из 36 агентов v2 обращались
+  к материалам Spine вне своей ячейки, 15 видели имя условия в сообщении baseline-коммита,
+  3 читали файлы харнесса, 2 открывали мета-файлы своей ячейки. Все 6 прошедших гейт прогонов
+  без Spine — из числа нашедших Spine сами. В v2.1 песочница дала **ноль по всем каналам**
+  на 12 прогонах.
 - **X11-снимки основного прогона вышли чёрными** (дисплей уходил в затемнение), поэтому
   доказательства — покадровые снимки панели tmux: они воспроизводят содержимое TUI дословно
   и от состояния экрана не зависят.

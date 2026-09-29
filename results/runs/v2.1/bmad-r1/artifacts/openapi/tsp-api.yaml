@@ -1,0 +1,226 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0
+  description: >
+    Дельта 0.2.0 аддитивна относительно 0.1.0 (подписки СБП, ADR-008): добавлены пути
+    /v1/subscriptions*, опциональные поля origin/consentId в Payment и типы вебхуков
+    subscription.*. Существующие пути, поля и enum status не изменены — обратная совместимость.
+    Владелец согласия выводится из аутентификации mTLS, tspId в теле не передаётся.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      description: Создание подписки (согласия плательщика); владелец определяется по mTLS
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Согласие зарегистрировано (consentUrl возвращается только здесь, инициатору)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SubscriptionCreated'}
+        '422':
+          description: Некорректные/отсутствующие лимиты (см. Problem Details)
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус согласия (без consentUrl)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '403':
+          description: Согласие принадлежит другому ТСП (CONSENT_FORBIDDEN)
+        '404':
+          description: Согласие не найдено (SUBSCRIPTION_NOT_FOUND)
+  /v1/subscriptions/{subscriptionId}/revoke:
+    post:
+      operationId: revokeSubscription
+      description: Отзыв согласия (идемпотентно, fail-closed; подтверждение ОПКЦ асинхронно)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRevokeRequest'}
+      responses:
+        '200':
+          description: Согласие отозвано (локально, fail-closed)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+        '403':
+          description: Согласие принадлежит другому ТСП (CONSENT_FORBIDDEN)
+        '404':
+          description: Согласие не найдено (SUBSCRIPTION_NOT_FOUND)
+  /v1/subscriptions/{subscriptionId}/debits:
+    post:
+      operationId: createDebit
+      description: Инициация списания по действующему согласию; возвращает ресурс платежа
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DebitRequest'}
+      responses:
+        '201':
+          description: Списание инициировано (ресурс платежа)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+        '403':
+          description: Согласие принадлежит другому ТСП (CONSENT_FORBIDDEN)
+        '404':
+          description: Согласие не найдено (SUBSCRIPTION_NOT_FOUND)
+        '422':
+          description: Согласие не активно или превышены лимиты (SUBSCRIPTION_NOT_ACTIVE / CONSENT_LIMIT_EXCEEDED)
+    get:
+      operationId: listDebits
+      description: Постраничный список списаний по подписке (опционально, см. tsp-api §3.10)
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - {in: query, name: from, required: false, schema: {type: string, format: date-time}}
+        - {in: query, name: to, required: false, schema: {type: string, format: date-time}}
+        - {in: query, name: cursor, required: false, schema: {type: string}}
+      responses:
+        '200':
+          description: Список списаний
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DebitList'}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string, description: "Опционально (см. tsp-api §3.2)"}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+        origin:
+          type: string
+          enum: [qr, subscription]
+          default: qr
+          description: "Добавлено в 0.2.0; отсутствие трактуется как qr"
+        consentId:
+          type: string
+          nullable: true
+          description: "Добавлено в 0.2.0; subscriptionId, если origin=subscription"
+    SubscriptionRequest:
+      type: object
+      required: [payerRef, amountLimit, paymentPurpose]
+      properties:
+        payerRef: {type: string, description: "Токен/деплинк плательщика; полный MSISDN не принимается и не хранится (ADR-006 §4)"}
+        amountLimit: {type: integer, description: "Обязательный лимит одной операции, копейки"}
+        periodLimit: {type: integer, description: "Лимит за период, копейки; обязателен для периодических режимов"}
+        period:
+          type: string
+          enum: [MONTHLY, WEEKLY, ON_DEMAND]
+          description: "Состав режимов — по документации НСПК [ТРЕБУЕТ ПРОВЕРКИ]"
+        paymentPurpose: {type: string}
+        expiresAt: {type: string, format: date-time}
+        redirectUrl: {type: string, format: uri}
+        merchantConsentId: {type: string}
+    Subscription:
+      type: object
+      required: [subscriptionId, status]
+      properties:
+        subscriptionId: {type: string}
+        status:
+          type: string
+          enum: [CREATED, PENDING_PAYER, ACTIVE, SUSPENDED, REJECTED, REVOKED, EXPIRED]
+        amountLimit: {type: integer}
+        periodLimit: {type: integer}
+        period: {type: string, enum: [MONTHLY, WEEKLY, ON_DEMAND]}
+        expiresAt: {type: string, format: date-time}
+        activatedAt: {type: string, format: date-time, nullable: true}
+        revokedAt: {type: string, format: date-time, nullable: true}
+        merchantConsentId: {type: string}
+    SubscriptionCreated:
+      allOf:
+        - {$ref: '#/components/schemas/Subscription'}
+        - type: object
+          properties:
+            consentUrl:
+              type: string
+              format: uri
+              description: "Возвращается только в ответе на создание, инициатору; в GET не выдаётся"
+    SubscriptionRevokeRequest:
+      type: object
+      properties:
+        reason: {type: string}
+    DebitRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {type: integer, description: "Копейки; в пределах лимитов согласия"}
+        paymentPurpose: {type: string}
+        merchantOrderId: {type: string, description: "Рекомендуется: бизнес-ключ дедупликации (tspId, consentId, merchantOrderId)"}
+    DebitList:
+      type: object
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/Payment'}
+        nextCursor: {type: string, nullable: true}

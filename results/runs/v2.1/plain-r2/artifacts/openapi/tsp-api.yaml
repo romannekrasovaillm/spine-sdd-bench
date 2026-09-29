@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: СБП-шлюз — API ТСП
+  version: 0.2.0-draft
+  description: >
+    v0.2.0-draft — аддитивное расширение 0.1.0: подписки СБП (рекуррентные
+    C2B-списания по согласию плательщика). Ломающих изменений нет: существующие
+    методы, обязательные поля и значения Payment.status сохранены (внутреннее
+    состояние DEBIT_REQUESTED наружу отдаётся как CREATED). Детали —
+    docs/contracts/tsp-api-subscriptions.md.
+paths:
+  /v1/payments:
+    post:
+      operationId: createPayment
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PaymentRequest'}
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/payments/{paymentId}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {in: path, name: paymentId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Payment'}
+  /v1/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Оформить подписку (рекуррентные C2B-списания)
+      description: >
+        Создаёт подписку по согласию плательщика. Если действующего согласия нет,
+        ответ содержит consentUrl/QR на подписание; активация — после
+        подтверждения согласия ОПКЦ.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubscriptionRequest'}
+      responses:
+        '201':
+          description: Подписка создана
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+    get:
+      operationId: listSubscriptions
+      parameters:
+        - {in: query, name: tspId, required: true, schema: {type: string}}
+        - {in: query, name: status, required: false, schema: {$ref: '#/components/schemas/SubscriptionStatus'}}
+        - {in: query, name: cursor, required: false, schema: {type: string}}
+      responses:
+        '200':
+          description: Список подписок (пагинация курсором)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Состояние подписки и согласия
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/cancel:
+    post:
+      operationId: cancelSubscription
+      summary: Отменить подписку (прекратить будущие списания)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Подписка отменена
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subscription'}
+  /v1/subscriptions/{subscriptionId}/charges:
+    get:
+      operationId: listSubscriptionCharges
+      description: История плановых списаний; детальный статус попытки (в т.ч. INITIATED/SKIPPED) виден только здесь.
+      parameters:
+        - {in: path, name: subscriptionId, required: true, schema: {type: string}}
+        - {in: query, name: from, required: false, schema: {type: string, format: date-time}}
+        - {in: query, name: to, required: false, schema: {type: string, format: date-time}}
+        - {in: query, name: cursor, required: false, schema: {type: string}}
+      responses:
+        '200':
+          description: Список плановых списаний
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: {$ref: '#/components/schemas/Charge'}
+                  nextCursor: {type: string, nullable: true}
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [amount, merchantOrderId]
+      properties:
+        amount: {type: integer, description: Сумма в копейках}
+        merchantOrderId: {type: string}
+    Payment:
+      type: object
+      required: [paymentId, amount, status]
+      properties:
+        paymentId: {type: string}
+        amount: {type: integer, description: Сумма в копейках}
+        source:
+          type: string
+          description: Источник платежа; отсутствие поля = QR (совместимость с 0.1.0)
+          enum: [QR, SUBSCRIPTION]
+        subscriptionId: {type: string, description: Для списаний по подписке}
+        chargeId: {type: string, description: Плановая попытка, породившая платёж}
+        status:
+          type: string
+          enum: [CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED]
+    SubscriptionStatus:
+      type: string
+      enum: [PENDING_CONSENT, ACTIVE, SUSPENDED, CANCELLED, REVOKED, EXPIRED]
+    SubscriptionRequest:
+      type: object
+      required: [tspId, amount, currency, schedule]
+      properties:
+        tspId: {type: string}
+        amount: {type: integer, description: Сумма одного списания в копейках}
+        currency: {type: string, enum: [RUB], default: RUB}
+        schedule: {$ref: '#/components/schemas/Schedule'}
+        consentId: {type: string, description: Если согласие уже оформлено в СБП}
+        paymentPurpose: {type: string}
+        merchantOrderId: {type: string}
+        redirectUrl: {type: string, format: uri}
+    Schedule:
+      type: object
+      required: [frequency]
+      properties:
+        frequency: {type: string, enum: [DAILY, WEEKLY, MONTHLY]}
+        dayOfMonth: {type: integer, minimum: 1, maximum: 31, description: Для MONTHLY}
+        anchorDate: {type: string, format: date, description: Начало расписания}
+        maxCharges: {type: integer, minimum: 1, description: Ограничение числа списаний}
+    Subscription:
+      type: object
+      required: [subscriptionId, tspId, status, amount, currency]
+      properties:
+        subscriptionId: {type: string}
+        tspId: {type: string}
+        status: {$ref: '#/components/schemas/SubscriptionStatus'}
+        amount: {type: integer, description: Сумма одного списания в копейках}
+        currency: {type: string}
+        consentId: {type: string}
+        consentUrl: {type: string, description: Ссылка/QR на подписание согласия (если требуется)}
+        schedule: {$ref: '#/components/schemas/Schedule'}
+        nextChargeAt: {type: string, format: date-time, nullable: true}
+        createdAt: {type: string, format: date-time}
+        cancelledAt: {type: string, format: date-time, nullable: true}
+    Charge:
+      type: object
+      required: [chargeId, subscriptionId, amount, status]
+      properties:
+        chargeId: {type: string}
+        subscriptionId: {type: string}
+        paymentId:
+          type: string
+          nullable: true
+          description: "null, если попытка SKIPPED"
+        amount: {type: integer, description: Сумма в копейках}
+        status:
+          type: string
+          enum: [SCHEDULED, INITIATED, PAID, CREDITED, COMPLETED, FAILED, SKIPPED]
+        scheduledAt: {type: string, format: date-time}
+        attemptedAt: {type: string, format: date-time, nullable: true}
+        errorCode: {type: string, nullable: true}

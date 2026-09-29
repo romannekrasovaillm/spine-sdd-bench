@@ -1,0 +1,53 @@
+{
+  "condition": "openspec",
+  "rep": 2,
+  "mode": "tui",
+  "session": "b-openspec-r2",
+  "base_sha": "5a905cdf7bfec8c9f1ba1cb476c6dfaaf996d906",
+  "wall_s": 439.4,
+  "turn_ok": true,
+  "records": 111,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 6,
+    "extension_skills": 0,
+    "commands": 6,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 64,
+  "tool_names": [
+    "ask_user_question",
+    "edit",
+    "read_file",
+    "run_shell_command",
+    "write_file"
+  ],
+  "dialogs_answered": 3,
+  "changed": [
+    "M\tARCHITECTURE-SPINE.md",
+    "A\tdocs/adr/ADR-008-model-podpisok-sbp-mandat-i-prioritet-otzyva-soglasiya.md",
+    "A\tdocs/adr/ADR-009-rekurrentnye-spisaniya-po-mandatu-limity-i-podtverzhdenie.md",
+    "M\tdocs/contracts/opkc-adapter.md",
+    "M\tdocs/contracts/tsp-api.md",
+    "M\tdocs/nfr.md",
+    "A\tdocs/spec/mandate-state-machine.md",
+    "M\topenapi/tsp-api.yaml",
+    "A\topenspec/changes/sbp-recurring-payments/.openspec.yaml",
+    "A\topenspec/changes/sbp-recurring-payments/design.md",
+    "A\topenspec/changes/sbp-recurring-payments/proposal.md",
+    "A\topenspec/changes/sbp-recurring-payments/specs/sbp-mandates/spec.md",
+    "A\topenspec/changes/sbp-recurring-payments/specs/sbp-opkc-subscription-transport/spec.md",
+    "A\topenspec/changes/sbp-recurring-payments/specs/sbp-recurring-charges/spec.md",
+    "A\topenspec/changes/sbp-recurring-payments/tasks.md"
+  ]
+}

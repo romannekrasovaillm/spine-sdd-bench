@@ -1,0 +1,59 @@
+{
+  "files": [
+    "openspec/changes/add-sbp-subscriptions/.openspec.yaml",
+    "openspec/changes/add-sbp-subscriptions/design.md",
+    "openspec/changes/add-sbp-subscriptions/proposal.md",
+    "openspec/changes/add-sbp-subscriptions/specs/subscriptions/debits/spec.md",
+    "openspec/changes/add-sbp-subscriptions/specs/subscriptions/mandates/spec.md",
+    "openspec/changes/add-sbp-subscriptions/specs/tsp-api/spec.md",
+    "openspec/changes/add-sbp-subscriptions/tasks.md"
+  ],
+  "sensors": {
+    "chars": 53187,
+    "significance_route": true,
+    "invariant_AD005_ref": true,
+    "alternatives": true,
+    "negative_consequences": true,
+    "reversibility": true,
+    "rollback": true,
+    "acceptance": true,
+    "nfr_numeric": true,
+    "human_decision": true,
+    "placeholders": 0,
+    "adr_files": 0
+  },
+  "deterministic": {
+    "spine_gate_exit": 0,
+    "spine_gate_route": "Fast",
+    "spine_gate_fails": [],
+    "spine_gate_tail": "Гейт: .\nМаршрут: Fast (auto: score 0 (триггеров нет))\n  [PASS] fitness * — Правил: 7, нарушений: 0 (error: 0, warn: 0); реестр: 7 правил (error: 5), отпечаток 72d0bf4f — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] delta_guard — изменённых файлов: 7, защищённых среди них: 0\n  [PASS] rule_weakened — реестр правил не ослаблен относительно accepted — файл: .arch-handoff/CONSTRAINTS.yaml\n  [PASS] spine_lint * — находок: 0 (error: 0)\n  [SKIP] trace_check — нет каталога model/\n  [SKIP] model_validate — нет каталога model/\n  [SKIP] decision_quality — не включена: добавьте 'decision_quality' в [gate.required] нужного маршрута\n  [SKIP] semantic_quality — не включена: добавьте 'semantic_quality' в [gate.required] нужного маршрута\nИтог: PASS\nАттестация вердикта: sha256:0768feefdab6eaa792dc6d98c1633092ca4ba71643af5c879801c486db208558\n",
+    "spine_gate_base": "accepted",
+    "spine_gate_skips": [
+      "decision_quality",
+      "model_validate",
+      "semantic_quality",
+      "trace_check"
+    ],
+    "invariants": {
+      "modified": [],
+      "removed": [],
+      "added": []
+    },
+    "contract_changed": false,
+    "openspec_validate_exit": 0,
+    "protected_touched": [],
+    "delta_dirs": []
+  },
+  "gate_class": "PASS_UNTOUCHED",
+  "hook_blocks": 0,
+  "contamination": [],
+  "access": {
+    "spine_material": 0,
+    "harness": 0,
+    "cell_meta": 0,
+    "operator_home": 0
+  },
+  "sandbox": "docker",
+  "judge": {},
+  "note": "только детерминированный слой: судья для этой кампании не запускался"
+}

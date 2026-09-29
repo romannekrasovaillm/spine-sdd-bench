@@ -1,0 +1,44 @@
+{
+  "condition": "openspec",
+  "rep": 1,
+  "mode": "tui",
+  "session": "b-openspec-r1",
+  "base_sha": "b23bbcdf22457c3275b837dcd9135c3541b14755",
+  "wall_s": 290.7,
+  "turn_ok": true,
+  "records": 66,
+  "solver": "deepseek-flash",
+  "judge": "glm-5.3",
+  "inventory": {
+    "project_skills": 6,
+    "extension_skills": 0,
+    "commands": 6,
+    "mcp_servers": [],
+    "hooks": []
+  },
+  "pins": {
+    "qwen": "@qwen-code/qwen-code@0.24.6",
+    "openspec": "@fission-ai/openspec@1.13.2",
+    "bmad": "bmad-method@6.12.0",
+    "superpowers_ref": "v6.4.2",
+    "arch_be": "0.3.11",
+    "calm": "@finos/calm-cli@1.60.1"
+  },
+  "tool_calls": 43,
+  "tool_names": [
+    "ask_user_question",
+    "read_file",
+    "run_shell_command",
+    "write_file"
+  ],
+  "dialogs_answered": 3,
+  "changed": [
+    "A\topenspec/changes/add-sbp-subscriptions/.openspec.yaml",
+    "A\topenspec/changes/add-sbp-subscriptions/design.md",
+    "A\topenspec/changes/add-sbp-subscriptions/proposal.md",
+    "A\topenspec/changes/add-sbp-subscriptions/specs/subscriptions/debits/spec.md",
+    "A\topenspec/changes/add-sbp-subscriptions/specs/subscriptions/mandates/spec.md",
+    "A\topenspec/changes/add-sbp-subscriptions/specs/tsp-api/spec.md",
+    "A\topenspec/changes/add-sbp-subscriptions/tasks.md"
+  ]
+}

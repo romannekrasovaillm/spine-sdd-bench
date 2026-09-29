@@ -1,0 +1,92 @@
+# Fitness-правила для `arch control check` (схема control::check).
+# Этап: решение изменения «Подписки СБП» (до кода). Наследует констрейнты
+# .arch-handoff/CONSTRAINTS.yaml и добавляет проверки инвариантов изменения.
+rules:
+  # --- наследуемые (базовое решение) ---
+  - name: spine-present
+    type: file_exists
+    path: ARCHITECTURE-SPINE.md
+    severity: error
+  - name: abs-credit-only-from-paid
+    type: must_contain
+    glob: "docs/adr/ADR-005-integraciya-s-abs-zachislenie-po-podtverzhdyonnomu-statusu-vozvraty-kak-saga.md"
+    pattern: 'только из состояния `PAID`'
+    severity: error
+  - name: nfr-measurable
+    type: must_contain
+    glob: "docs/nfr.md"
+    pattern: '99,95'
+    severity: error
+  - name: adr-no-placeholders
+    type: must_not_contain
+    glob: "docs/adr/*.md"
+    pattern: '<!--'
+    severity: error
+  - name: spine-lints-clean
+    type: must_not_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'TODO|TBD|XXX'
+    severity: warn
+
+  # --- инкремент изменения ---
+  - name: adr-subscriptions-present
+    type: file_exists
+    path: docs/adr/ADR-008-podpiski-sbp-rekurrentnye-c2b-spisaniya.md
+    severity: error
+  - name: subscription-lifecycle-spec-present
+    type: file_exists
+    path: docs/spec/subscription-lifecycle.md
+    severity: error
+  - name: change-package-present
+    type: file_exists
+    path: docs/solutioning-subscriptions.md
+    severity: error
+  - name: spine-ad-009-present
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-009'
+    severity: error
+  - name: spine-ad-010-present
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'AD-010'
+    severity: error
+  - name: consent-gate-invariant
+    type: must_contain
+    glob: "ARCHITECTURE-SPINE.md"
+    pattern: 'Consent=ACTIVE'
+    severity: error
+  - name: occurrence-idempotency-invariant
+    type: must_contain
+    glob: "docs/spec/subscription-lifecycle.md"
+    pattern: 'subscriptionId, plannedAt'
+    severity: error
+  - name: nfr-subscriptions-measurable
+    type: must_contain
+    glob: "docs/nfr-subscriptions.md"
+    pattern: '99,95'
+    severity: error
+  - name: openapi-version-bumped
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: '0.2.0-draft'
+    severity: error
+  - name: openapi-payment-status-not-extended
+    type: must_contain
+    glob: "openapi/tsp-api.yaml"
+    pattern: 'CREATED, QR_ISSUED, PAID, CREDITED, COMPLETED, FAILED, EXPIRED, REFUNDED'
+    severity: error
+  - name: rollback-criterion-present
+    type: must_contain
+    glob: "docs/solutioning-subscriptions.md"
+    pattern: 'Критерий успешного отката'
+    severity: error
+  - name: handoff-result-contract-present
+    type: must_contain
+    glob: ".arch-handoff/increments/2026-09-29-sbp-subscriptions/TASK.md"
+    pattern: 'conflicts_with_prior_decisions'
+    severity: warn
+  - name: subscription-contract-addendum-present
+    type: file_exists
+    path: docs/contracts/tsp-api-subscriptions.md
+    severity: error
