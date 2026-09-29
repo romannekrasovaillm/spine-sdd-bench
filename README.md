@@ -18,7 +18,8 @@
 <sub>Одна картинка — весь эксперимент: главный вывод, объяснение «изменения через дельту»
 для не-инженера, оценка p (плохо / терпимо / хорошо / отлично), три группы по доступу к процессу,
 **что это даёт архитектору** с примером «один агент, один стек: FAIL против PASS_DELTA»,
-матрица 12 ячеек, проверка утечек в песочнице v2.1 и все пять волн серии. Подробная разбивка —
+**как Spine оценён по смысловым рубрикам** (не лучше контроля), матрица 12 ячеек, проверка утечек
+в песочнице v2.1 и все пять волн серии. Подробная разбивка —
 [`charts/dashboard.png`](charts/dashboard.png), сырые данные — [`results/manifest.csv`](results/manifest.csv).</sub>
 
 > **English abstract.** A live, pre-registered benchmark of architectural control in coding
@@ -42,6 +43,10 @@
 > the delta convention itself (a single agreed location, `changes/<id>/DELTA.md`) is part of the
 > control loop — in `plain-r1` the agent wrote change docs elsewhere and the protected-file edit
 > still failed the gate.
+> **No rubric advantage:** across the judged span (`solution_architecture`, `architecture_gates`,
+> and the neutral rubric written by a non-Spine author) Spine is *not* rated above control
+> (3.60 vs 3.70 / 3.32 vs 3.27 / 3.80 vs 3.58); every gap is smaller than the within-group spread.
+> The benchmark supports discipline of change, not "better architecture documents".
 > Judged content quality: **no conclusion**
 > (n = 3, one judge sample, blindness test uninformative). Every raw artifact, transcript and
 > screenshot is included. Docs are in Russian.
@@ -179,6 +184,32 @@
 
 Чего эти данные **не** дают: обещания, что пакет станет лучше по содержанию. По рубрикам вывода
 нет (n = 3, один сэмпл судьи) — доказан только способ изменения решения.
+
+---
+
+## Как Spine оценён в целом (смысловые рубрики)
+
+Отдельно от детерминированного гейта судья `glm-5.3` ставил баллы 1–5 по смысловым рубрикам —
+включая **нейтральную, написанную не автором Spine** (ISO/IEC/IEEE 42010, arc42, ADR по Nygard).
+Основной анализ v2, 36 прогонов:
+
+| Рубрика (1–5) | без Spine (n = 12) | Spine всего (n = 23–24) | Разница |
+|---|---|---|---|
+| `solution_architecture` — пакет решения | **3,70** ± 0,27 | 3,60 ± 0,25 | −0,10 |
+| `architecture_gates` — архитектурные гейты | 3,27 ± 0,54 | **3,32** ± 0,52 | +0,05 |
+| `neutral_architecture` — нейтральная (не Spine) | 3,58 ± 0,30 | **3,80** ± 0,22 | +0,22 |
+
+По всем оценённым волнам (v1, v1-clean, v2; пилот и v2.1 судьёй не оценивались) картина та же:
+со Spine — 3,59 / 3,32 / 3,80 (n = 24–28), без Spine — 3,65 / 3,27 / 3,58.
+
+**Честный вывод: по содержанию Spine не оценён лучше контроля.** Все три различия меньше разброса
+внутри групп (σ 0,22–0,54), а n = 3 на ячейку при одном сэмпле судьи не позволяет отделить сигнал
+от шума. Единственное, что эти данные доказывают, — **способ** изменения решения (PASS_DELTA
+0/18 → 23/24), а не то, что агент «умнее пишет». `adr_quality` и `macedo_dimensions` в основном
+прогоне не оценивались (бюджет судейского времени) — в таблицах стоят как «—».
+
+Именно поэтому честная формулировка результата — «контур контроля даёт дисциплину изменения
+решения», а не «Spine улучшает архитектурные пакеты».
 
 ---
 
