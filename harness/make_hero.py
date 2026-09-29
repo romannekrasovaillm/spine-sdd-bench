@@ -7,18 +7,18 @@
        рядом — шкала «как читать p (критерий Фишера)» с качественной оценкой
        силы доказательства: ПЛОХО / ТЕРПИМО / ХОРОШО / ОТЛИЧНО.
     2. ЧТО ЗНАЧИТ «ИЗМЕНЕНИЕ ЧЕРЕЗ ДЕЛЬТУ»: заявка -> правка решения -> гейт.
-       Блок написан для менеджера, а не для инженера.
     3. Три группы прогонов по доступу к процессу Spine:
            нет доступа (чистый контроль v2 + песочница v2.1)  -> 0/18
            доступ случайный (нашли arch-be сами в $HOME)      -> 6/6
            доступ штатный (MCP + скиллы / Stop-хук)           -> 23/24
-    4. Доказательная база: матрица 36 прогонов, утечки в песочнице v2.1,
+    4. ЧТО ЭТО ДАЁТ АРХИТЕКТОРУ: четыре следствия и «что делать в понедельник».
+    5. НА ПРИМЕРЕ: один агент, один кейс, один стек — FAIL без доступа к процессу
+       против PASS_DELTA с ним (plain-r1 против plain+spine-r1).
+    6. Доказательная база: матрица 36 прогонов, утечки в песочнице v2.1,
        изменения существующих инвариантов, все волны серии.
 
-Вся вёрстка идёт в одной системе координат (дюймы холста 16 x 13), поэтому текст
-не наезжает на панели и не обрезается по краям. Ключевые блоки набраны крупно:
-картинка открывается в README шириной ~900 px, и главный вывод, объяснение дельты
-и три числа должны читаться без увеличения.
+Вся вёрстка идёт в одной системе координат (дюймы холста 16 x 17.1), поэтому текст
+не наезжает на панели и не обрезается по краям.
 """
 from __future__ import annotations
 
@@ -53,7 +53,7 @@ BLUE = "#4c8dff"
 GREY = "#6e7681"
 LIME = "#7cc45c"
 
-W, H = 16.0, 13.0
+W, H = 16.0, 17.1
 
 STACKS = [("plain", "голый агент"), ("openspec", "OpenSpec"), ("bmad", "BMAD"),
           ("superpowers", "superpowers")]
@@ -111,32 +111,32 @@ def main() -> None:
                                     linewidth=lw, edgecolor=edge, facecolor=face))
 
     # ------------------------------------------------------------------ шапка
-    t(0.35, 12.62, "Spine × SDD-стеки", size=27, weight="bold")
-    t(0.37, 12.08, f"{len(rows)} живых прогонов Qwen Code в роли solution-архитектора банка "
+    t(0.35, 16.80, "Spine × SDD-стеки", size=27, weight="bold")
+    t(0.37, 16.40, f"{len(rows)} живых прогонов Qwen Code в роли solution-архитектора банка "
                    f"(кейс: платёжный шлюз СБП, изменение «СБП-подписки»)",
       size=12, color=MUTED)
-    t(15.65, 12.66, "github.com/romannekrasovaillm/spine-sdd-bench", size=10.5, color=BLUE,
+    t(15.65, 16.84, "github.com/romannekrasovaillm/spine-sdd-bench", size=10.5, color=BLUE,
       ha="right")
-    t(15.65, 12.36, "гейт — arch-be 0.3.11 · решатель — deepseek-flash · судья — glm-5.3",
+    t(15.65, 16.52, "гейт — arch-be 0.3.11 · решатель — deepseek-flash · судья — glm-5.3",
       size=9.5, color=DIM, ha="right")
 
     # --------------------------------------------------- главный вывод + шкала p
-    card(0.35, 9.98, 9.05, 11.72, face=PANEL, edge="#1d2634")
-    t(0.62, 11.46, "ГЛАВНЫЙ ВЫВОД", size=9.5, color=MUTED, weight="bold")
-    t(0.62, 10.99, "Дисциплину изменения даёт доступ к процессу,\nа не название стека",
+    card(0.35, 14.52, 9.05, 16.26, face=PANEL, edge="#1d2634")
+    t(0.62, 16.00, "ГЛАВНЫЙ ВЫВОД", size=9.5, color=MUTED, weight="bold")
+    t(0.62, 15.52, "Дисциплину изменения даёт доступ к процессу,\nа не название стека",
       size=18, weight="bold", lsp=1.35)
-    t(0.62, 10.52, "Один и тот же агент, один и тот же кейс, одни и те же стеки.\n"
+    t(0.62, 15.05, "Один и тот же агент, один и тот же кейс, одни и те же стеки.\n"
                    "Разница только в том, видит ли агент механику принятого решения.",
       size=10.5, color=MUTED, lsp=1.45)
-    t(0.62, 10.12, "Случайностью не объяснить: p = 5,4·10⁻¹¹ — 1 шанс из 18,5 млрд, "
+    t(0.62, 14.68, "Случайностью не объяснить: p = 5,4·10⁻¹¹ — 1 шанс из 18,5 млрд, "
                    "оценка «отлично».",
       size=10, color=GREEN, weight="bold")
 
-    card(9.30, 9.98, 15.65, 11.72, face=PANEL, edge="#1d2634")
-    t(9.55, 11.46, "КАК ЧИТАТЬ p (критерий Фишера)", size=10.5, color=FG, weight="bold")
-    t(9.55, 11.20, "p — вероятность увидеть такую разницу случайно, если связи нет вообще.",
+    card(9.30, 14.52, 15.65, 16.26, face=PANEL, edge="#1d2634")
+    t(9.55, 16.00, "КАК ЧИТАТЬ p (критерий Фишера)", size=10.5, color=FG, weight="bold")
+    t(9.55, 15.74, "p — вероятность увидеть такую разницу случайно, если связи нет вообще.",
       size=9.4, color=MUTED)
-    t(9.55, 11.02, "Чем меньше p, тем сильнее доказательство (оценка справа):",
+    t(9.55, 15.56, "Чем меньше p, тем сильнее доказательство (оценка справа):",
       size=9.4, color=MUTED)
 
     def chip(y, label, col):
@@ -152,16 +152,16 @@ def main() -> None:
              ("p < 0,001", "почти исключено (1 из 1000)", LIME, MUTED, "ХОРОШО"),
              ("p = 5,4·10⁻¹¹", "1 из 18 500 000 000 — здесь", GREEN, FG, "ОТЛИЧНО")]
     for i, (val, txt, col, tcol, grade) in enumerate(scale):
-        y = 10.78 - i * 0.22
+        y = 15.36 - i * 0.22
         t(9.55, y, val, size=10.5, color=col, weight="bold")
         t(10.95, y, "— " + txt, size=9.4, color=tcol)
         chip(y, grade, col)
 
     # ------------------------------------------- что значит «через дельту»
-    card(0.35, 7.88, 15.65, 9.78, face=CARD, edge="#243044")
-    t(0.62, 9.60, "ЧТО ЗНАЧИТ «ИЗМЕНЕНИЕ ЧЕРЕЗ ДЕЛЬТУ»", size=14, weight="bold")
-    t(0.62, 9.36, "Принятое решение защищено гейтом: правку нельзя сделать молча — "
-                  "её объявляют заявкой, то есть дельтой.", size=10, color=MUTED)
+    card(0.35, 12.42, 15.65, 14.32, face=CARD, edge="#243044")
+    t(0.62, 14.14, "ЧТО ЗНАЧИТ «ИЗМЕНЕНИЕ ЧЕРЕЗ ДЕЛЬТУ»", size=14, weight="bold")
+    t(0.62, 13.90, "Принятое решение защищено гейтом: правку нельзя сделать молча — "
+                   "её объявляют заявкой, то есть дельтой.", size=10, color=MUTED)
     steps = [
         ("1. ЗАЯВКА — до правки", GREEN,
          "Агент пишет дельту: что в решении\nДОБАВЛЯЕТСЯ, МЕНЯЕТСЯ и СНИМАЕТСЯ\n"
@@ -175,39 +175,99 @@ def main() -> None:
     ]
     for i, (head, col, body) in enumerate(steps):
         x0 = 0.62 + i * 5.05
-        card(x0, 8.18, x0 + 4.75, 9.20, face=CELL, edge=col, lw=1.5, rs=0.06)
-        t(x0 + 0.22, 9.03, head, size=11, color=col, weight="bold")
-        t(x0 + 0.22, 8.82, body, size=10.5, color=MUTED, va="top", lsp=1.45)
-    t(0.62, 8.00, "Без дельты: молча переписал решение → 5 из 6 провалов гейта; "
-                  "не тронул решение вовсе → гейт зелёный, но изменение живёт мимо "
-                  "архитектуры (PASS_UNTOUCHED).",
+        card(x0, 12.72, x0 + 4.75, 13.74, face=CELL, edge=col, lw=1.5, rs=0.06)
+        t(x0 + 0.22, 13.57, head, size=11, color=col, weight="bold")
+        t(x0 + 0.22, 13.36, body, size=10.5, color=MUTED, va="top", lsp=1.45)
+    t(0.62, 12.54, "Без дельты: молча переписал решение → 5 из 6 провалов гейта; "
+                   "не тронул решение вовсе → гейт зелёный, но изменение живёт мимо "
+                   "архитектуры (PASS_UNTOUCHED).",
       size=9.6, color=DIM)
 
     # ------------------------------------------------------------------ три группы
-    t(0.35, 7.62, "PASS_DELTA — доля прогонов, где принятое решение изменено принятым "
-                  "способом (через дельту)", size=11, weight="bold")
+    t(0.35, 10.07, "PASS_DELTA — доля прогонов, где принятое решение изменено принятым "
+                   "способом (через дельту)", size=11, weight="bold")
     for i, (label, yes, n, sub, col) in enumerate(groups):
         x0 = 0.35 + i * 5.15
         x1 = x0 + 4.95
-        card(x0, 5.45, x1, 7.40, face=CARD, edge=col, lw=1.8)
+        card(x0, 10.25, x1, 12.20, face=CARD, edge=col, lw=1.8)
         cx = (x0 + x1) / 2
-        t(cx, 7.10, label, size=13, color=col, weight="bold", ha="center", lsp=1.35)
-        t(cx, 6.62, f"{yes} / {n}", size=34, weight="bold", ha="center")
-        ax.add_patch(Rectangle((x0 + 0.45, 6.18), 4.05, 0.16, color="#222a36"))
+        t(cx, 11.90, label, size=13, color=col, weight="bold", ha="center", lsp=1.35)
+        t(cx, 11.42, f"{yes} / {n}", size=34, weight="bold", ha="center")
+        ax.add_patch(Rectangle((x0 + 0.45, 10.98), 4.05, 0.16, color="#222a36"))
         share = yes / n if n else 0
         if share > 0:
-            ax.add_patch(Rectangle((x0 + 0.45, 6.18), 4.05 * share, 0.16, color=col))
-        t(cx, 5.92, f"{share:.0%} изменений через дельту", size=11, color=MUTED, ha="center")
-        t(cx, 5.66, sub, size=10, color=DIM, ha="center", lsp=1.4)
+            ax.add_patch(Rectangle((x0 + 0.45, 10.98), 4.05 * share, 0.16, color=col))
+        t(cx, 10.72, f"{share:.0%} изменений через дельту", size=11, color=MUTED, ha="center")
+        t(cx, 10.46, sub, size=10, color=DIM, ha="center", lsp=1.4)
+
+    # ------------------------------------------- что это даёт архитектору
+    card(0.35, 7.30, 15.65, 9.85, face=CARD, edge="#243044")
+    t(0.62, 9.65, "ЧТО ЭТО ДАЁТ АРХИТЕКТОРУ", size=13.5, weight="bold")
+    lessons = [
+        ("1. СТЕК МОЖНО НЕ МЕНЯТЬ", GREEN,
+         "Эффект даёт контур контроля, а не\nпереезд. В советующем режиме через\n"
+         "дельту прошли 3/3 в каждом стеке:\nOpenSpec, BMAD, superpowers\nи голый агент."),
+        ("2. ХУК НЕ ОБЯЗАТЕЛЕН", BLUE,
+         "MCP + скиллы — 12/12.\nБлокирующий Stop-хук — 11/12\n"
+         "и почти вдвое дольше: медиана\n990 с против 536 с. Процедуру\n"
+         "делают доступной, не карательной."),
+        ("3. ГЕЙТ ≠ АРХИТЕКТУРНОЕ РЕВЬЮ", YELLOW,
+         "8 из 29 зелёных дельт меняли\nсуществующие AD (7 объявлены).\n"
+         "Гейт видит файл и наличие дельты;\nчто именно изменилось в теле\n"
+         "решения — читает человек."),
+        ("4. ДОКАЗАТЕЛЬСТВО БЕЗ LLM", LIME,
+         "Класс гейта, дельта и дифф\nвоспроизводимы и не зависят\n"
+         "от модели. «Правка защищённого\nфайла без дельты — красный»\n"
+         "ставится обязательным чеком CI."),
+    ]
+    for i, (head, col, body) in enumerate(lessons):
+        x0 = 0.62 + i * 3.83
+        card(x0, 7.87, x0 + 3.63, 9.39, face=CELL, edge=col, lw=1.4, rs=0.06)
+        t(x0 + 0.18, 9.22, head, size=10, color=col, weight="bold")
+        t(x0 + 0.18, 9.00, body, size=9.8, color=MUTED, va="top", lsp=1.45)
+    t(0.62, 7.62, "Что делать в понедельник: 1) объявить защищённые файлы решения "
+                  "(ARCHITECTURE-SPINE.md, CONSTRAINTS.yaml) и завести шаблон дельты — "
+                  "ADDED / MODIFIED / REMOVED + влияние на инварианты;",
+      size=9.6, color=FG)
+    t(0.62, 7.46, "2) договориться о едином месте дельты (changes/<id>/DELTA.md) — иначе "
+                  "гейт её не увидит; 3) сделать гейт обязательным чеком CI; 4) начать "
+                  "с советующего режима MCP + скиллы, хук — точечно.",
+      size=9.6, color=DIM)
+
+    # ------------------------------------------------------------- на примере
+    card(0.35, 5.25, 15.65, 7.10, face=CARD, edge="#243044")
+    t(0.62, 6.92, "НА ПРИМЕРЕ: один и тот же агент, один и тот же кейс, один и тот же "
+                  "стек — голый агент (plain)", size=12.5, weight="bold")
+    ex_left = ("БЕЗ ДОСТУПА К ПРОЦЕССУ → FAIL", RED,
+               "ADR-008 и папку изменения агент завёл, но AD-009 и AD-010 дописал прямо",
+               "в ARCHITECTURE-SPINE.md — дельты в конвенции контура "
+               "(changes/<id>/DELTA.md) нет.",
+               "Гейт: FAIL — защищённый файл правлен без дельты.",
+               "Ревью и аудит: изменение в решении есть, заявки в истории решений нет.")
+    ex_right = ("С ДОСТУПОМ К ПРОЦЕССУ → PASS_DELTA", GREEN,
+                "Тот же стек и кейс: сначала changes/sbp-subscriptions/DELTA.md — ADDED /",
+                "MODIFIED / REMOVED и таблица влияния, затем те же защищённые файлы.",
+                "Гейт: PASS_DELTA — дельта объявляет изменение, набор контура полный.",
+                "Ревью и аудит: одна дельта вместо 25 файлов, всё воспроизводимо.")
+    for i, (head, col, l1, l2, l3, l4) in enumerate((ex_left, ex_right)):
+        x0 = 0.62 + i * 7.55
+        card(x0, 5.47, x0 + 7.20, 6.73, face=CELL, edge=col, lw=1.5, rs=0.06)
+        t(x0 + 0.22, 6.56, head, size=11, color=col, weight="bold")
+        t(x0 + 0.22, 6.36, f"{l1}\n{l2}\n{l3}\n{l4}", size=9.8, color=MUTED, va="top",
+          lsp=1.45)
+    t(0.62, 5.35, "Урок архитектору: конвенция «где и в каком виде живёт дельта» — часть "
+                  "контура. Тот же агент и стек: без неё заявка есть, но гейт её не видит "
+                  "→ FAIL; с ней → PASS_DELTA.",
+      size=9.6, color=FG)
 
     # ------------------------------------------------------------------ матрица
-    card(0.35, 1.62, 9.55, 5.30, face=CARD, edge=GRID)
-    t(0.62, 5.04, "Основной анализ v2: 36 прогонов", size=12.5, weight="bold")
+    card(0.35, 1.62, 9.55, 5.05, face=CARD, edge=GRID)
+    t(0.62, 4.78, "Основной анализ v2: 36 прогонов", size=12.5, weight="bold")
     mx0, mx1 = 0.55, 9.35
     colw = (mx1 - mx0) / 3
     for i, (_, mlabel) in enumerate(MODES):
-        t(mx0 + colw * (i + 0.5), 4.74, mlabel, size=10.5, ha="center", lsp=1.35, color=FG)
-    row_top, rowh = 4.22, 0.70
+        t(mx0 + colw * (i + 0.5), 4.46, mlabel, size=10.5, ha="center", lsp=1.35, color=FG)
+    row_top, rowh = 3.98, 0.68
     for j, (skey, slabel) in enumerate(STACKS):
         y = row_top - j * rowh
         t(mx0 + 0.02, y, slabel, size=11, color=FG)
@@ -215,7 +275,7 @@ def main() -> None:
             cell_x0 = mx0 + colw * i + 0.10
             cell_x1 = mx0 + colw * (i + 1) - 0.10
             if j % 2 == 0:
-                card(cell_x0, y - 0.28, cell_x1, y + 0.28, face=CELL, edge=GRID, lw=0.9,
+                card(cell_x0, y - 0.25, cell_x1, y + 0.25, face=CELL, edge=GRID, lw=0.9,
                      rs=0.05)
             xs = [r for r in v2 if r["stack"] == skey and r["spine_mode"] == mkey]
             ccx = (cell_x0 + cell_x1) / 2
@@ -223,29 +283,29 @@ def main() -> None:
                 col = CLASS_COLOR.get(r["gate_class"], GREY)
                 leak = int(r.get("access_spine_material") or 0) > 0
                 sx = ccx + (k - 1) * 0.34
-                ax.scatter(sx, y + 0.09, s=185, color=col, zorder=3,
+                ax.scatter(sx, y + 0.08, s=180, color=col, zorder=3,
                            edgecolors="white" if leak else BG,
                            linewidths=1.7 if leak else 1.1,
                            linestyles="dashed" if leak else "solid")
-                t(sx, y + 0.09, r["rep"], size=6.8, color="#0b0e13", ha="center",
+                t(sx, y + 0.08, r["rep"], size=6.8, color="#0b0e13", ha="center",
                   weight="bold")
             kind = Counter(r["gate_class"] for r in xs).most_common(1)[0][0]
-            t(ccx, y - 0.17, {"PASS_DELTA": "через дельту",
+            t(ccx, y - 0.16, {"PASS_DELTA": "через дельту",
                               "PASS_UNTOUCHED": "спайн не тронут",
                               "FAIL": "провал гейта"}.get(kind, "—"),
               size=8.4, color=CLASS_COLOR.get(kind, MUTED), ha="center")
-    t(0.62, 1.74, "Белая штриховая обводка — агент нашёл материалы Spine сам.",
+    t(0.62, 1.70, "Белая штриховая обводка — агент нашёл материалы Spine сам.",
       size=9, color=MUTED)
 
     # ------------------------------------------------------------------ песочница v2.1
-    card(9.80, 3.75, 15.65, 5.30, face=CARD, edge=GRID)
-    t(10.05, 5.04, "Песочница v2.1: утечек нет", size=12.5, weight="bold")
-    t(10.05, 4.78, "12 контрольных прогонов в контейнере.", size=9.8, color=MUTED)
-    t(10.05, 4.58, "Изменений через дельту — ноль. Проверенные каналы:",
+    card(9.80, 3.55, 15.65, 5.05, face=CARD, edge=GRID)
+    t(10.05, 4.78, "Песочница v2.1: утечек нет", size=12.5, weight="bold")
+    t(10.05, 4.52, "12 контрольных прогонов в контейнере.", size=9.8, color=MUTED)
+    t(10.05, 4.34, "Изменений через дельту — ноль. Проверенные каналы:",
       size=9.8, color=MUTED)
     for i, name in enumerate(("материалы Spine", "харнесс и руководство",
                               "мета-файлы ячейки", "$HOME оператора")):
-        y = 4.36 - i * 0.18
+        y = 4.14 - i * 0.17
         t(10.05, y, "— " + name, size=8.8, color=DIM)
         t(15.40, y, "0", size=10.5, color=GREEN, weight="bold", ha="right")
 
@@ -254,10 +314,10 @@ def main() -> None:
     decl = sum(1 for r in pd_rows if r["invariants_modified"] and not r["invariants_undeclared"])
     undecl = sum(1 for r in pd_rows if r["invariants_undeclared"])
     total = len(pd_rows)
-    card(9.80, 1.62, 15.65, 3.65, face=CARD, edge=GRID)
-    t(10.05, 3.40, "Что менялось в принятых инвариантах", size=12.5, weight="bold")
+    card(9.80, 1.62, 15.65, 3.45, face=CARD, edge=GRID)
+    t(10.05, 3.20, "Что менялось в принятых инвариантах", size=12.5, weight="bold")
     x0, x1, h = 10.05, 15.40, 0.26
-    ybar = 2.80
+    ybar = 2.62
     ax.add_patch(Rectangle((x0, ybar), (x1 - x0) * decl / total, h, color=YELLOW))
     ax.add_patch(Rectangle((x0 + (x1 - x0) * decl / total, ybar), (x1 - x0) * undecl / total,
                            h, color=RED))
@@ -273,10 +333,10 @@ def main() -> None:
     for i, (col, label) in enumerate([(YELLOW, "объявлено в MODIFIED дельты"),
                                       (RED, "не объявлено"),
                                       ("#222a36", "существующие AD не тронуты")]):
-        ly = 2.48 - i * 0.20
+        ly = 2.32 - i * 0.20
         ax.add_patch(Rectangle((10.05, ly - 0.05), 0.16, 0.11, color=col))
         t(10.30, ly, label, size=8.8, color=MUTED)
-    t(10.05, 1.84, f"из {total} зелёных дельт существующие AD меняли {decl + undecl};\n"
+    t(10.05, 1.76, f"из {total} зелёных дельт существующие AD меняли {decl + undecl};\n"
                    f"все — в ячейках со Spine, ослаблений правил нет.",
       size=9, color=DIM, va="top", lsp=1.4)
 
