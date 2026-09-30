@@ -1,0 +1,439 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Бенчмарк Spine × SDD-стеки: как измерялась дисциплина изменения решения",
+    "subtitle": "80 живых сеансов Qwen Code в роли solution-архитектора банка: 4 стека × 3 режима Spine + изолированный контроль",
+    "output": "docs/index.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1200,
+      640
+    ],
+    "views": [
+      {
+        "id": "field",
+        "label": "1. Поле и фактор",
+        "focus": [
+          "case",
+          "task",
+          "cell",
+          "agent"
+        ],
+        "note": "Кейс и задание одинаковы для всех ячеек; меняются только стек и режим Spine."
+      },
+      {
+        "id": "measure",
+        "label": "2. Откуда берётся класс гейта",
+        "focus": [
+          "agent",
+          "protected",
+          "delta",
+          "gate",
+          "gateclass"
+        ],
+        "note": "Гейт смотрит на файл и на наличие дельты в единой конвенции, а не на смысл правки."
+      },
+      {
+        "id": "access",
+        "label": "3. Два режима доступа к процессу",
+        "focus": [
+          "spine",
+          "hook",
+          "cell",
+          "agent"
+        ],
+        "note": "Советующий режим дал 12/12, блокирующий Stop-хук — 11/12 и почти вдвое дольше."
+      },
+      {
+        "id": "control",
+        "label": "4. Чистый контроль в песочнице",
+        "focus": [
+          "sandbox",
+          "cell",
+          "agent"
+        ],
+        "note": "Волна v2.1: bwrap-изоляция, ноль каналов утечки, 0/12 PASS_DELTA."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "case",
+      "type": "external",
+      "label": "Кейс: СБП-шлюз",
+      "sublabel": "brownfield · СБП",
+      "pos": [
+        48,
+        300
+      ],
+      "size": [
+        116,
+        64
+      ]
+    },
+    {
+      "id": "task",
+      "type": "backend",
+      "label": "TASK.md",
+      "sublabel": "одно задание",
+      "pos": [
+        192,
+        300
+      ],
+      "size": [
+        116,
+        64
+      ]
+    },
+    {
+      "id": "cell",
+      "type": "backend",
+      "label": "Ячейка прогона",
+      "sublabel": "репозиторий-песочница",
+      "tag": "12 ячеек × 3",
+      "pos": [
+        340,
+        300
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "agent",
+      "type": "backend",
+      "label": "Qwen Code 0.24.6",
+      "sublabel": "живой TUI в tmux",
+      "tag": "deepseek-flash",
+      "pos": [
+        540,
+        300
+      ],
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "spine",
+      "type": "security",
+      "label": "Контур Spine",
+      "sublabel": "MCP-сервер + скиллы",
+      "tag": "12/12",
+      "pos": [
+        350,
+        90
+      ],
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "hook",
+      "type": "security",
+      "label": "Stop-хук",
+      "sublabel": "блокирующий режим",
+      "tag": "11/12, дороже",
+      "pos": [
+        530,
+        90
+      ],
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "protected",
+      "type": "database",
+      "label": "Защищённые файлы решения",
+      "sublabel": "SPINE.md · CONSTRAINTS.yaml",
+      "pos": [
+        741,
+        150
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "delta",
+      "type": "database",
+      "label": "Дельта изменения",
+      "sublabel": "changes/…/DELTA.md",
+      "tag": "ADDED · MODIFIED · REMOVED",
+      "pos": [
+        741,
+        470
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "gate",
+      "type": "security",
+      "label": "arch-be gate",
+      "sublabel": "без LLM, детерминизм",
+      "tag": "delta_guard",
+      "pos": [
+        766,
+        300
+      ],
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "gateclass",
+      "type": "frontend",
+      "label": "Класс исхода",
+      "sublabel": "PASS_DELTA · PASS_UNTOUCHED · FAIL",
+      "pos": [
+        960,
+        300
+      ],
+      "size": [
+        200,
+        68
+      ]
+    },
+    {
+      "id": "sandbox",
+      "type": "cloud",
+      "label": "Песочница v2.1",
+      "sublabel": "v2.1 · bwrap-изоляция",
+      "tag": "0 утечек",
+      "pos": [
+        340,
+        470
+      ],
+      "size": [
+        170,
+        68
+      ]
+    },
+    {
+      "id": "judge",
+      "type": "external",
+      "label": "Судья glm-5.3",
+      "sublabel": "рубрики 1–5 + нейтральная",
+      "tag": "1 сэмпл",
+      "pos": [
+        960,
+        470
+      ],
+      "size": [
+        200,
+        68
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Поле: кейс и задание",
+      "wraps": [
+        "case",
+        "task"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Ячейка: 4 стека × 3 режима Spine",
+      "wraps": [
+        "cell",
+        "agent",
+        "sandbox"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Контур архитектурного контроля Spine",
+      "wraps": [
+        "spine",
+        "hook"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "Защищённые файлы решения",
+      "wraps": [
+        "protected"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "Дельта — заявка на изменение",
+      "wraps": [
+        "delta"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Детерминированный слой: без LLM",
+      "wraps": [
+        "gate",
+        "gateclass"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "from": "case",
+      "to": "task"
+    },
+    {
+      "from": "task",
+      "to": "cell",
+      "variant": "emphasis"
+    },
+    {
+      "from": "cell",
+      "to": "agent"
+    },
+    {
+      "from": "spine",
+      "to": "cell",
+      "label": "MCP + скиллы",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "hook",
+      "to": "agent",
+      "label": "стоп без дельты",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "sandbox",
+      "to": "cell",
+      "label": "изоляция v2.1",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "from": "agent",
+      "to": "protected",
+      "label": "правка файла",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "via": [
+        [
+          610,
+          250
+        ],
+        [
+          836,
+          250
+        ]
+      ]
+    },
+    {
+      "from": "agent",
+      "to": "delta",
+      "label": "дельта до правки",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "via": [
+        [
+          610,
+          504
+        ]
+      ]
+    },
+    {
+      "from": "protected",
+      "to": "gate",
+      "label": "дифф",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        884,
+        252
+      ]
+    },
+    {
+      "from": "delta",
+      "to": "gate",
+      "label": "в конвенции",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [
+        888,
+        404
+      ]
+    },
+    {
+      "from": "gate",
+      "to": "gateclass",
+      "label": "класс"
+    },
+    {
+      "from": "gateclass",
+      "to": "judge",
+      "label": "другая линейка",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        1060,
+        424
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Главный результат: дисциплину даёт доступ к процессу",
+      "items": [
+        "со Spine: 23 / 24 PASS_DELTA — в каждом стеке 3 / 3",
+        "чистый контроль: v2 — 0 / 6, v2.1 в песочнице — 0 / 12",
+        "пул 23 / 24 против 0 / 18: критерий Фишера p = 5,4·10⁻¹¹",
+        "стек менять не нужно: эффект не зависит от OpenSpec, BMAD, superpowers"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Почему класс гейта трёхзначный",
+      "items": [
+        "PASS_DELTA — защищённый файл правлен через changes/ID/DELTA.md",
+        "FAIL — правка защищённого файла без дельты: изменение в обход процедуры",
+        "PASS_UNTOUCHED — гейт зелёный, но принятое решение не тронуто вовсе",
+        "8 из 29 зелёных дельт меняли AD-001…AD-008; 7 объявлены в разделе MODIFIED"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Чего эти данные не доказывают",
+      "items": [
+        "по смысловым рубрикам Spine не выше контроля: 3,60 vs 3,70 / 3,32 vs 3,27 / 3,80 vs 3,58",
+        "все различия меньше разброса внутри групп (σ 0,22–0,54)",
+        "n = 3 на ячейку, один сэмпл судьи, проверка слепоты неинформативна",
+        "гейт видит файл и наличие дельты, но не читает тело решения — это работа ревью"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Что делать в понедельник",
+      "items": [
+        "объявить защищённые файлы: ARCHITECTURE-SPINE.md и CONSTRAINTS.yaml",
+        "договориться о едином месте дельты — иначе гейт её не найдёт (кейс plain-r1)",
+        "сделать гейт обязательным чеком CI: правка без дельты — красный",
+        "начать с советующего режима; хук — точечно (медиана 990 с против 536 с)"
+      ]
+    }
+  ]
+}
